@@ -40,7 +40,7 @@
 
 // Register Definitions -----
 
-//Define the register names
+// Define the register names
 #define DEVICEID 0x00
 #define CHIPID  0x01
 #define POWERCFG  0x02

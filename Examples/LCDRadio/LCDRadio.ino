@@ -40,6 +40,7 @@
 #include <RADIO.h>
 #include <RDA5807M.h>
 #include <si4703.h>
+#include <TEA5767.h>
 
 #include <RDSParser.h>
 
@@ -78,9 +79,9 @@ int    i_smax=14;       // Max Index of Stations
 /// by uncommenting the right radio object definition.
 
 // RADIO radio;    // Create an instance of a non functional radio.
-// RDA5807M radio;    // Create an instance of a RDA5807 chip radio
-SI4703 radio;    // Create an instance of a SI4703 chip radio.
-
+//RDA5807M radio;    // Create an instance of a RDA5807 chip radio
+SI4703   radio;    // Create an instance of a SI4703 chip radio.
+// TEA5767  radio;    // Create an instance of a TEA5767 chip radio.
 
 /// The lcd object has to be defined by using a LCD library that supports the standard functions
 /// When using a I2C->LCD library ??? the I2C bus can be used to control then radio chip and the lcd. 
@@ -166,10 +167,9 @@ void setup() {
   
   state = STATE_PARSECOMMAND;
   
-  radio.attachReceiveRDS(RDS_process);
-  rds.attachNewServicenName(DisplayServiceName);
-            // todo: implement DisplayServiceName(programServiceName);
-            
+//   radio.attachReceiveRDS(RDS_process);
+//   rds.attachNewServicenName(DisplayServiceName);
+  
 } // Setup
 
 
@@ -282,7 +282,6 @@ void loop() {
   
   char c;
   if (Serial.available() > 0) {
-
     // read the next char from input.
     c = Serial.peek();
 

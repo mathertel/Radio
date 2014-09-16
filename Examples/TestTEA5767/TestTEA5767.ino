@@ -1,6 +1,6 @@
 ///
-/// \file  TestSI7403.ino
-/// \brief An Arduino sketch to operate a SI4703 chip based radio using the Radio library.
+/// \file  TestTEA5767.ino
+/// \brief An Arduino sketch to operate a TEA5767 chip based radio using the Radio library.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
@@ -16,7 +16,6 @@
 ///
 /// Wiring
 /// ------ 
-/// The SI4703 board has to be connected by using the following connections:
 /// Arduino port | Si4703 signal
 /// ------------ | ---------------
 ///     3.3V | VCC
@@ -29,12 +28,12 @@
 ///
 /// History:
 /// --------
-/// * 05.08.2014 created.
+/// * 15.09.2014 created.
 
 #include <Arduino.h>
 #include <Wire.h>
 #include <radio.h>
-#include <si4703.h>
+#include <TEA5767.h>
 
 /// The band that will be tuned by this sketch is FM.
 #define FIX_BAND RADIO_BAND_FM
@@ -42,7 +41,7 @@
 /// The station that will be tuned by this sketch is 89.30 MHz.
 #define FIX_STATION 8930
 
-SI4703 radio;    // Create an instance of Class for Si4703 Chip
+TEA5767 radio;    // Create an instance of Class for Si4703 Chip
 
 uint8_t test1;
 byte test2;

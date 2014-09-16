@@ -12,9 +12,10 @@
 /// Implementation for the following Radio Chips are available:
 /// * RDA5807M
 /// * SI4703
+/// * TEA5767
 ///
 /// The following chip is planned to be supported too:
-/// * TEA5767
+/// ...
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
