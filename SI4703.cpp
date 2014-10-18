@@ -47,6 +47,7 @@
 #define CHANNEL  0x03
 #define SYSCONFIG1  0x04
 #define SYSCONFIG2  0x05
+#define SYSCONFIG3 0x06
 #define STATUSRSSI  0x0A
 #define READCHAN  0x0B
 #define RDSA  0x0C
@@ -55,8 +56,9 @@
 #define RDSD  0x0F
 
 //Register 0x02 - POWERCFG
-#define SMUTE  15
+#define DSMUTE  15
 #define DMUTE  14
+#define SETMONO  13
 #define SKMODE  10
 #define SEEKUP  9
 #define SEEK  8
@@ -72,8 +74,28 @@
 
 
 //Register 0x05 - SYSCONFIG2
+#define SEEKTH_MASK 0xFF00
+#define SEEKTH_MIN  0x0000
+#define SEEKTH_MID  0x1000
+#define SEEKTH_MAX  0x7F00
+
 #define SPACE1  5
 #define SPACE0  4
+
+// Register 0x06 - SYSCONFIG3 
+#define SKSNR_MASK 0x00F0
+#define SKSNR_OFF  0x0000  
+#define SKSNR_MIN  0x0010
+#define SKSNR_MID  0x0030
+#define SKSNR_MAX  0x0070
+
+#define SKCNT_MASK 0x000F
+#define SKCNT_OFF  0x0000
+#define SKCNT_MIN  0x000F
+#define SKCNT_MID  0x0003
+#define SKCNT_MAX  0x0001
+
+
 
 //Register 0x0A - STATUSRSSI
 #define RDSR  15
@@ -81,7 +103,7 @@
 #define SFBL  13
 #define AFCRL  12
 #define RDSS  11
-#define STEREO  8
+#define SI  8 ///< Stereo Indicator
 
 // ----- implement
 
@@ -118,7 +140,7 @@ bool SI4703::init() {
 
   _readRegisters(); //Read the current register set
   registers[POWERCFG] = 0x4001; //Enable the IC
-  //  registers[POWERCFG] |= (1<<SMUTE) | (1<<DMUTE); //Disable Mute, disable softmute
+  //  registers[POWERCFG] |= (1<<DSMUTE) | (1<<DMUTE); //Disable Mute, disable softmute
   registers[SYSCONFIG1] |= (1<<RDS); //Enable RDS
   // registers[SYSCONFIG1] |= 0x0010;  //Enable GPIO3 as Stereo indicator ==> is not working with me.
 
@@ -129,8 +151,18 @@ bool SI4703::init() {
   registers[SYSCONFIG2] &= ~(1<<SPACE1 | 1<<SPACE0) ; //Force 200kHz channel spacing for USA
   #endif
 
+  _volume = 1;
   registers[SYSCONFIG2] &= 0xFFF0; //Clear volume bits
-  registers[SYSCONFIG2] |= 0x0001; //Set volume to lowest
+  registers[SYSCONFIG2] |= (_volume & 0x0F); //Set volume
+  registers[SYSCONFIG2] |= SEEKTH_MID; //Set volume
+
+  // set seek parameters
+  registers[SYSCONFIG3] &= ~(SKSNR_MASK); // Clear seek mask bits
+  registers[SYSCONFIG3] |= SKSNR_MID;     //Set volume
+
+  registers[SYSCONFIG3] &= ~(SKCNT_MASK); // Clear seek mask bits
+  registers[SYSCONFIG3] |= SKCNT_MID;     //Set volume
+
   _saveRegisters(); //Update
 
   delay(110); //Max powerup time, from datasheet page 13
@@ -158,7 +190,7 @@ void SI4703::term()
 void SI4703::setVolume(uint8_t newVolume)
 {
   DEBUG_FUNC0("setVolume");
-  newVolume &= 0x0F;
+  if (newVolume > 15) newVolume = 15;
   _readRegisters(); //Read the current register set
   registers[SYSCONFIG2] &= 0xFFF0; //Clear volume bits
   registers[SYSCONFIG2] |= newVolume; //Set new volume
@@ -177,15 +209,23 @@ void SI4703::setBassBoost(bool switchOn)
 // Mono / Stereo
 void SI4703::setMono(bool switchOn)
 {
-  DEBUG_FUNC0("setMono");
+  DEBUG_FUNC1("setMono", switchOn);
   RADIO::setMono(switchOn);
+  _readRegisters(); //Read the current register set
+  if (switchOn) {
+    registers[POWERCFG] &= ~(1 << SETMONO); // clear stereo bit
+  }
+  else {
+    registers[POWERCFG] |= (1 << SETMONO); // set stereo bit
+  } // if
+  _saveRegisters();
 } // setMono
 
 
-// Switch mute mode.
+/// Switch mute mode.
 void SI4703::setMute(bool switchOn)
 {
-  DEBUG_FUNC0("setMute");
+  DEBUG_FUNC1("setMute", switchOn);
   RADIO::setMute(switchOn);
 
   if (switchOn) {
@@ -197,6 +237,24 @@ void SI4703::setMute(bool switchOn)
   _saveRegisters();
 
 } // setMute()
+
+
+/// Switch soft mute mode.
+void SI4703::setSoftMute(bool switchOn)
+{
+  DEBUG_FUNC1("setSoftMute", switchOn);
+  RADIO::setSoftMute(switchOn);
+
+  if (switchOn) {
+    registers[POWERCFG] &= ~(1<<DSMUTE); // clear mute bit
+  }
+  else {
+    registers[POWERCFG] |= (1<<DSMUTE); // set mute bit
+  } // if
+  _saveRegisters();
+
+} // setSoftMute()
+
 
 
 // ----- Band and frequency control methods -----
@@ -255,13 +313,14 @@ void SI4703::setFrequency(RADIO_FREQ newF) {
 
 // start seek mode upwards
 void SI4703::seekUp(bool toNextSender) {
-  DEBUG_FUNC0("seekUp");
+  DEBUG_FUNC1("seekUp", toNextSender);
   _seek(true);
 } // seekUp()
 
 
 // start seek mode downwards
 void SI4703::seekDown(bool toNextSender) {
+  DEBUG_FUNC1("seekDown", toNextSender);
   _seek(false);
 } // seekDown()
 
@@ -338,7 +397,7 @@ void SI4703::getRadioInfo(RADIO_INFO *info) {
 
   _readRegisters();
   info->active = true; // ???
-  if (registers[STATUSRSSI] & (1<<STEREO)) info->stereo = true;
+  if (registers[STATUSRSSI] & (1<<SI)) info->stereo = true;
   info->rssi = registers[STATUSRSSI] & 0x00FF;
   if (registers[STATUSRSSI] & (1<<RDSR)) info->rds = true;
   if (registers[STATUSRSSI] & (1<<STC)) info->tuned = true;
@@ -350,7 +409,7 @@ void SI4703::getAudioInfo(AUDIO_INFO *info) {
 
   _readRegisters();
   if (! (registers[POWERCFG] & (1<<DMUTE))) info->mute = true;
-  if (! (registers[POWERCFG] & (1<<SMUTE))) info->softmute = true;
+  if (! (registers[POWERCFG] & (1<<DSMUTE))) info->softmute = true;
 
 
 } // getAudioInfo()
@@ -391,7 +450,6 @@ void SI4703::debugStatus()
 
 /// Seeks out the next available station
 void SI4703::_seek(bool seekUp) {
-  DEBUG_FUNC0("_seek");
   uint16_t reg;
 
   _readRegisters();

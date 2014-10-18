@@ -48,6 +48,10 @@ class SI4703 : public RADIO {
   // Control the mute function of the radio chip
   void   setMute(bool switchOn); // Switch to mute mode.
 
+  // Control the softMute function of the radio chip
+  void   setSoftMute(bool switchOn); // Switch to soft mute mode.
+
+
   // Control of the core receiver
 
   // Control the frequency
