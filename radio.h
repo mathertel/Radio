@@ -130,6 +130,9 @@ class RADIO {
   virtual void   setMute(bool switchOn);        ///< Set the mute mode on or off.
   virtual bool   getMute();                     ///< Retrieve the current mute mode setting.
 
+  virtual void   setSoftMute(bool switchOn);    ///< Set the soft mute mode (mute on low signals) on or off.
+  virtual bool   getSoftMute();                 ///< Retrieve the current soft mute mode (mute on low signals) setting.
+
   // ----- Receiver features -----
 
   virtual void setBand(RADIO_BAND newBand);     ///< Set the current band.
@@ -177,6 +180,7 @@ class RADIO {
   bool    _bassBoost; ///< Last set bass Boost effect.
   bool    _mono;      ///< Last set mono effect.
   bool    _mute;      ///< Last set mute effect.
+  bool    _softMute;  ///< Last set softMute effect.
 
   RADIO_BAND _band;   ///< Last set band.
   RADIO_FREQ _freq;   ///< Last set frequency.

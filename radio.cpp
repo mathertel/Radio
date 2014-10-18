@@ -116,6 +116,18 @@ bool RADIO::getMute() {
 } // getMute()
 
 
+// ----- mute control -----
+
+void RADIO::setSoftMute(bool switchOn) {
+  _softMute = switchOn;
+} // setSoftMute()
+
+
+bool RADIO::getSoftMute() {
+  return(_softMute);
+} // getSoftMute()
+
+
 // ----- receiver control -----
 
 // some implementations to return internal variables if used by concrete chip implementations
