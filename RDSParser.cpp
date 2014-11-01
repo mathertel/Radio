@@ -1,12 +1,24 @@
-/*
-* RDSParser.cpp
-*
-* Created: 01.09.2014 19:24:43
-* Author: Matthias
-*/
-
+///
+/// \file RDSParser.cpp
+/// \brief RDS Parser class implementation.
+///
+/// \author Matthias Hertel, http://www.mathertel.de
+/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
+/// This work is licensed under a BSD style license.\n
+/// See http://www.mathertel.de/License.aspx
+///
+/// \details
+///
+/// More documentation and source code is available at http://www.mathertel.de/Arduino
+///
+/// History:
+/// --------
+/// * 01.09.2014 created and RDS sender name working.
+/// * 01.11.2014 RDS time added.
 
 #include "RDSParser.h"
+
+#define DEBUG_FUNC0(fn)          { Serial.print(fn); Serial.println("()"); }
 
 /// Setup the RDS object and initialize private variables to 0.
 RDSParser::RDSParser() {
@@ -16,20 +28,25 @@ RDSParser::RDSParser() {
 
 void RDSParser::init() {
   strcpy(_PSName1, "--------");
-  strcpy(_PSName2, "--------");
+  strcpy(_PSName2, _PSName1);
   strcpy(programServiceName, "          ");
+  memset(_RDSText, 0, sizeof(_RDSText));
+  strcpy(_RDSText, _PSName1);
+  
 }
 
 
 
 void RDSParser::processData( uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4 )
 {
-  // FUNC_DEBUG0("process");
+  // DEBUG_FUNC0("process");
 
   //int  i_rdsnew=0;
   uint8_t  idx; // index of rdsText
   char c1, c2;
-  uint8_t off, min, hr;
+
+  uint16_t mins; ///< RDS time in minutes
+  uint8_t off;   ///< RDS time offset and sign
   
   //int i_x,i_hh,i_mm,i_ofs;
   //long l_mjd;
@@ -66,7 +83,7 @@ void RDSParser::processData( uint16_t block1, uint16_t block2, uint16_t block3, 
           // publish station name
           strcpy (programServiceName, _PSName2);
           if (_sendServiceName)
-            _sendServiceName(programServiceName);
+          _sendServiceName(programServiceName);
         } // if
       } // if
     } // if
@@ -79,14 +96,40 @@ void RDSParser::processData( uint16_t block1, uint16_t block2, uint16_t block3, 
     } // if
     break;
 
+    case 0x2A:
+      idx = 4 * (block2 & 0x000F);
+
+      // new data is 2 chars from block 3
+      _RDSText[idx] = (block3 >> 8);     idx++;
+      _RDSText[idx] = (block3 & 0x00FF); idx++;
+
+      // new data is 2 chars from block 4
+      _RDSText[idx] = (block4 >> 8); idx++;
+      _RDSText[idx] = (block4 & 0x00FF); idx++;
+
+      // Serial.print("T>"); Serial.println(_RDSText);
+      break;
+  
     case 0x4A:
-    // Clock time and date
-    //       off = (block4      ) & 0x3F; // 6 bits
-    //       min = (block4 >>  6) & 0x3F; // 6 bits
-    //       hr  = ((block3 & 0x0001) << 4) | ((block4 >> 12) & 0x0F); // 4 bits
-    //
-    //       Serial.print(block4, HEX); Serial.print(' '); Serial.print(hr); Serial.print(':'); Serial.print(min); Serial.print('/'); Serial.println(off);
-    break;
+      // Clock time and date
+      off = (block4      ) & 0x3F; // 6 bits
+      mins = (block4 >>  6) & 0x3F; // 6 bits
+      mins += 60 * (((block3 & 0x0001) << 4) | ((block4 >> 12) & 0x0F));
+    
+      // adjust offset
+      if (off & 0x20) {
+        mins -= 30 * (off & 0x1F);
+        } else {
+        mins += 30 * (off & 0x1F);
+      }
+    
+      // Serial.print(" >>"); Serial.print(mins/60); Serial.print(':'); Serial.println(mins % 60);
+
+      if ((_sendTime) && (mins != _lastRDSMinutes)) {
+        _lastRDSMinutes = mins;
+        _sendTime(mins/60, mins % 60);
+      } // if
+      break;
     
     default:
     // Serial.print("RDS_GRP:"); Serial.println(rdsGroupType, HEX);
@@ -94,7 +137,14 @@ void RDSParser::processData( uint16_t block1, uint16_t block2, uint16_t block3, 
   }
 }
 
-void RDSParser::attachNewServicenName( receiveServicenNameFunction newFunction )
+void RDSParser::attachServicenNameCallback(receiveServicenNameFunction newFunction)
 {
   _sendServiceName = newFunction;
 }
+
+void RDSParser::attachTimeCallback(receiveTimeFunction newFunction)
+{
+  _sendTime = newFunction;
+}
+
+// End.

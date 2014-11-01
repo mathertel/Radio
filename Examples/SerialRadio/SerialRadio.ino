@@ -240,7 +240,7 @@ void setup() {
   
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
-  rds.attachNewServicenName(DisplayServiceName);
+  rds.attachServicenNameCallback(DisplayServiceName);
   
   runCommand('?', 0);
 } // Setup
