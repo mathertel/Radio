@@ -51,6 +51,7 @@
 /// Don't change the radio chip (yet).
 RADIO::RADIO() {
   memset(this, 0, sizeof(RADIO));
+  MAXVOLUME = 15; 
 } // RADIO()
 
 

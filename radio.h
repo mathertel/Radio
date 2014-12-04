@@ -96,21 +96,25 @@ typedef struct RADIO_INFO {
   uint8_t rssi;  ///< Radio Station Strength Information.
   bool rds;      ///< RDS information is available.
   bool tuned;    ///< A stable frequency is tuned.
+  bool mono;     ///< Mono mode is on.
   bool stereo;   ///< Stereo audio is available
 };
 
 
 /// a structure that contains information about the audio features
 typedef struct AUDIO_INFO {
-  bool bassBoost;
+  uint8_t volume;
   bool mute;
   bool softmute;
+  bool bassBoost;
 };
 
 // ----- common RADIO class definition -----
 
 class RADIO {
   public:
+    uint8_t MAXVOLUME; ///< max volume level for the radio implementations
+
   RADIO(); ///< create a new object from this class.
 
   virtual bool   init();  ///< initialize library and the chip.
