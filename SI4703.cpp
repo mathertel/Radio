@@ -82,9 +82,9 @@
 #define SPACE1  5
 #define SPACE0  4
 
-// Register 0x06 - SYSCONFIG3 
+// Register 0x06 - SYSCONFIG3
 #define SKSNR_MASK 0x00F0
-#define SKSNR_OFF  0x0000  
+#define SKSNR_OFF  0x0000
 #define SKSNR_MIN  0x0010
 #define SKSNR_MID  0x0030
 #define SKSNR_MAX  0x0070
@@ -98,12 +98,13 @@
 
 
 //Register 0x0A - STATUSRSSI
-#define RDSR  15
-#define STC  14
-#define SFBL  13
-#define AFCRL  12
-#define RDSS  11
-#define SI  8 ///< Stereo Indicator
+#define RDSR   0x8000 ///<RDS ready
+#define STC    0x4000 ///<Seek Tune Complete
+#define SFBL   0x2000 ///< Seek Fail Band Limit
+#define AFCRL  0x1000
+#define RDSS   0x0800 ///<RDS syncronized
+#define SI     0x0100 ///< Stereo Indicator
+#define RSSI   0x00FF
 
 // ----- implement
 
@@ -199,13 +200,6 @@ void SI4703::setVolume(uint8_t newVolume)
 } // setVolume()
 
 
-void SI4703::setBassBoost(bool switchOn)
-{
-  DEBUG_FUNC0("setBassBoost");
-  RADIO::setBassBoost(switchOn);
-} // setBassBoost()
-
-
 // Mono / Stereo
 void SI4703::setMono(bool switchOn)
 {
@@ -280,9 +274,9 @@ void SI4703::setBand(RADIO_BAND newBand) {
 
 
 /**
- * @brief Retrieve the real frequency from the chip after automatic tuning.
- * @return RADIO_FREQ the current frequency.
- */
+* @brief Retrieve the real frequency from the chip after automatic tuning.
+* @return RADIO_FREQ the current frequency.
+*/
 RADIO_FREQ SI4703::getFrequency() {
   _readRegisters();
   int channel = registers[READCHAN] & 0x03FF; //Mask out everything but the lower 10 bits
@@ -292,12 +286,14 @@ RADIO_FREQ SI4703::getFrequency() {
 
 
 /**
- * @brief Change the frequency in the chip.
- * @param newF
- * @return void
- */
+* @brief Change the frequency in the chip.
+* @param newF
+* @return void
+*/
 void SI4703::setFrequency(RADIO_FREQ newF) {
   DEBUG_FUNC1("setFrequency", newF);
+  if (newF < _freqLow)  newF = _freqLow;
+  if (newF > _freqHigh) newF = _freqHigh;
 
   _readRegisters();
   int channel = (newF - _freqLow) / _freqSteps;
@@ -392,15 +388,18 @@ uint16_t SI4703::_read16(void)
 } // _read16
 
 
+
+/// Retrieve all the information related to the current radio receiving situation.
 void SI4703::getRadioInfo(RADIO_INFO *info) {
-  RADIO::getRadioInfo(info);
+  RADIO::getRadioInfo(info); // all settings to 0 and false
 
   _readRegisters();
   info->active = true; // ???
-  if (registers[STATUSRSSI] & (1<<SI)) info->stereo = true;
-  info->rssi = registers[STATUSRSSI] & 0x00FF;
-  if (registers[STATUSRSSI] & (1<<RDSR)) info->rds = true;
-  if (registers[STATUSRSSI] & (1<<STC)) info->tuned = true;
+  if (registers[STATUSRSSI] & SI) info->stereo = true;
+  info->rssi = registers[STATUSRSSI] & RSSI;
+  if (registers[STATUSRSSI] & (RDSS)) info->rds = true;
+  if (registers[STATUSRSSI] & STC) info->tuned = true;
+  if (registers[POWERCFG] & (1 << SETMONO)) info->mono = true;
 } // getRadioInfo()
 
 
@@ -410,8 +409,9 @@ void SI4703::getAudioInfo(AUDIO_INFO *info) {
   _readRegisters();
   if (! (registers[POWERCFG] & (1<<DMUTE))) info->mute = true;
   if (! (registers[POWERCFG] & (1<<DSMUTE))) info->softmute = true;
-
-
+  // no bassboost
+  
+  info->volume = registers[SYSCONFIG2] & 0x000F;
 } // getAudioInfo()
 
 
@@ -419,14 +419,12 @@ void SI4703::checkRDS()
 {
   // DEBUG_FUNC0("checkRDS");
 
-  // check RDS data if there is a listener !
+  // check if there is a listener !
   if (_sendRDS) {
     _readRegisters();
-    if(registers[STATUSRSSI] & (1<<RDSR)) {
-      _sendRDS(registers[RDSA],
-      registers[RDSB],
-      registers[RDSC],
-      registers[RDSD]);
+    // check for a RDS data set ready
+    if(registers[STATUSRSSI] & RDSR) {
+      _sendRDS(registers[RDSA], registers[RDSB], registers[RDSC], registers[RDSD]);
     } // if
   } // if
 } // checkRDS
@@ -475,14 +473,14 @@ void SI4703::_waitEnd() {
   // wait until STC gets high
   do {
     _readRegisters();
-  } while ((registers[STATUSRSSI] & (1<<STC)) == 0);
+  } while ((registers[STATUSRSSI] & STC) == 0);
   
   // DEBUG_VAL("Freq:", getFrequency());
   
   _readRegisters();
   // get the SFBL bit.
-  if (registers[STATUSRSSI] & (1<<SFBL))
-    DEBUG_STR("Seek limit hit");
+  if (registers[STATUSRSSI] & SFBL)
+  DEBUG_STR("Seek limit hit");
   
   // end the seek mode
   registers[POWERCFG] &= ~(1<<SEEK);
@@ -490,9 +488,9 @@ void SI4703::_waitEnd() {
   _saveRegisters();
 
   // wait until STC gets down again
-   do {
-     _readRegisters();
-   } while ((registers[STATUSRSSI] & (1<<STC)) != 0);
+  do {
+    _readRegisters();
+  } while ((registers[STATUSRSSI] & STC) != 0);
 } // _waitEnd()
 
 
