@@ -49,6 +49,7 @@ class RDA5807M : public RADIO {
   void   setBassBoost(bool switchOn);
   void   setMono(bool switchOn);
   void   setMute(bool switchOn);
+  void   setSoftMute(bool switchOn);    ///< Set the soft mute mode (mute on low signals) on or off.
 
   // ----- Receiver features -----
   void   setBand(RADIO_BAND newBand);
@@ -61,6 +62,12 @@ class RDA5807M : public RADIO {
   // ----- Supporting RDS for RADIO_BAND_FM and RADIO_BAND_FMWORLD
 
   void    checkRDS();
+
+  // ----- combined status functions -----
+
+  virtual void getRadioInfo(RADIO_INFO *info); ///< Retrieve some information about the current radio function of the chip.
+
+  // ----- Supporting RDS for RADIO_BAND_FM and RADIO_BAND_FMWORLD
 
   // ----- debug Helpers send information to Serial port
   

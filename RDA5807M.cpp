@@ -61,7 +61,10 @@
 #define RADIO_REG_RA_STEREO    0x0400
 #define RADIO_REG_RA_NR        0x03FF
 
-#define RADIO_REG_RB      0x0B
+#define RADIO_REG_RB          0x0B
+#define RADIO_REG_RB_FMTRUE   0x0100
+#define RADIO_REG_RB_FMREADY  0x0080
+
 
 #define RADIO_REG_RDSA   0x0C
 #define RADIO_REG_RDSB   0x0D
@@ -71,7 +74,7 @@
 // I2C-Address RDA Chip for sequential  Access
 #define I2C_SEQ  0x10
 
-// I2C-Address RDA Chip for sequential  Access
+// I2C-Address RDA Chip for Index  Access
 #define I2C_INDX  0x11
 
 
@@ -171,7 +174,7 @@ void RDA5807M::setMono(bool switchOn)
 void RDA5807M::setMute(bool switchOn)
 {
   RADIO::setMute(switchOn);
-  registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_SEEK);
+
   if (switchOn) {
     // now don't unmute
     registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_UNMUTE);
@@ -182,6 +185,21 @@ void RDA5807M::setMute(bool switchOn)
   } // if
   _saveRegister(RADIO_REG_CTRL);
 } // setMute()
+
+
+// Switch softmute mode.
+void RDA5807M::setSoftMute(bool switchOn)
+{
+  RADIO::setSoftMute(switchOn);
+
+  if (switchOn) {
+    registers[RADIO_REG_R4] |= (RADIO_REG_R4_SOFTMUTE);
+  }
+  else {
+    registers[RADIO_REG_R4] &= (~RADIO_REG_R4_SOFTMUTE);
+  } // if
+  _saveRegister(RADIO_REG_R4);
+} // setSoftMute()
 
 
 // ----- Band and frequency control methods -----
@@ -381,6 +399,23 @@ void RDA5807M::checkRDS()
   }
 }
 
+
+/// Retrieve all the information related to the current radio receiving situation.
+void RDA5807M::getRadioInfo(RADIO_INFO *info) {
+
+  RADIO::getRadioInfo(info);
+
+  // read data from registers A .. F of the chip into class memory
+  _readRegisters();
+  info->active = true; // ???
+  if (registers[RADIO_REG_RA] & RADIO_REG_RA_STEREO) info->stereo = true;
+  if (registers[RADIO_REG_RA] & RADIO_REG_RA_RDS) info->rds = true;
+  info->rssi = registers[RADIO_REG_RB] >> 10;
+  if (registers[RADIO_REG_RB] & RADIO_REG_RB_FMTRUE) info->tuned = true;
+  if (registers[RADIO_REG_CTRL] & RADIO_REG_CTRL_MONO) info->mono = true;
+} // getRadioInfo()
+
+
 // ----- Debug functions -----
 
 void RDA5807M::debugScan()
@@ -421,7 +456,7 @@ void RDA5807M::debugStatus()
   Serial.print((registers[RADIO_REG_RA] & RADIO_REG_RA_STEREO) ? " Stereo" : " Mono  ");
   Serial.print((registers[RADIO_REG_RA] & RADIO_REG_RA_RDS)    ? " ---"    : " RDS");
   
-  int rssi = registers[0x0B]>>10;
+  int rssi = registers[RADIO_REG_RB] >> 10;
 
   Serial.print(" Sig="); if (rssi < 10) Serial.write(' ');
   Serial.print(rssi);
