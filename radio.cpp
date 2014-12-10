@@ -117,7 +117,7 @@ bool RADIO::getMute() {
 } // getMute()
 
 
-// ----- mute control -----
+// ----- softmute control -----
 
 void RADIO::setSoftMute(bool switchOn) {
   _softMute = switchOn;
@@ -182,9 +182,15 @@ void RADIO::getRadioInfo(RADIO_INFO *info) {
 }
 
 
+/// Return current settings as far as no chip is required.
+/// When using the radio::setXXX methods, no chip specific implementation is needed.
 void RADIO::getAudioInfo(AUDIO_INFO *info) {
   // set everything to false and 0.
   memset(info, 0, sizeof(AUDIO_INFO));
+  info->volume = _volume;
+  info->mute = _mute;
+  info->softmute = _softMute;
+  info->bassBoost = _bassBoost;
 }
 
 
