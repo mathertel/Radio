@@ -24,8 +24,9 @@
 
 /// callback function for passing a ServicenName 
 extern "C" {
-  typedef void (*receiveServicenNameFunction)(char *name);
-  typedef void (*receiveTimeFunction)(uint8_t hour, uint8_t minute);
+  typedef void(*receiveServicenNameFunction)(char *name);
+  typedef void(*receiveTextFunction)(char *name);
+  typedef void(*receiveTimeFunction)(uint8_t hour, uint8_t minute);
 }
 
 
@@ -37,28 +38,31 @@ public:
 
   /// Initialize internal variables before starting or after a change to another channel.
   void init();
-  
+
   /// Pass all available RDS data through this function.
   void processData(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4);
-  
+
   void attachServicenNameCallback(receiveServicenNameFunction newFunction); ///< Register function for displaying a new Service Name.
+  void attachTextCallback(receiveTextFunction newFunction); ///< Register the function for displaying a rds text.
   void attachTimeCallback(receiveTimeFunction newFunction); ///< Register function for displaying a new time
 
 private:
   // ----- actual RDS values
   uint8_t rdsGroupType, rdsTP, rdsPTY;
+  uint8_t _textAB, _last_textAB, _lastTextIDX;
 
   // Program Service Name
   char _PSName1[10]; // including trailing '\00' character.
   char _PSName2[10]; // including trailing '\00' character.
   char programServiceName[10];    // found station name or empty. Is max. 8 character long.
-  
-  receiveServicenNameFunction _sendServiceName; ///< Registered ServiceName function.
 
+  receiveServicenNameFunction _sendServiceName; ///< Registered ServiceName function.
   receiveTimeFunction _sendTime; ///< Registered Time function.
+  receiveTextFunction _sendText;
+
   uint16_t _lastRDSMinutes; ///< last RDS time send to callback.
 
-  char _RDSText[64+2];
+  char _RDSText[64 + 2];
 
 }; //RDSParser
 
