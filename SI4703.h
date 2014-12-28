@@ -62,8 +62,11 @@ class SI4703 : public RADIO {
   
   void checkRDS(); // read RDS data from the current station and process when data available.
   
-  void getRadioInfo(RADIO_INFO *info);
-  void getAudioInfo(AUDIO_INFO *info);
+  // ----- combined status functions -----
+
+  virtual void getRadioInfo(RADIO_INFO *info); ///< Retrieve some information about the current radio function of the chip.
+
+  virtual void getAudioInfo(AUDIO_INFO *info); ///< Retrieve some information about the current audio function of the chip.
 
   // ----- debug Helpers send information to Serial port
   
