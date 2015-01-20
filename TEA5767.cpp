@@ -161,16 +161,13 @@ void TEA5767::setBand(RADIO_BAND newBand) {
   if (newBand == RADIO_BAND_FM) {
 
     RADIO::setBand(newBand);
-    _freqLow = 8750;
 
 #ifdef IN_EUROPE
     //Freq(MHz) = 0.100(in Europe) * Channel + 87.5MHz
-    _freqSteps = 10;
     registers[REG_4] &= ~REG_4_BL;
 
 #else
     //Freq(MHz) = 0.200(in USA) * Channel + 87.5MHz
-    _freqSteps = 10;
     registers[REG_4] |= REG_4_BL;
 #endif
 
@@ -261,22 +258,6 @@ void TEA5767::_saveRegisters()
   } // if
 
 } // _saveRegisters
-
-
-// write a register value using 2 bytes into the Wire.
-void TEA5767::_write16(uint16_t val)
-{
-  Wire.write(val >> 8); Wire.write(val & 0xFF);
-} // _write16
-
-
-// read a register value using 2 bytes in a row
-uint16_t TEA5767::_read16(void)
-{
-  uint8_t hiByte = Wire.read();
-  uint8_t loByte = Wire.read();
-  return((hiByte << 8) + loByte);
-} // _read16
 
 
 void TEA5767::getRadioInfo(RADIO_INFO *info) {
