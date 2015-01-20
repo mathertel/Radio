@@ -94,6 +94,7 @@ bool TEA5767::TEA5767::init() {
   #else
   registers[REG_5] = REG_5_DTC; // 75 ms Europe setup
   #endif
+  Wire.begin();
 
 
   return(result);
