@@ -176,10 +176,19 @@ RADIO_FREQ RADIO::getMaxFrequency() { return(_freqHigh); }
 RADIO_FREQ RADIO::getFrequencyStep(){ return(_freqSteps); }
 
 
+/// Return all the Radio settings.
+/// This implementation only knows some values from the last settings.
 void RADIO::getRadioInfo(RADIO_INFO *info) {
   // set everything to false and 0.
   memset(info, 0, sizeof(RADIO_INFO));
-}
+  // info->tuned = false;
+  // info->rds = false;
+  // info->stereo = false;
+
+  // use current settings
+  info->mono = _mono;
+
+} // getRadioInfo()
 
 
 /// Return current settings as far as no chip is required.
@@ -187,11 +196,13 @@ void RADIO::getRadioInfo(RADIO_INFO *info) {
 void RADIO::getAudioInfo(AUDIO_INFO *info) {
   // set everything to false and 0.
   memset(info, 0, sizeof(AUDIO_INFO));
+
+  // use current settings
   info->volume = _volume;
   info->mute = _mute;
   info->softmute = _softMute;
   info->bassBoost = _bassBoost;
-}
+} // getAudioInfo()
 
 
 // check if RDS Data is available and good
