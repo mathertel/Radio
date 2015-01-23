@@ -207,10 +207,10 @@ void SI4703::setMono(bool switchOn)
   RADIO::setMono(switchOn);
   _readRegisters(); //Read the current register set
   if (switchOn) {
-    registers[POWERCFG] &= ~(1 << SETMONO); // clear stereo bit
+    registers[POWERCFG] |= (1 << SETMONO); // set force mono bit
   }
   else {
-    registers[POWERCFG] |= (1 << SETMONO); // set stereo bit
+    registers[POWERCFG] &= ~(1 << SETMONO); // clear force mono bit
   } // if
   _saveRegisters();
 } // setMono
@@ -391,7 +391,7 @@ uint16_t SI4703::_read16(void)
 
 /// Retrieve all the information related to the current radio receiving situation.
 void SI4703::getRadioInfo(RADIO_INFO *info) {
-  RADIO::getRadioInfo(info); // all settings to 0 and false
+  RADIO::getRadioInfo(info); // all settings to last current settings
 
   _readRegisters();
   info->active = true; // ???
@@ -403,14 +403,14 @@ void SI4703::getRadioInfo(RADIO_INFO *info) {
 } // getRadioInfo()
 
 
+/// Return current audio settings.
 void SI4703::getAudioInfo(AUDIO_INFO *info) {
   RADIO::getAudioInfo(info);
 
   _readRegisters();
   if (! (registers[POWERCFG] & (1<<DMUTE))) info->mute = true;
   if (! (registers[POWERCFG] & (1<<DSMUTE))) info->softmute = true;
-  // no bassboost
-  
+  info->bassBoost = false; // no bassBoost
   info->volume = registers[SYSCONFIG2] & 0x000F;
 } // getAudioInfo()
 
