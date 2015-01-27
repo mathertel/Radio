@@ -190,7 +190,7 @@ void SI4703::term()
 
 void SI4703::setVolume(uint8_t newVolume)
 {
-  DEBUG_FUNC0("setVolume");
+  DEBUG_FUNC1("setVolume", newVolume);
   if (newVolume > 15) newVolume = 15;
   _readRegisters(); //Read the current register set
   registers[SYSCONFIG2] &= 0xFFF0; //Clear volume bits

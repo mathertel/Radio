@@ -58,7 +58,7 @@
 #define DEBUG_FUNC2(fn, p1, p2)  if (_debugEnabled) { Serial.print(fn); Serial.print('('); Serial.print(p1); Serial.print(", "); Serial.print(p2); Serial.println(')'); }
 
 /// Used for Debugging function entries with 2 parameters and Hex Value.
-#define DEBUG_FUNC2X(fn, p1, p2) if (_debugEnabled) { Serial.print(fn); Serial.print('('); Serial.print(p1); Serial.print(", 0x"); Serial.print(p2, HEX); Serial.println(')'); }
+#define DEBUG_FUNC2X(fn, p1, p2) if (_debugEnabled) { Serial.print(fn); Serial.print("(0x"); Serial.print(p1, HEX); Serial.print(", 0x"); Serial.print(p2, HEX); Serial.println(')'); }
 
 
 // ----- Callback function types -----
