@@ -38,7 +38,8 @@
 
 #include <RADIO.h>
 #include <RDA5807M.h>
-#include <si4703.h>
+#include <SI4703.h>
+#include <SI4705.h>
 #include <TEA5767.h>
 
 #include <RDSParser.h>
@@ -76,7 +77,8 @@ int    i_sidx=5;        ///< Start at Station with index=5
 
 // RADIO radio;       ///< Create an instance of a non functional radio.
 // RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
-SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
+// SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
+SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
 
 
@@ -232,7 +234,9 @@ void setup() {
   delay(100);
 
   radio.setMono(false);
+  radio.setMute(false);
   // radio.debugRegisters();
+  radio.setVolume(8);
 
   Serial.write('>');
   
