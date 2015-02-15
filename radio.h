@@ -44,6 +44,7 @@
 
 /// Used for Debugging function entries without parameters.
 #define DEBUG_VAL(label, val)    if (_debugEnabled) { Serial.print(label);  Serial.print(':');  Serial.println(val); }
+#define DEBUG_VALX(label, val)    if (_debugEnabled) { Serial.print(label);  Serial.print(':');  Serial.println(val, HEX); }
 
 /// Used for Debugging function entries without parameters.
 #define DEBUG_FUNC0(fn)          if (_debugEnabled) { Serial.print(fn); Serial.println("()"); }

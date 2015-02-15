@@ -129,7 +129,7 @@ void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t blo
 /// See the "?" command for available commands.
 /// \param cmd The command character.
 /// \param value An optional parameter for the command.
-void runCommand(char cmd, int16_t value)
+void runSerialCommand(char cmd, int16_t value)
 {
   if (cmd == '?') {
     Serial.println();
@@ -213,7 +213,7 @@ void runCommand(char cmd, int16_t value)
   else if (cmd == 'x') { 
     radio.debugStatus(); // print chip specific data.
   }
-} // runCommand()
+} // runSerialCommand()
 
 
 /// Setup a FM only radio configuration with I/O for commands and debugging on the Serial port.
@@ -231,7 +231,7 @@ void setup() {
 
   radio.setBandFrequency(RADIO_BAND_FM, preset[i_sidx]); // 5. preset.
 
-  delay(100);
+  // delay(100);
 
   radio.setMono(false);
   radio.setMute(false);
@@ -246,7 +246,7 @@ void setup() {
   radio.attachReceiveRDS(RDS_process);
   rds.attachServicenNameCallback(DisplayServiceName);
   
-  runCommand('?', 0);
+  runSerialCommand('?', 0);
 } // Setup
 
 
@@ -287,7 +287,7 @@ void loop() {
       }
       else {
         // not a value -> execute
-        runCommand(command, value);
+        runSerialCommand(command, value);
         command = ' ';
         state = STATE_PARSECOMMAND;
         value = 0;

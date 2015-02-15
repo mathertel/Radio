@@ -1,0 +1,69 @@
+#######################################
+# Syntax Coloring Map For Arduino Radio Library 
+# see 
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+RDA5807M	KEYWORD1
+RADIO	    KEYWORD1
+SI4703	    KEYWORD1
+SI4705	    KEYWORD1
+TEA5767	    KEYWORD1
+
+RADIO_FREQ	KEYWORD1
+RADIO_BAND	KEYWORD1
+RADIO_INFO	KEYWORD1
+AUDIO_INFO	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init  KEYWORD2
+term  KEYWORD2
+
+setVolume     KEYWORD2
+getVolume     KEYWORD2
+setBassBoost  KEYWORD2
+getBassBoost  KEYWORD2
+setMono       KEYWORD2
+getMono       KEYWORD2
+setMute       KEYWORD2
+getMute       KEYWORD2
+setSoftMute   KEYWORD2
+getSoftMute   KEYWORD2
+
+setBand       KEYWORD2
+getBand       KEYWORD2
+
+setFrequency  KEYWORD2
+getFrequency  KEYWORD2
+
+setBandFrequency  KEYWORD2
+
+seekUp        KEYWORD2
+seekDown      KEYWORD2
+
+getMinFrequency   KEYWORD2
+getMaxFrequency   KEYWORD2
+getFrequencyStep  KEYWORD2
+
+getRadioInfo  KEYWORD2
+getAudioInfo  KEYWORD2
+
+checkRDS          KEYWORD2
+attachReceiveRDS  KEYWORD2
+
+formatFrequency   KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################

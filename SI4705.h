@@ -74,9 +74,10 @@ private:
   // ----- local variables
 
   // store the current status values
+  uint8_t _status;        ///< the status after sending a command
   uint8_t tuneStatus[8];
   uint8_t rsqStatus[8];
-  uint8_t rdsStatus[12];
+  uint8_t rdsStatus[1+12];
 
   // ----- low level communication to the chip using I2C bus
 
@@ -86,8 +87,11 @@ private:
   /// set a property
   void _setProperty(uint16_t prop, uint16_t value);
 
+  /// read the interrupt status.
+  uint8_t _readStatus();
+
   /// read status information into a buffer
-  void _readStatus(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len);
+  void _readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len);
 
 
   void     _write16(uint16_t val);        // Write 16 Bit Value on I2C-Bus
