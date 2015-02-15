@@ -5,6 +5,7 @@
 /// * 06.11.2014 created.
 /// * 22.11.2014 working.
 /// * 07.02.2015 more complete implementation
+//  * 14.02.2015 still works with no ethernet available (slow start).
 
 // There are several tasks that have to be done when the radio is running.
 // Therefore all these tasks are handled this way:

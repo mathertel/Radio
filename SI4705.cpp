@@ -275,7 +275,7 @@ void SI4705::setBand(RADIO_BAND newBand) {
  * @return RADIO_FREQ the current frequency.
  */
 RADIO_FREQ SI4705::getFrequency() {
-  DEBUG_FUNC0("getFrequency");
+  // DEBUG_FUNC0("getFrequency");
   _readStatusData(CMD_FM_TUNE_STATUS, 0x03, tuneStatus, sizeof(tuneStatus));
   _freq = (tuneStatus[2] << 8) + tuneStatus[3];
 
@@ -377,7 +377,7 @@ uint16_t SI4705::_read16(void)
 
 
 void SI4705::getRadioInfo(RADIO_INFO *info) {
-  DEBUG_FUNC0("getRadioInfo");
+  // DEBUG_FUNC0("getRadioInfo");
 
   RADIO::getRadioInfo(info);
 
