@@ -143,9 +143,6 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     _RDSText[idx] = (block4 >> 8); idx++;
     _RDSText[idx] = (block4 & 0x00FF); idx++;
 
-    p = strchr(_RDSText, '\0x0D');
-    if (p) *p = ']';
-    
     // Serial.print(' '); Serial.println(_RDSText);
     // Serial.print("T>"); Serial.println(_RDSText);
     break;

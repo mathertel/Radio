@@ -697,7 +697,9 @@ void DisplayFrequency()
 } // DisplayFrequency()
 
 
-/// Update the ServiceName text on the LCD display when in RDS mode.
+/// This function will be called by the RDS module when a rds service name was received.
+/// The text be displayed on the LCD and written to the serial port
+/// and will be stored for the web interface.
 void DisplayServiceName(char *name)
 {
   Serial.print("RDS:"); Serial.println(name);
@@ -710,7 +712,9 @@ void DisplayServiceName(char *name)
 } // DisplayServiceName()
 
 
-/// Update the internal RDS text when in RDS mode.
+/// This function will be called by the RDS module when a rds text message was received.
+/// The text will not displayed on the LCD but written to the serial port
+/// and will be stored for the web interface.
 void DisplayText(char *text)
 {
   Serial.print("TEXT:"); Serial.println(text);
@@ -718,17 +722,21 @@ void DisplayText(char *text)
 } // DisplayText()
 
 
+/// This function will be called by the RDS module when a rds time message was received.
+/// The time will not displayed on the LCD but written to the serial port.
 void DisplayTime(uint8_t hour, uint8_t minute) {
   Serial.print("RDS-Time:");
   if (hour < 10) Serial.print('0');
   Serial.print(hour);
   Serial.print(':');
   if (minute < 10) Serial.print('0');
-  Serial.print(minute);
+  Serial.println(minute);
 } // DisplayTime()
 
 
 /// Display the current volume.
+/// This function is called after a new volume level is choosen.
+/// The new volume is displayed on the LCD 2. Line.
 void DisplayVolume(uint8_t v)
 {
   DEBUGFUNC1("DisplayVolume", v);

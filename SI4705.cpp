@@ -402,20 +402,21 @@ void SI4705::checkRDS()
 {
   // DEBUG_FUNC0("checkRDS");
   if (_sendRDS) {
-
     // fetch the interrupt status first
     uint8_t status = _readStatus();
 
     // fetch the current RDS data
-    _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus, sizeof(rdsStatus));
+    _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
 
-    if ((rdsStatus[2] = 0x01) && (rdsStatus[3]) && (rdsStatus[12] == 0)) {
+    if ((rdsStatus.resp2 = 0x01) && (rdsStatus.rdsFifoUsed) && (rdsStatus.blockErrors == 0)) {
       // RDS is in sync, it's a complete entry and no errors
-      _sendRDS((rdsStatus[4] << 8) + rdsStatus[5],
-        (rdsStatus[6] << 8) + rdsStatus[7],
-        (rdsStatus[8] << 8) + rdsStatus[9], 
-        (rdsStatus[10] << 8) + rdsStatus[11]);
 
+#define RDSBLOCKWORD(h, l) (h << 8 | l)
+
+      _sendRDS(RDSBLOCKWORD(rdsStatus.blockAH, rdsStatus.blockAL),
+        RDSBLOCKWORD(rdsStatus.blockBH, rdsStatus.blockBL),
+        RDSBLOCKWORD(rdsStatus.blockCH, rdsStatus.blockCL),
+        RDSBLOCKWORD(rdsStatus.blockDH, rdsStatus.blockDL));
     } // if
 
   } // if _sendRDS
@@ -452,7 +453,7 @@ void SI4705::debugStatus()
   Serial.print("MULT:"); Serial.print(tuneStatus[6]); Serial.print(' ');
   Serial.print(rsqStatus[7], HEX); Serial.print(' ');
 
-  _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus, sizeof(rdsStatus));
+  _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
   Serial.print("RDS-Status: ");
   for (uint8_t n = 0; n < 12; n++) {
     Serial.print(rsqStatus[n], HEX); Serial.print(' ');
