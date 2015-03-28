@@ -15,6 +15,7 @@
 /// --------
 /// * 01.09.2014 created and RDS sender name working.
 /// * 01.11.2014 RDS time added.
+/// * 27.03.2015 Reset RDS data by sending a 0 in blockA in the case the frequency changes.
 
 #include "RDSParser.h"
 
@@ -29,28 +30,28 @@ RDSParser::RDSParser() {
 void RDSParser::init() {
   strcpy(_PSName1, "--------");
   strcpy(_PSName2, _PSName1);
-  strcpy(programServiceName, "          ");
+  strcpy(programServiceName, "        ");
   memset(_RDSText, 0, sizeof(_RDSText));
   strcpy(_RDSText, _PSName1);
   _lastTextIDX = 0;
-}
+} // init()
 
 
 void RDSParser::attachServicenNameCallback(receiveServicenNameFunction newFunction)
 {
   _sendServiceName = newFunction;
-}
+} // attachServicenNameCallback
 
 void RDSParser::attachTextCallback(receiveTextFunction newFunction)
 {
   _sendText = newFunction;
-}
+} // attachTextCallback
 
 
 void RDSParser::attachTimeCallback(receiveTimeFunction newFunction)
 {
   _sendTime = newFunction;
-}
+} // attachTimeCallback
 
 
 void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4)
@@ -71,6 +72,15 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
   //
 
   // Serial.print('('); Serial.print(block1, HEX); Serial.print(' '); Serial.print(block2, HEX); Serial.print(' '); Serial.print(block3, HEX); Serial.print(' '); Serial.println(block4, HEX);
+
+  if (block1 == 0) {
+    // reset all the RDS info.
+    init();
+    // Send out empty data
+    if (_sendServiceName) _sendServiceName(programServiceName);
+    if (_sendText)        _sendText("");
+    return;
+  } // if
 
   // analyzing Block 2
   rdsGroupType = 0x0A | ((block2 & 0xF000) >> 8) | ((block2 & 0x0800) >> 11);
@@ -148,6 +158,15 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     break;
 
   case 0x4A:
+    //(D363 4541 BE29 1A02
+    //  >> 18:40
+    //(D363 4541 BE29 1AC2
+    //  >> 18:43
+    //(D363 4541 BE29 1B02
+    //  >> 18:44
+         
+    // Serial.print('('); Serial.print(block1, HEX); Serial.print(' '); Serial.print(block2, HEX); Serial.print(' '); Serial.print(block3, HEX); Serial.print(' '); Serial.println(block4, HEX);
+
     // Clock time and date
     off = (block4)& 0x3F; // 6 bits
     mins = (block4 >> 6) & 0x3F; // 6 bits
@@ -161,7 +180,7 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
       mins += 30 * (off & 0x1F);
     }
 
-    // Serial.print(" >>"); Serial.print(mins/60); Serial.print(':'); Serial.println(mins % 60);
+    Serial.print(" >>"); Serial.print(mins/60); Serial.print(':'); Serial.println(mins % 60);
 
     if ((_sendTime) && (mins != _lastRDSMinutes)) {
       _lastRDSMinutes = mins;
@@ -193,6 +212,6 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     // Serial.print("RDS_GRP:"); Serial.println(rdsGroupType, HEX);
     break;
   }
-}
+} // processData()
 
 // End.

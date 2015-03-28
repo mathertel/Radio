@@ -12,7 +12,7 @@
 // * The setupNNN function has to initialize all the IO and variables to work.
 // * The loopNNN function will be called as often as possible by passing the current (relative) time.
 
-
+ 
 #include <SPI.h>
 #include <Wire.h>
 
@@ -253,20 +253,25 @@ SdFile   root;
 
 void setup() {
   Serial.begin(57600);
+  // DEBUGTEXT(F("Initializing LCD..."));
+  setupLCD();
+
+  // DEBUGTEXT(F("Initializing Radio..."));
+  lcd.print("Radio...");
+  setupRadio();
 
   // Initialize the SD card.
   // see if the card is present and can be initialized:
-  DEBUGTEXT(F("Initializing SD card..."));
+  // DEBUGTEXT(F("Initializing SD card..."));
   SD.begin(4);
 
-  setupLCD();
-  lcd.print("Radio...");
-  delay(800);
+  delay(2500);
 
   webstate = WEBSERVER_OFF;
 
   // Let's start the network
-  DEBUGTEXT(F("Starting network..."));
+  lcd.print("Net...");
+  // DEBUGTEXT(F("Starting network..."));
 
   int result = Ethernet.begin(mac);  // Ethernet.begin(mac, ip); if there is no DHCP
 
@@ -285,7 +290,7 @@ void setup() {
   }
   DEBUGVAR(F("Free RAM"), FreeRam());
 
-  setupRadio();
+  lcd.clear();
 } // setup()
 
 
@@ -879,8 +884,7 @@ void setupRadio() {
   radio.setMono(false);
   radio.setMute(false);
   // radio.debugRegisters();
-  radio.setVolume(8);
-
+  radio.setVolume(6);
 
   // Setup rotary encoder
 

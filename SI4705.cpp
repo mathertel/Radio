@@ -19,6 +19,7 @@
 /// * 30.01.2015 working first version.
 /// * 07.02.2015 cleanup
 /// * 15.02.2015 RDS is working.
+/// * 27.03.2015 scanning is working. No changes to default settings needed.
 
 #include <Arduino.h>
 #include <Wire.h>     // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
@@ -291,19 +292,45 @@ RADIO_FREQ SI4705::getFrequency() {
 void SI4705::setFrequency(RADIO_FREQ newF) {
   DEBUG_FUNC1("setFrequency", newF);
   _sendCommand(5, CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)& 0xff, 0);
+
+  // reset the RDSParser
+  if (_sendRDS) _sendRDS(0, 0, 0, 0);
 } // setFrequency()
 
 
-// start seek mode upwards
+/// Start seek mode upwards.
 void SI4705::seekUp(bool toNextSender) {
   DEBUG_FUNC0("seekUp");
-  _seek(true);
+  if (! toNextSender) {
+    RADIO_FREQ newF = getFrequency() + _freqSteps;
+    setFrequency(newF);
+
+  } else {
+    // start tuning
+    _sendCommand(2, CMD_FM_SEEK_START, 0x0C);
+    // reset the RDSParser
+    if (_sendRDS) _sendRDS(0, 0, 0, 0);
+
+  } // if
+
 } // seekUp()
 
 
-// start seek mode downwards
+/// Start seek mode downwards.
 void SI4705::seekDown(bool toNextSender) {
-  _seek(false);
+  DEBUG_FUNC0("seekUp");
+  if (!toNextSender) {
+    RADIO_FREQ newF = getFrequency() - _freqSteps;
+    setFrequency(newF);
+
+  } else {
+    // start tuning
+    _sendCommand(2, CMD_FM_SEEK_START, 0x04);
+    // reset the RDSParser
+    if (_sendRDS) _sendRDS(0, 0, 0, 0);
+
+  } // if
+
 } // seekDown()
 
 
@@ -461,12 +488,6 @@ void SI4705::debugStatus()
 
 
 } // debugStatus
-
-
-/// Seeks out the next available station
-void SI4705::_seek(bool seekUp) {
-  DEBUG_FUNC0("_seek");
-} // _seek
 
 
 /// wait until the current seek and tune operation is over.
