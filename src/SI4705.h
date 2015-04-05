@@ -1,9 +1,9 @@
 ///
-/// \file SI4703.h
-/// \brief Library header file for the radio library to control the SI4703 radio chip.
+/// \file SI4705.h
+/// \brief Library header file for the radio library to control the SI4705 radio chip.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
@@ -13,11 +13,12 @@
 ///
 /// History:
 /// --------
-/// * 05.08.2014 created.
+/// * 05.12.2014 created.
+/// *   .01.2015 working first version.
 
 
-#ifndef SI4703_h
-#define SI4703_h
+#ifndef SI4705_h
+#define SI4705_h
 
 #include <arduino.h>
 #include <Wire.h>
@@ -27,27 +28,27 @@
 // ----- library definition -----
 
 
-class SI4703 : public RADIO {
-  public:
-  SI4703();
-  
+/// Library to control the SI4705 radio chip.
+class SI4705 : public RADIO {
+public:
+  SI4705();
+
   bool   init();  // initialize library and the chip.
   void   term();  // terminate all radio functions.
-  
+
   // Control of the audio features
-  
+
   // Control the volume output of the radio chip
   void   setVolume(uint8_t newVolume); // set volume to 0..15
+
+  // Control the bass boost function of the radio chip
+  void   setBassBoost(bool switchOn);
 
   // Control mono/stereo mode of the radio chip
   void   setMono(bool switchOn); // Switch to mono mode.
 
   // Control the mute function of the radio chip
   void   setMute(bool switchOn); // Switch to mute mode.
-
-  // Control the softMute function of the radio chip
-  void   setSoftMute(bool switchOn); // Switch to soft mute mode.
-
 
   // Control of the core receiver
 
@@ -59,36 +60,63 @@ class SI4703 : public RADIO {
 
   void seekUp(bool toNextSender = true);   // start seek mode upwards
   void seekDown(bool toNextSender = true); // start seek mode downwards
-  
+
   void checkRDS(); // read RDS data from the current station and process when data available.
-  
-  // ----- combined status functions -----
 
-  virtual void getRadioInfo(RADIO_INFO *info); ///< Retrieve some information about the current radio function of the chip.
-
-  virtual void getAudioInfo(AUDIO_INFO *info); ///< Retrieve some information about the current audio function of the chip.
+  void getRadioInfo(RADIO_INFO *info);
+  void getAudioInfo(AUDIO_INFO *info);
 
   // ----- debug Helpers send information to Serial port
-  
+
   void  debugScan();               // Scan all frequencies and report a status
   void  debugStatus();             // Report Info about actual Station
 
-  // ----- read/write registers of the chip
-
-  void  _readRegisters();  // read all status & data registers
-  void  _saveRegisters();  // Save writable registers back to the chip
-
-  private:
+private:
   // ----- local variables
 
-  // store the current values of the 16 chip internal 16-bit registers
-  uint16_t registers[16];  
+  // store the current status values
+  uint8_t _status;        ///< the status after sending a command
+  uint8_t tuneStatus[8];
+  uint8_t rsqStatus[8];
+  uint8_t rdsStatusx[1+12];
+
+  /// structure used to read RDS information from the SI4705 radio chip.
+  union {
+    // use structured access 
+    struct {
+      uint8_t  status;
+      uint8_t  resp1;
+      uint8_t  resp2;
+      uint8_t  rdsFifoUsed;
+      uint8_t  blockAH; uint8_t  blockAL;
+      uint8_t  blockBH; uint8_t  blockBL;
+      uint8_t  blockCH; uint8_t  blockCL;
+      uint8_t  blockDH; uint8_t  blockDL;
+      uint8_t  blockErrors;
+    };
+    // use the the byte while receiving and sending.
+    uint8_t buffer[1 + 12];
+  } rdsStatus; // union RDSSTATUS
+
 
   // ----- low level communication to the chip using I2C bus
 
+  /// send a command
+  void _sendCommand(int cnt, int cmd, ...);
+
+  /// set a property
+  void _setProperty(uint16_t prop, uint16_t value);
+
+  /// read the interrupt status.
+  uint8_t _readStatus();
+
+  /// read status information into a buffer
+  void _readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len);
+
+
   void     _write16(uint16_t val);        // Write 16 Bit Value on I2C-Bus
   uint16_t _read16(void);
-  
+
   void _seek(bool seekUp = true);
   void _waitEnd();
 };

@@ -1,13 +1,19 @@
-// - - - - -
-// RDA5807M - A library to control the RDA5807M radio chip
-// RDA5807M.cpp: Library implementation
-//
-// Copyright (c) 2014 by Matthias Hertel, http://www.mathertel.de
-// This work is licensed under a BSD style license. See http://www.mathertel.de/License.aspx
-//
-// This library enables the use of the radio chip RDA5807M from http://www.rdamicro.com/.
-//
-// Documentation and source code is available at http://www.mathertel.de/Arduino
+/// \file RDA5807M.cpp
+/// \brief Implementation for the radio library to control the RDA5807M radio chip.
+///
+/// \author Matthias Hertel, http://www.mathertel.de
+/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// This work is licensed under a BSD style license.\n
+/// See http://www.mathertel.de/License.aspx
+///
+/// This library enables the use of the radio chip RDA5807M from http://www.rdamicro.com/.
+///
+/// More documentation and source code is available at http://www.mathertel.de/Arduino
+///
+/// History:
+/// --------
+/// * 05.08.2014 created.
+
 
 #include <arduino.h>
 #include <Wire.h>

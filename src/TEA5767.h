@@ -1,9 +1,9 @@
 ///
-/// \file newchip.h
-/// \brief Library header file for the radio library to control the newchip radio chip.
+/// \file TEA5767.h
+/// \brief Library header file for the radio library to control the TEA5767 radio chip.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
@@ -16,8 +16,8 @@
 /// * 05.08.2014 created.
 
 
-#ifndef newchip_h
-#define newchip_h
+#ifndef TEA5767_h
+#define TEA5767_h
 
 #include <arduino.h>
 #include <Wire.h>
@@ -27,9 +27,10 @@
 // ----- library definition -----
 
 
-class newchip : public RADIO {
+/// Library to control the TEA5767 radio chip.
+class TEA5767 : public RADIO {
   public:
-  newchip();
+  TEA5767();
   
   bool   init();  // initialize library and the chip.
   void   term();  // terminate all radio functions.
@@ -77,8 +78,10 @@ class newchip : public RADIO {
   private:
   // ----- local variables
 
-  // store the current values of the 16 chip internal 16-bit registers
-  // uint16_t registers[16];  
+  // store the current values of the 5 chip internal 8-bit registers
+  uint8_t registers[5]; ///< registers for controlling the radio chip.
+  uint8_t status[5];    ///< registers with the current status of the radio chip.
+
 
   // ----- low level communication to the chip using I2C bus
 

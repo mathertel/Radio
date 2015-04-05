@@ -3,7 +3,7 @@
 /// \brief Library header file for the radio library to control the RDA5807M radio chip.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 /// 
@@ -35,6 +35,7 @@
 
 // ----- library definition -----
 
+/// Library to control the RDA5807M radio chip.
 class RDA5807M : public RADIO {
   public:
   // ----- RDA5807M specific implementations -----
