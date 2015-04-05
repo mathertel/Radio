@@ -20,7 +20,7 @@
     <header>
       <div class="inner">
         <h1>Radio</h1>
-        <h2>An Arduino library to control radio chips like SI4703, RDA5807M</h2>
+        <h2>An Arduino library to control radio chips like SI4703, SI4703, RDA5807M, TEA5768.</h2>
         <a href="https://github.com/mathertel/Radio" class="button"><small>View project on</small> GitHub</a>
       </div>
     </header>
@@ -28,13 +28,35 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h2>
-<a id="radio" class="anchor" href="#radio" aria-hidden="true"><span class="octicon octicon-link"></span></a>Radio</h2>
+          <h2>Radio</h2>
 
-<h1></h1>
+<h1>Radio</h1>
 
-<p>An Arduino library to control radio chips like SI4703, RDA5807M</p>
+<p>An Arduino library to control radio for receiving FM broadcast signals.
+Currently the following chios are supported:</p>
+<ul>
+<li>The SI4703 from Silicon Labs</li>
+<li>The SI4705 from Silicon Labs</li>
+<li>The TEA5767 from NXP</li>
+<li>The RDA5807 from RDA Microelectronics</li>
+</ul>
+<p>They all are capable for receiving FM radio stations in stereo with European and US settings
+and can be controlled by using the I2C bus.
+However there are differences in the sensitivity and quality and well
+on receiving RDS information from the stations.</p>
+
+<p>For each of these chips a specific library is implemented that knows how to communicate
+with the chip using the I2C bus and the wire library. These libraries all share a common base,
+the radio library so that all the common code is only implemented once in there:</p>
+
+<p>All the libraries share the same interface (defined by the radio library)
+so it is possible to exchange them when not using one of the chip specific functions.</p>
+
+<p>The documentation for the libraries in DOXYGEN style can be found
+<a href="html/annotated.html">here</a>.</p>
+
         </section>
+
 
         <aside id="sidebar">
           <a href="https://github.com/mathertel/Radio/zipball/master" class="button">
