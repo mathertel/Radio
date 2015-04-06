@@ -58,6 +58,9 @@
 </div><!--header-->
 <div class="contents">
 
+<p>Library to control radio chips in general. This library acts as a base library for the chip specific implementations.  
+ <a href="class_r_a_d_i_o.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="radio_8h_source.html">radio.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for RADIO:</div>
@@ -65,11 +68,11 @@ Inheritance diagram for RADIO:</div>
  <div class="center">
   <img src="class_r_a_d_i_o.png" usemap="#RADIO_map" alt=""/>
   <map id="RADIO_map" name="RADIO_map">
-<area href="classnewchip.html" alt="newchip" shape="rect" coords="0,56,77,80"/>
-<area href="class_r_d_a5807_m.html" alt="RDA5807M" shape="rect" coords="87,56,164,80"/>
-<area href="class_s_i4703.html" alt="SI4703" shape="rect" coords="174,56,251,80"/>
-<area href="class_s_i4705.html" alt="SI4705" shape="rect" coords="261,56,338,80"/>
-<area href="class_t_e_a5767.html" alt="TEA5767" shape="rect" coords="348,56,425,80"/>
+<area href="classnewchip.html" title="Template library control a new radio chip. " alt="newchip" shape="rect" coords="0,56,77,80"/>
+<area href="class_r_d_a5807_m.html" title="Library to control the RDA5807M radio chip. " alt="RDA5807M" shape="rect" coords="87,56,164,80"/>
+<area href="class_s_i4703.html" title="Library to control the SI4703 radio chip. " alt="SI4703" shape="rect" coords="174,56,251,80"/>
+<area href="class_s_i4705.html" title="Library to control the SI4705 radio chip. " alt="SI4705" shape="rect" coords="261,56,338,80"/>
+<area href="class_t_e_a5767.html" title="Library to control the TEA5767 radio chip. " alt="TEA5767" shape="rect" coords="348,56,425,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -232,7 +235,9 @@ Private Member Functions</h2></td></tr>
  <a href="#a796ee7046d43208069842991ab8fb6d9">More...</a><br /></td></tr>
 <tr class="separator:a796ee7046d43208069842991ab8fb6d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Library to control radio chips in general. This library acts as a base library for the chip specific implementations. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ae4199ade68cc0073d2290605ff57158c"></a>
 <div class="memitem">
 <div class="memproto">
@@ -429,7 +434,7 @@ Private Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Send debug information about actual available chip functionality and other internal things. </p>
-<p>The <a class="el" href="class_r_a_d_i_o.html">RADIO</a> class doesn't have interesting status information so nothing is sent. </p>
+<p>The <a class="el" href="class_r_a_d_i_o.html" title="Library to control radio chips in general. This library acts as a base library for the chip specific ...">RADIO</a> class doesn't have interesting status information so nothing is sent. </p>
 
 <p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a714270ed69b14e5fa0cc35b1ef639861">RDA5807M</a>, <a class="el" href="class_s_i4703.html#a6788daf0381e955edc169f3faadfe6ef">SI4703</a>, <a class="el" href="class_s_i4705.html#a72fd62b37cf68961f01add03deefbd3f">SI4705</a>, <a class="el" href="classnewchip.html#ac53aa6ae91471d809a7a4c8bb338f6f0">newchip</a>, and <a class="el" href="class_t_e_a5767.html#a0928e58cb248168eda11c3410452ef20">TEA5767</a>.</p>
 
@@ -804,7 +809,7 @@ Private Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>initialize library and the chip. </p>
-<p>The <a class="el" href="class_r_a_d_i_o.html">RADIO</a> class doesn't implement a concrete chip so nothing has to be initialized. </p>
+<p>The <a class="el" href="class_r_a_d_i_o.html" title="Library to control radio chips in general. This library acts as a base library for the chip specific ...">RADIO</a> class doesn't implement a concrete chip so nothing has to be initialized. </p>
 
 <p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a05f2d34aa69fccfbd5fe8f2225166125">RDA5807M</a>, <a class="el" href="class_s_i4705.html#a04853d95fc544d03fb98da98861eb9f3">SI4705</a>, <a class="el" href="classnewchip.html#ac9541334f40bfac0125ce5eb58476650">newchip</a>, <a class="el" href="class_s_i4703.html#a2a43f7d5022bca73ca12644411f4aaca">SI4703</a>, and <a class="el" href="class_t_e_a5767.html#acad7a8c78caf5fdd0a3b03b046fdb200">TEA5767</a>.</p>
 
@@ -1161,7 +1166,7 @@ Private Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>terminate all radio functions. </p>
-<p>switch the power off The <a class="el" href="class_r_a_d_i_o.html">RADIO</a> class doesn't implement a concrete chip so nothing has to be terminated. </p>
+<p>switch the power off The <a class="el" href="class_r_a_d_i_o.html" title="Library to control radio chips in general. This library acts as a base library for the chip specific ...">RADIO</a> class doesn't implement a concrete chip so nothing has to be terminated. </p>
 
 <p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a6b7a08e45408f089d3f0a7f2ce64010c">RDA5807M</a>, <a class="el" href="class_s_i4705.html#ac04457011af19a3fbd79780d82157e7b">SI4705</a>, <a class="el" href="classnewchip.html#ade3c83af8b4a8e637e0d04bd2da1e052">newchip</a>, <a class="el" href="class_s_i4703.html#abcbedad84835a0596b69502f7ca7bd75">SI4703</a>, and <a class="el" href="class_t_e_a5767.html#a965433514b087084821bea70ef188944">TEA5767</a>.</p>
 
@@ -1447,13 +1452,13 @@ Private Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li><a class="el" href="radio_8h_source.html">radio.h</a></li>
-<li><a class="el" href="radio_8cpp.html">radio.cpp</a></li>
+<li>src/<a class="el" href="radio_8h_source.html">radio.h</a></li>
+<li>src/<a class="el" href="radio_8cpp.html">radio.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Apr 5 2015 18:51:50 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Apr 6 2015 13:00:51 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

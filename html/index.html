@@ -42,10 +42,20 @@
 <div class="title">Arduino Radio Library Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+<div class="textblock"><p>An Arduino library to control radio for receiving FM broadcast signals.</p>
+<p>Currently the following chios are supported:</p><ul>
+<li>The <a class="el" href="class_s_i4703.html" title="Library to control the SI4703 radio chip. ">SI4703</a> from Silicon Labs</li>
+<li>The <a class="el" href="class_s_i4705.html" title="Library to control the SI4705 radio chip. ">SI4705</a> from Silicon Labs</li>
+<li>The <a class="el" href="class_t_e_a5767.html" title="Library to control the TEA5767 radio chip. ">TEA5767</a> from NXP</li>
+<li>The <a class="el" href="class_r_d_a5807_m.html" title="Library to control the RDA5807M radio chip. ">RDA5807M</a> from RDA Microelectronics</li>
+</ul>
+<p>They all are capable for receiving FM radio stations in stereo with European and US settings and can be controlled by using the I2C bus.However there are differences in the sensitivity and quality and well on receiving RDS information from the stations.</p>
+<p>For each of these chips a specific library is implemented that knows how to communicate with the chip using the I2C bus and the wire library.These libraries all share a common base, the radio library so that all the common code is only implemented once in there :</p>
+<p>All the libraries share the same interface (defined by the radio library) so it is possible to exchange them when not using one of the chip specific functions. </p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Apr 5 2015 18:51:50 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Apr 6 2015 13:00:51 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

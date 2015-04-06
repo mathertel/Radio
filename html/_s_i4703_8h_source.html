@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.8"/>
-<title>Arduino Radio Library: SI4703.h Source File</title>
+<title>Arduino Radio Library: src/SI4703.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -42,6 +42,10 @@
       <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li>  </ul>
+</div>
 </div><!-- top -->
 <div class="header">
   <div class="headertitle">
@@ -61,79 +65,79 @@
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">// ----- library definition -----</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
-<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="class_s_i4703.html">   30</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_s_i4703.html">SI4703</a> : <span class="keyword">public</span> <a class="code" href="class_r_a_d_i_o.html">RADIO</a> {</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <a class="code" href="class_s_i4703.html#ad858d67b4e52c6c69feab397ed25401b">SI4703</a>();</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keywordtype">bool</span>   <a class="code" href="class_s_i4703.html#a2a43f7d5022bca73ca12644411f4aaca">init</a>();  <span class="comment">// initialize library and the chip.</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#abcbedad84835a0596b69502f7ca7bd75">term</a>();  <span class="comment">// terminate all radio functions.</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="comment">// Control of the audio features</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  </div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="comment">// Control the volume output of the radio chip</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#a0cef8ec52550dc160450362a7f2a3ca4">setVolume</a>(uint8_t newVolume); <span class="comment">// set volume to 0..15</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  <span class="comment">// Control mono/stereo mode of the radio chip</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#aa197b4377e6901603638b131374f2a4f">setMono</a>(<span class="keywordtype">bool</span> switchOn); <span class="comment">// Switch to mono mode.</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  <span class="comment">// Control the mute function of the radio chip</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#a096356c7a9b9d1cda6fb04336d81e8b4">setMute</a>(<span class="keywordtype">bool</span> switchOn); <span class="comment">// Switch to mute mode.</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="comment">// Control the softMute function of the radio chip</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">setSoftMute</a>(<span class="keywordtype">bool</span> switchOn); <span class="comment">// Switch to soft mute mode.</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="class_s_i4703.html">   31</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_s_i4703.html">SI4703</a> : <span class="keyword">public</span> <a class="code" href="class_r_a_d_i_o.html">RADIO</a> {</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <a class="code" href="class_s_i4703.html#ad858d67b4e52c6c69feab397ed25401b">SI4703</a>();</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <span class="keywordtype">bool</span>   <a class="code" href="class_s_i4703.html#a2a43f7d5022bca73ca12644411f4aaca">init</a>();  <span class="comment">// initialize library and the chip.</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#abcbedad84835a0596b69502f7ca7bd75">term</a>();  <span class="comment">// terminate all radio functions.</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <span class="comment">// Control of the audio features</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="comment">// Control the volume output of the radio chip</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#a0cef8ec52550dc160450362a7f2a3ca4">setVolume</a>(uint8_t newVolume); <span class="comment">// set volume to 0..15</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  <span class="comment">// Control mono/stereo mode of the radio chip</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#aa197b4377e6901603638b131374f2a4f">setMono</a>(<span class="keywordtype">bool</span> switchOn); <span class="comment">// Switch to mono mode.</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="comment">// Control the mute function of the radio chip</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#a096356c7a9b9d1cda6fb04336d81e8b4">setMute</a>(<span class="keywordtype">bool</span> switchOn); <span class="comment">// Switch to mute mode.</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  <span class="comment">// Control the softMute function of the radio chip</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keywordtype">void</span>   <a class="code" href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">setSoftMute</a>(<span class="keywordtype">bool</span> switchOn); <span class="comment">// Switch to soft mute mode.</span></div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="comment">// Control of the core receiver</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="comment">// Control the frequency</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a7800f9751a6a4475f3c8c346574208d8">setBand</a>(<a class="code" href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a> newBand);</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  <span class="keywordtype">void</span>    <a class="code" href="class_s_i4703.html#a1c9981a69502198a54636b5eafc9ee93">setFrequency</a>(<a class="code" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a> newF);</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <a class="code" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a> <a class="code" href="class_s_i4703.html#a7cff351adf3a994d0516179d56f0ddc0">getFrequency</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a3c996ff7e8e1099641727a7c5591f35d">seekUp</a>(<span class="keywordtype">bool</span> toNextSender = <span class="keyword">true</span>);   <span class="comment">// start seek mode upwards</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a056ee70fbc5cc59df632b7c23d8576f3">seekDown</a>(<span class="keywordtype">bool</span> toNextSender = <span class="keyword">true</span>); <span class="comment">// start seek mode downwards</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a85317d56cce774172ca10ac72038a3e4">checkRDS</a>(); <span class="comment">// read RDS data from the current station and process when data available.</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="comment">// ----- combined status functions -----</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#aed97aa0642ebce3cd6676154724a7e3a">getRadioInfo</a>(<a class="code" href="struct_r_a_d_i_o___i_n_f_o.html">RADIO_INFO</a> *info); </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#ad5106d1507e3d35b3b40e5e10b21b02e">getAudioInfo</a>(<a class="code" href="struct_a_u_d_i_o___i_n_f_o.html">AUDIO_INFO</a> *info); </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="comment">// ----- debug Helpers send information to Serial port</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a911f93025945ec3a62200b424b2e24aa">debugScan</a>();               <span class="comment">// Scan all frequencies and report a status</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a6788daf0381e955edc169f3faadfe6ef">debugStatus</a>();             <span class="comment">// Report Info about actual Station</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="comment">// ----- read/write registers of the chip</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a2e4fbb840b6c816000980d332923b7bf">_readRegisters</a>();  <span class="comment">// read all status &amp; data registers</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a833eadca079e40491dc137f3952549c9">_saveRegisters</a>();  <span class="comment">// Save writable registers back to the chip</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="comment">// ----- local variables</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <span class="comment">// store the current values of the 16 chip internal 16-bit registers</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="class_s_i4703.html#a8a6ea22ef3d4286dd12be9508f1b4045">   85</a></span>&#160;  uint16_t <a class="code" href="class_s_i4703.html#a8a6ea22ef3d4286dd12be9508f1b4045">registers</a>[16];  </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  <span class="comment">// ----- low level communication to the chip using I2C bus</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="keywordtype">void</span>     <a class="code" href="class_s_i4703.html#a28db4a74da4e22a8ff31c51be4fbe048">_write16</a>(uint16_t val);        <span class="comment">// Write 16 Bit Value on I2C-Bus</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  uint16_t <a class="code" href="class_s_i4703.html#af731426e4881e1c07c42af0ef2503881">_read16</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  </div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a38c1b80930ed0cde67b922ee8d6e4432">_seek</a>(<span class="keywordtype">bool</span> seekUp = <span class="keyword">true</span>);</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a048550553ca143f88076366e7b4b4197">_waitEnd</a>();</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;};</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="comment">// Control of the core receiver</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="comment">// Control the frequency</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a7800f9751a6a4475f3c8c346574208d8">setBand</a>(<a class="code" href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a> newBand);</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keywordtype">void</span>    <a class="code" href="class_s_i4703.html#a1c9981a69502198a54636b5eafc9ee93">setFrequency</a>(<a class="code" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a> newF);</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a> <a class="code" href="class_s_i4703.html#a7cff351adf3a994d0516179d56f0ddc0">getFrequency</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a3c996ff7e8e1099641727a7c5591f35d">seekUp</a>(<span class="keywordtype">bool</span> toNextSender = <span class="keyword">true</span>);   <span class="comment">// start seek mode upwards</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a056ee70fbc5cc59df632b7c23d8576f3">seekDown</a>(<span class="keywordtype">bool</span> toNextSender = <span class="keyword">true</span>); <span class="comment">// start seek mode downwards</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a85317d56cce774172ca10ac72038a3e4">checkRDS</a>(); <span class="comment">// read RDS data from the current station and process when data available.</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <span class="comment">// ----- combined status functions -----</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#aed97aa0642ebce3cd6676154724a7e3a">getRadioInfo</a>(<a class="code" href="struct_r_a_d_i_o___i_n_f_o.html">RADIO_INFO</a> *info); </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#ad5106d1507e3d35b3b40e5e10b21b02e">getAudioInfo</a>(<a class="code" href="struct_a_u_d_i_o___i_n_f_o.html">AUDIO_INFO</a> *info); </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="comment">// ----- debug Helpers send information to Serial port</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a911f93025945ec3a62200b424b2e24aa">debugScan</a>();               <span class="comment">// Scan all frequencies and report a status</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a6788daf0381e955edc169f3faadfe6ef">debugStatus</a>();             <span class="comment">// Report Info about actual Station</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="comment">// ----- read/write registers of the chip</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a2e4fbb840b6c816000980d332923b7bf">_readRegisters</a>();  <span class="comment">// read all status &amp; data registers</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="keywordtype">void</span>  <a class="code" href="class_s_i4703.html#a833eadca079e40491dc137f3952549c9">_saveRegisters</a>();  <span class="comment">// Save writable registers back to the chip</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="comment">// ----- local variables</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="comment">// store the current values of the 16 chip internal 16-bit registers</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="class_s_i4703.html#a8a6ea22ef3d4286dd12be9508f1b4045">   86</a></span>&#160;  uint16_t <a class="code" href="class_s_i4703.html#a8a6ea22ef3d4286dd12be9508f1b4045">registers</a>[16];  </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  <span class="comment">// ----- low level communication to the chip using I2C bus</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <span class="keywordtype">void</span>     <a class="code" href="class_s_i4703.html#a28db4a74da4e22a8ff31c51be4fbe048">_write16</a>(uint16_t val);        <span class="comment">// Write 16 Bit Value on I2C-Bus</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  uint16_t <a class="code" href="class_s_i4703.html#af731426e4881e1c07c42af0ef2503881">_read16</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a38c1b80930ed0cde67b922ee8d6e4432">_seek</a>(<span class="keywordtype">bool</span> seekUp = <span class="keyword">true</span>);</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="class_s_i4703.html#a048550553ca143f88076366e7b4b4197">_waitEnd</a>();</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;};</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="class_s_i4703_html_a833eadca079e40491dc137f3952549c9"><div class="ttname"><a href="class_s_i4703.html#a833eadca079e40491dc137f3952549c9">SI4703::_saveRegisters</a></div><div class="ttdeci">void _saveRegisters()</div><div class="ttdef"><b>Definition:</b> SI4703.cpp:347</div></div>
 <div class="ttc" id="class_s_i4703_html_a056ee70fbc5cc59df632b7c23d8576f3"><div class="ttname"><a href="class_s_i4703.html#a056ee70fbc5cc59df632b7c23d8576f3">SI4703::seekDown</a></div><div class="ttdeci">void seekDown(bool toNextSender=true)</div><div class="ttdoc">start seek mode downwards </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:318</div></div>
 <div class="ttc" id="class_s_i4703_html_a7cff351adf3a994d0516179d56f0ddc0"><div class="ttname"><a href="class_s_i4703.html#a7cff351adf3a994d0516179d56f0ddc0">SI4703::getFrequency</a></div><div class="ttdeci">RADIO_FREQ getFrequency(void)</div><div class="ttdoc">Retrieve the real frequency from the chip after automatic tuning. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:280</div></div>
 <div class="ttc" id="class_s_i4703_html_aed97aa0642ebce3cd6676154724a7e3a"><div class="ttname"><a href="class_s_i4703.html#aed97aa0642ebce3cd6676154724a7e3a">SI4703::getRadioInfo</a></div><div class="ttdeci">virtual void getRadioInfo(RADIO_INFO *info)</div><div class="ttdoc">Retrieve some information about the current radio function of the chip. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:393</div></div>
 <div class="ttc" id="class_s_i4703_html_a85317d56cce774172ca10ac72038a3e4"><div class="ttname"><a href="class_s_i4703.html#a85317d56cce774172ca10ac72038a3e4">SI4703::checkRDS</a></div><div class="ttdeci">void checkRDS()</div><div class="ttdoc">Check if RDS Data is available and good. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:418</div></div>
-<div class="ttc" id="radio_8h_html_a90d798068718e16f09d632d46bf64985"><div class="ttname"><a href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a></div><div class="ttdeci">RADIO_BAND</div><div class="ttdef"><b>Definition:</b> radio.h:77</div></div>
+<div class="ttc" id="radio_8h_html_a90d798068718e16f09d632d46bf64985"><div class="ttname"><a href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a></div><div class="ttdeci">RADIO_BAND</div><div class="ttdef"><b>Definition:</b> radio.h:97</div></div>
 <div class="ttc" id="class_s_i4703_html_af731426e4881e1c07c42af0ef2503881"><div class="ttname"><a href="class_s_i4703.html#af731426e4881e1c07c42af0ef2503881">SI4703::_read16</a></div><div class="ttdeci">uint16_t _read16(void)</div><div class="ttdef"><b>Definition:</b> SI4703.cpp:383</div></div>
 <div class="ttc" id="class_s_i4703_html_a1c9981a69502198a54636b5eafc9ee93"><div class="ttname"><a href="class_s_i4703.html#a1c9981a69502198a54636b5eafc9ee93">SI4703::setFrequency</a></div><div class="ttdeci">void setFrequency(RADIO_FREQ newF)</div><div class="ttdoc">Change the frequency in the chip. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:293</div></div>
 <div class="ttc" id="radio_8h_html"><div class="ttname"><a href="radio_8h.html">radio.h</a></div><div class="ttdoc">Library header file for the radio libraries to control radio chips. </div></div>
@@ -142,27 +146,27 @@
 <div class="ttc" id="class_s_i4703_html_a0cef8ec52550dc160450362a7f2a3ca4"><div class="ttname"><a href="class_s_i4703.html#a0cef8ec52550dc160450362a7f2a3ca4">SI4703::setVolume</a></div><div class="ttdeci">void setVolume(uint8_t newVolume)</div><div class="ttdoc">Set the output volume of the chip to 0 .. 15. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:191</div></div>
 <div class="ttc" id="class_s_i4703_html_a6788daf0381e955edc169f3faadfe6ef"><div class="ttname"><a href="class_s_i4703.html#a6788daf0381e955edc169f3faadfe6ef">SI4703::debugStatus</a></div><div class="ttdeci">void debugStatus()</div><div class="ttdoc">Send the current values of all registers to the Serial port. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:435</div></div>
 <div class="ttc" id="class_s_i4703_html_a3c996ff7e8e1099641727a7c5591f35d"><div class="ttname"><a href="class_s_i4703.html#a3c996ff7e8e1099641727a7c5591f35d">SI4703::seekUp</a></div><div class="ttdeci">void seekUp(bool toNextSender=true)</div><div class="ttdoc">start seek mode upwards </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:311</div></div>
-<div class="ttc" id="radio_8h_html_a439b0cff44988e48e2618027047ada19"><div class="ttname"><a href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a></div><div class="ttdeci">uint16_t RADIO_FREQ</div><div class="ttdef"><b>Definition:</b> radio.h:91</div></div>
+<div class="ttc" id="radio_8h_html_a439b0cff44988e48e2618027047ada19"><div class="ttname"><a href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a></div><div class="ttdeci">uint16_t RADIO_FREQ</div><div class="ttdef"><b>Definition:</b> radio.h:111</div></div>
 <div class="ttc" id="class_s_i4703_html_ad858d67b4e52c6c69feab397ed25401b"><div class="ttname"><a href="class_s_i4703.html#ad858d67b4e52c6c69feab397ed25401b">SI4703::SI4703</a></div><div class="ttdeci">SI4703()</div><div class="ttdef"><b>Definition:</b> SI4703.cpp:112</div></div>
 <div class="ttc" id="class_s_i4703_html_a38c1b80930ed0cde67b922ee8d6e4432"><div class="ttname"><a href="class_s_i4703.html#a38c1b80930ed0cde67b922ee8d6e4432">SI4703::_seek</a></div><div class="ttdeci">void _seek(bool seekUp=true)</div><div class="ttdoc">Seeks out the next available station. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:450</div></div>
 <div class="ttc" id="class_s_i4703_html_a2a43f7d5022bca73ca12644411f4aaca"><div class="ttname"><a href="class_s_i4703.html#a2a43f7d5022bca73ca12644411f4aaca">SI4703::init</a></div><div class="ttdeci">bool init()</div><div class="ttdoc">initialize library and the chip. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:116</div></div>
-<div class="ttc" id="class_s_i4703_html_a8a6ea22ef3d4286dd12be9508f1b4045"><div class="ttname"><a href="class_s_i4703.html#a8a6ea22ef3d4286dd12be9508f1b4045">SI4703::registers</a></div><div class="ttdeci">uint16_t registers[16]</div><div class="ttdef"><b>Definition:</b> SI4703.h:85</div></div>
+<div class="ttc" id="class_s_i4703_html_a8a6ea22ef3d4286dd12be9508f1b4045"><div class="ttname"><a href="class_s_i4703.html#a8a6ea22ef3d4286dd12be9508f1b4045">SI4703::registers</a></div><div class="ttdeci">uint16_t registers[16]</div><div class="ttdef"><b>Definition:</b> SI4703.h:86</div></div>
 <div class="ttc" id="class_s_i4703_html_a096356c7a9b9d1cda6fb04336d81e8b4"><div class="ttname"><a href="class_s_i4703.html#a096356c7a9b9d1cda6fb04336d81e8b4">SI4703::setMute</a></div><div class="ttdeci">void setMute(bool switchOn)</div><div class="ttdoc">Switch mute mode. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:220</div></div>
 <div class="ttc" id="class_s_i4703_html_a28db4a74da4e22a8ff31c51be4fbe048"><div class="ttname"><a href="class_s_i4703.html#a28db4a74da4e22a8ff31c51be4fbe048">SI4703::_write16</a></div><div class="ttdeci">void _write16(uint16_t val)</div><div class="ttdef"><b>Definition:</b> SI4703.cpp:376</div></div>
 <div class="ttc" id="class_s_i4703_html_a2e14c12d6c9a8e32ee58d54cde3906d7"><div class="ttname"><a href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">SI4703::setSoftMute</a></div><div class="ttdeci">void setSoftMute(bool switchOn)</div><div class="ttdoc">Switch soft mute mode. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:237</div></div>
-<div class="ttc" id="class_r_a_d_i_o_html"><div class="ttname"><a href="class_r_a_d_i_o.html">RADIO</a></div><div class="ttdef"><b>Definition:</b> radio.h:115</div></div>
+<div class="ttc" id="class_r_a_d_i_o_html"><div class="ttname"><a href="class_r_a_d_i_o.html">RADIO</a></div><div class="ttdoc">Library to control radio chips in general. This library acts as a base library for the chip specific ...</div><div class="ttdef"><b>Definition:</b> radio.h:136</div></div>
 <div class="ttc" id="class_s_i4703_html_a7800f9751a6a4475f3c8c346574208d8"><div class="ttname"><a href="class_s_i4703.html#a7800f9751a6a4475f3c8c346574208d8">SI4703::setBand</a></div><div class="ttdeci">void setBand(RADIO_BAND newBand)</div><div class="ttdoc">Set the current band. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:257</div></div>
 <div class="ttc" id="class_s_i4703_html_abcbedad84835a0596b69502f7ca7bd75"><div class="ttname"><a href="class_s_i4703.html#abcbedad84835a0596b69502f7ca7bd75">SI4703::term</a></div><div class="ttdeci">void term()</div><div class="ttdoc">terminate all radio functions. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:183</div></div>
-<div class="ttc" id="struct_r_a_d_i_o___i_n_f_o_html"><div class="ttname"><a href="struct_r_a_d_i_o___i_n_f_o.html">RADIO_INFO</a></div><div class="ttdoc">A structure that contains information about the radio features from the chip. </div><div class="ttdef"><b>Definition:</b> radio.h:95</div></div>
-<div class="ttc" id="class_s_i4703_html"><div class="ttname"><a href="class_s_i4703.html">SI4703</a></div><div class="ttdef"><b>Definition:</b> SI4703.h:30</div></div>
+<div class="ttc" id="struct_r_a_d_i_o___i_n_f_o_html"><div class="ttname"><a href="struct_r_a_d_i_o___i_n_f_o.html">RADIO_INFO</a></div><div class="ttdoc">A structure that contains information about the radio features from the chip. </div><div class="ttdef"><b>Definition:</b> radio.h:115</div></div>
+<div class="ttc" id="class_s_i4703_html"><div class="ttname"><a href="class_s_i4703.html">SI4703</a></div><div class="ttdoc">Library to control the SI4703 radio chip. </div><div class="ttdef"><b>Definition:</b> SI4703.h:31</div></div>
 <div class="ttc" id="class_s_i4703_html_aa197b4377e6901603638b131374f2a4f"><div class="ttname"><a href="class_s_i4703.html#aa197b4377e6901603638b131374f2a4f">SI4703::setMono</a></div><div class="ttdeci">void setMono(bool switchOn)</div><div class="ttdoc">Set the mono mode on or off. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:204</div></div>
-<div class="ttc" id="struct_a_u_d_i_o___i_n_f_o_html"><div class="ttname"><a href="struct_a_u_d_i_o___i_n_f_o.html">AUDIO_INFO</a></div><div class="ttdoc">a structure that contains information about the audio features </div><div class="ttdef"><b>Definition:</b> radio.h:106</div></div>
+<div class="ttc" id="struct_a_u_d_i_o___i_n_f_o_html"><div class="ttname"><a href="struct_a_u_d_i_o___i_n_f_o.html">AUDIO_INFO</a></div><div class="ttdoc">a structure that contains information about the audio features </div><div class="ttdef"><b>Definition:</b> radio.h:126</div></div>
 <div class="ttc" id="class_s_i4703_html_a911f93025945ec3a62200b424b2e24aa"><div class="ttname"><a href="class_s_i4703.html#a911f93025945ec3a62200b424b2e24aa">SI4703::debugScan</a></div><div class="ttdeci">void debugScan()</div></div>
 <div class="ttc" id="class_s_i4703_html_a048550553ca143f88076366e7b4b4197"><div class="ttname"><a href="class_s_i4703.html#a048550553ca143f88076366e7b4b4197">SI4703::_waitEnd</a></div><div class="ttdeci">void _waitEnd()</div><div class="ttdoc">wait until the current seek and tune operation is over. </div><div class="ttdef"><b>Definition:</b> SI4703.cpp:470</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Apr 5 2015 18:51:50 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Apr 6 2015 13:00:51 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>
