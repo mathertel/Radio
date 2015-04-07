@@ -122,16 +122,18 @@
 
 // ----- implement
 
-// initialize the extra variables in SI4703
+// initialize the extra variables in SI4705
 SI4705::SI4705() {
 }
 
-// initialize all internals.
+/// Initialize the library and the chip.
+/// Set all internal variables to the standard values.
 bool SI4705::init() {
   bool result = false; // no chip found yet.
   DEBUG_FUNC0("init");
 
-  Wire.begin(); //Now that the unit is reset and I2C inteface mode, we need to begin I2C
+  // Now that the unit is reset and I2C inteface mode, we need to begin I2C
+  Wire.begin();
 
   // power up in FM mode and analog outputs.
   _sendCommand(3, CMD_POWER_UP, CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_2_GPO2OEN | CMD_POWER_UP_1_FUNC_FM, CMD_POWER_UP_2_ANALOGOUT); // 
@@ -159,7 +161,7 @@ bool SI4705::init() {
 
   // _sendCommand(2, 0x22, 0x03);
 
-  /// RDS
+  // RDS
   //_setProperty(0x1500, 0x0001);
   //_setProperty(0x1501, 0x0004);
   //_setProperty(0x1502, 0xEF01);
@@ -172,7 +174,7 @@ bool SI4705::init() {
 } // init()
 
 
-// switch the power off
+// Switch all functions of the chip off and power down.
 void SI4705::term()
 {
   DEBUG_FUNC0("term");
@@ -201,7 +203,9 @@ void SI4705::setBassBoost(bool switchOn)
 } // setBassBoost()
 
 
-// Mono / Stereo
+/// Control the mono mode of the radio chip
+/// In mono mode the stereo decoding will be switched off completely 
+/// and the noise is typically reduced.
 void SI4705::setMono(bool switchOn)
 {
   DEBUG_FUNC1("setMono", switchOn);
@@ -219,7 +223,9 @@ void SI4705::setMono(bool switchOn)
 } // setMono
 
 
-// Switch mute mode.
+/// Control the mute mode of the radio chip
+/// In mute mode no output will be produced by the radio chip.
+/// @param switchOn true to switch mute mode on, false to switch mute mode off.
 void SI4705::setMute(bool switchOn) {
   DEBUG_FUNC1("setMute", switchOn);
   RADIO::setMute(switchOn);
@@ -249,7 +255,7 @@ void SI4705::setMute(bool switchOn) {
 
 // ----- Band and frequency control methods -----
 
-// tune to new band.
+/// Start using the new band for receiving.
 void SI4705::setBand(RADIO_BAND newBand) {
   DEBUG_FUNC1("setBand", newBand);
   if (newBand == RADIO_BAND_FM) {
@@ -265,9 +271,6 @@ void SI4705::setBand(RADIO_BAND newBand) {
     _sendCommand(1, CMD_POWER_DOWN);
 
   } // if
-
-
-
 } // setBand()
 
 
@@ -284,13 +287,15 @@ RADIO_FREQ SI4705::getFrequency() {
 }  // getFrequency
 
 
-/**
- * @brief Change the frequency in the chip.
- * @param newF
- * @return void
- */
+/// Start using the new frequency for receiving.\n
+/// The new frequency is stored for later retrieval by the base class.\n
+/// Because the chip may change the frequency automatically (when seeking)
+/// the stored value might not be the current frequency.
+/// @param newF is the new frequency.
+/// @return void
 void SI4705::setFrequency(RADIO_FREQ newF) {
   DEBUG_FUNC1("setFrequency", newF);
+  RADIO::setFrequency(newF);
   _sendCommand(5, CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)& 0xff, 0);
 
   // reset the RDSParser

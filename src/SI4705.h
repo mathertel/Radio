@@ -14,7 +14,7 @@
 /// History:
 /// --------
 /// * 05.12.2014 created.
-/// *   .01.2015 working first version.
+/// * 30.01.2015 working first version.
 
 
 #ifndef SI4705_h
@@ -33,22 +33,22 @@ class SI4705 : public RADIO {
 public:
   SI4705();
 
-  bool   init();  // initialize library and the chip.
-  void   term();  // terminate all radio functions.
+  bool   init();  ///< Initialize the library and the chip.
+  void   term();  ///< Terminate all radio functions in the chip.
 
   // Control of the audio features
 
   // Control the volume output of the radio chip
   void   setVolume(uint8_t newVolume); // set volume to 0..15
 
-  // Control the bass boost function of the radio chip
+  /// Control the bass boost mode of the radio chip
   void   setBassBoost(bool switchOn);
 
-  // Control mono/stereo mode of the radio chip
+  /// Control mono/stereo mode of the radio chip
   void   setMono(bool switchOn); // Switch to mono mode.
 
-  // Control the mute function of the radio chip
-  void   setMute(bool switchOn); // Switch to mute mode.
+  /// Control the mute mode of the radio chip
+  void   setMute(bool switchOn);
 
   // Control of the core receiver
 

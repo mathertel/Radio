@@ -147,8 +147,8 @@ class RADIO {
   virtual void    setVolume(uint8_t newVolume); ///< Set the output volume of the chip to 0 .. 15.
   virtual uint8_t getVolume();                  ///< Retrieve the current output volume.
 
-  virtual void   setBassBoost(bool switchOn);   ///< Set the bass boost function on or off.
-  virtual bool   getBassBoost();                ///< Retrieve the current bass boost function setting.
+  virtual void   setBassBoost(bool switchOn);   ///< Control the bass boost mode of the radio chip.
+  virtual bool   getBassBoost();                ///< Retrieve the current bass boost mode setting.
 
   virtual void   setMono(bool switchOn);        ///< Set the mono mode on or off.
   virtual bool   getMono();                     ///< Retrieve the current mono mode setting.
@@ -164,7 +164,7 @@ class RADIO {
   virtual void setBand(RADIO_BAND newBand);     ///< Set the current band.
   virtual RADIO_BAND getBand();                 ///< Retrieve the current band settings from the chip.
 
-  virtual void    setFrequency(RADIO_FREQ newF);  ///< Set the frequency to be tuned.
+  virtual void    setFrequency(RADIO_FREQ newF);  ///< Start using the new frequency for receiving.
   virtual RADIO_FREQ getFrequency(void);          ///< Retrieve the current tuned frequency from the chip.
 
   virtual void setBandFrequency(RADIO_BAND newBand, RADIO_FREQ newFreq); ///< Set Band and Frequency in one call.

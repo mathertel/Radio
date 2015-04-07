@@ -71,11 +71,15 @@ uint8_t RADIO::getVolume() {
 
 // ----- bass boost control -----
 
+/// Control the bass boost mode of the radio chip.
+/// The base implementation ony stores the value to the internal variable.
 void RADIO::setBassBoost(bool switchOn) {
   _bassBoost = switchOn;
 } // setBassBoost()
 
 
+/// Retrieve the current bass boost mode setting.
+/// The base implementation returns only the value in the internal variable.
 bool RADIO::getBassBoost() {
   return(_bassBoost);
 } // getBassBoost()
@@ -121,6 +125,7 @@ bool RADIO::getSoftMute() {
 
 // some implementations to return internal variables if used by concrete chip implementations
 
+/// Start using the new band for receiving.
 void RADIO::setBand(RADIO_BAND newBand) {
   RADIO_FREQ l, h, s;
 
@@ -143,6 +148,8 @@ void RADIO::setBand(RADIO_BAND newBand) {
 } // setBand()
 
 
+/// Start using the new frequency for receiving.
+/// The new frequency is stored for later retrieval.
 void RADIO::setFrequency(RADIO_FREQ newFreq) {
   _freq = newFreq;
 } // setFrequency()
