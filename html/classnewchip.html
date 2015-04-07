@@ -86,7 +86,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a4e8f3dd43c96cae83aeb284fdae2c13b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the output volume of the chip to 0 .. 15.  <a href="#a4e8f3dd43c96cae83aeb284fdae2c13b">More...</a><br /></td></tr>
 <tr class="separator:a4e8f3dd43c96cae83aeb284fdae2c13b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98366f622e401024a79bcced50c429ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnewchip.html#a98366f622e401024a79bcced50c429ce">setBassBoost</a> (bool switchOn)</td></tr>
-<tr class="memdesc:a98366f622e401024a79bcced50c429ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the bass boost function on or off.  <a href="#a98366f622e401024a79bcced50c429ce">More...</a><br /></td></tr>
+<tr class="memdesc:a98366f622e401024a79bcced50c429ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the bass boost mode of the radio chip.  <a href="#a98366f622e401024a79bcced50c429ce">More...</a><br /></td></tr>
 <tr class="separator:a98366f622e401024a79bcced50c429ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5089f6ef80f39a195198623a95d43d3c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnewchip.html#a5089f6ef80f39a195198623a95d43d3c">setMono</a> (bool switchOn)</td></tr>
 <tr class="memdesc:a5089f6ef80f39a195198623a95d43d3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the mono mode on or off.  <a href="#a5089f6ef80f39a195198623a95d43d3c">More...</a><br /></td></tr>
@@ -131,7 +131,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a70cb0f40aee92ae18ca03bd61303075f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current output volume.  <a href="#a70cb0f40aee92ae18ca03bd61303075f">More...</a><br /></td></tr>
 <tr class="separator:a70cb0f40aee92ae18ca03bd61303075f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e611a535d53fa341ade0a52de63a150"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a0e611a535d53fa341ade0a52de63a150">getBassBoost</a> ()</td></tr>
-<tr class="memdesc:a0e611a535d53fa341ade0a52de63a150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current bass boost function setting.  <a href="#a0e611a535d53fa341ade0a52de63a150">More...</a><br /></td></tr>
+<tr class="memdesc:a0e611a535d53fa341ade0a52de63a150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current bass boost mode setting.  <a href="#a0e611a535d53fa341ade0a52de63a150">More...</a><br /></td></tr>
 <tr class="separator:a0e611a535d53fa341ade0a52de63a150"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ae2fe66d5e7afe7380ca9cb2c9f637da9">getMono</a> ()</td></tr>
 <tr class="memdesc:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current mono mode setting.  <a href="#ae2fe66d5e7afe7380ca9cb2c9f637da9">More...</a><br /></td></tr>
@@ -696,7 +696,8 @@ Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieve the current bass boost function setting. </p>
+<p>Retrieve the current bass boost mode setting. </p>
+<p>Retrieve the current bass boost mode setting. The base implementation returns only the value in the internal variable. </p>
 
 </div>
 </div>
@@ -1040,6 +1041,7 @@ Private Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Set the current band. </p>
+<p>Start using the new band for receiving. </p>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a45356b3d4c28bdf782857942f200530b">RADIO</a>.</p>
 
@@ -1103,7 +1105,8 @@ Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the bass boost function on or off. </p>
+<p>Control the bass boost mode of the radio chip. </p>
+<p>Control the bass boost mode of the radio chip. The base implementation ony stores the value to the internal variable. </p>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a7b368aa86bd3d343a72509969848a7ae">RADIO</a>.</p>
 
@@ -1578,7 +1581,7 @@ Private Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Apr 6 2015 13:00:51 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Apr 7 2015 22:43:42 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>
