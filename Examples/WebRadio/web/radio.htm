@@ -449,6 +449,7 @@
 
       // sync call
       xhr.open("GET", url, false);
+      xhr.timeout = 3000;
       xhr.send();
       cs = xhr.responseText;
       return (cs);
@@ -470,15 +471,10 @@
 
     function upd() {
       var data = getData('/$radio');
-      data = data.split('\r\n');
+      data = JSON.parse(data);
       for (var n in data) {
-        var idx = data[n].indexOf(' ');
-        if (idx >= 0) {
-          var evn = data[n].substr(0, idx);
-          var d = data[n].substr(idx + 1);
-          if (radioValues[evn] != d)
-            OpenAjax.hub.publish('radio.' + evn, d);
-        } // if
+        if (radioValues[n] != data[n])
+          OpenAjax.hub.publish('radio.' + n, data[n]);
       } // for
       timer = window.setTimeout(upd, 1200);
     } // upd()
@@ -501,7 +497,7 @@
       </tr>
 
       <tr><td colspan="3" style="text-align:center;height:30px;"><span id="servicename" eventname="radio.servicename">#RDS</span></td></tr>
-      <tr><td colspan="3" style="text-align:center;height:40px;"><span id="rdstext" eventname="radio.rdstext">#RDSTEXT</span></td></tr>
+      <tr><td colspan="3" style="text-align:center;height:60px;"><span id="rdstext" eventname="radio.rdstext">#RDSTEXT</span></td></tr>
       <tr>
         <td colspan="3">
           <button id="station1" eventname="radio.freq" presetvalue="8930">hr3</button>

@@ -1,11 +1,32 @@
-/// WebRadio.ino
+/// \file WebRadio.ino 
+/// \brief Radio implementation using a web frontend served by the Arduino.
+/// 
+/// \author Matthias Hertel, http://www.mathertel.de
+/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// This work is licensed under a BSD style license.\n
+/// See http://www.mathertel.de/License.aspx
+///
+/// \details
+/// This is a full function radio implementation ...\n
+/// The web site is stored on the SD card. You can find the web content I used in the web folder.\n
+/// It can be used with various chips after adjusting the radio object definition.\n
+///
+/// Wiring
+/// ------
+/// The hardware setup for this sketch is:
+/// Arduino MEGA board with Ethernet shield on top. Arduino UNO has not enough memory.
+/// A 2*16 LCD Display in the I2C bus using a PCF8574 board with address 0x27.
+/// A Rotary encoder with the data pins on A8 and A9.
+/// A Rotary encoder press function on pin A10.
+/// A button for scanning upwards on pin A11.
 
-/// History:
+/// ChangeLog:
 /// --------
 /// * 06.11.2014 created.
 /// * 22.11.2014 working.
 /// * 07.02.2015 more complete implementation
-//  * 14.02.2015 still works with no ethernet available (slow start).
+/// * 14.02.2015 works with no ethernet available (start radio first then Internet but slow).
+/// * 17.04.2015 Return JSON format.
 
 // There are several tasks that have to be done when the radio is running.
 // Therefore all these tasks are handled this way:
@@ -19,10 +40,6 @@
 #include <Dhcp.h>
 #include <Dns.h>
 #include <Ethernet.h>
-// #include <EthernetClient.h>
-// #include <EthernetServer.h>
-// #include <EthernetUdp.h>
-// #include <util.h>
 
 // Use the Arduino standard SD library to access files on the SD Disk
 #include <SD.h>
@@ -216,13 +233,13 @@ EthernetClient _client;
 
 WebServerState webstate;
 
-char _readBuffer[BUFSIZ]; // a buffer that is used to read a line from the request header.
+char _readBuffer[BUFSIZ]; ///< a buffer that is used to read a line from the request header.
+char _writeBuffer[BUFSIZ]; ///< a buffer that is used to compose a line for the reponse.
 
 char _httpVerb[6]; // HTTP verb from the first line of the request
 char _httpURI[40]; // HTTP URI from the first line of the request
 
 char *_fileType;
-char _httpContentType[28];
 
 int _httpContentLen;
 
@@ -240,6 +257,7 @@ SdFile   root;
 #define HTTP_200_CT   F("HTTP/1.1 200 OK\r\nContent-Type: ")
 #define HTTPERR_404   F("HTTP/1.1 404 Not Found\nContent-Type: text/html\r\n")
 #define HTTP_GENERAL  F("Server: Arduino\r\nConnection: close\r\n")
+#define HTTP_NOCACHE  F("Cache-Control: no-cache\r\n")
 #define HTTP_ENDHEAD  F("\r\n")
 
 // ----- html frame for generated response -----
@@ -487,8 +505,8 @@ void respondFileContent()
     p = _ctFind(CONTENTTYPES, _fileType);
     if (p) {
       p = _ctNextWord(p);
-      p = _ctCopyWord(p, _httpContentType, sizeof(_httpContentType));
-      respondHeaderContentType(_httpContentType);
+      p = _ctCopyWord(p, _writeBuffer, sizeof(_writeBuffer));
+      respondHeaderContentType(_writeBuffer);
     }
 
     if (p) {
@@ -769,39 +787,75 @@ void DisplaySoftMute(uint8_t v)
 } // DisplaySoftMute()
 
 
+/// Send a JSON object to the client.
+void respondJSONObject(char *name, char *value, bool lastValue = false)
+{
+  _writeBuffer[0] = '\"';
+  strcpy(_writeBuffer + 1, name);
+  strcat(_writeBuffer, "\":\"");
+  strcat(_writeBuffer, value);
+  strcat(_writeBuffer, "\"");
+  if (!lastValue) strcat(_writeBuffer, ",");
+  _client.print(_writeBuffer);
+}
+
+
+/// Send a JSON object to the client.
+void respondJSONObject(char *name, int value, bool lastValue = false)
+{
+  char *p;
+
+  _writeBuffer[0] = '\"';
+  strcpy(_writeBuffer + 1, name);
+  strcat(_writeBuffer, "\":");
+  // strcat(_writeBuffer, value);
+  p = _writeBuffer + strlen(_writeBuffer);
+  itoa(value, p, 10);
+  if (!lastValue) strcat(_writeBuffer, ",");
+  _client.print(_writeBuffer);
+}
+
+
 /// Response to a $info request and return all information of the current radio operation.
+/// Format al data as in JSON Format.\n
 /// Format all data to the format NAME blank VALUE\r\n.
 void respondRadioData()
 {
   // DEBUGFUNC0("respondRadioData");
   char s[12];
-  respondHeaderContentType("text/plain");
-  _client.print("Cache-Control: no-cache\r\n");
+  respondHeaderContentType("application/json");
+  _client.print(HTTP_NOCACHE);
   _client.print(HTTP_ENDHEAD);
 
+  _client.print("{");
+
   // return frequency
-  _client.print("freq ");  _client.println(radio.getFrequency());
-  _client.print("band ");  _client.println(radio.getBand());
+  respondJSONObject("freq", radio.getFrequency());
+  respondJSONObject("band", radio.getBand());
 
   // return radio related features
   RADIO_INFO ri;
   radio.getRadioInfo(&ri);
-  _client.print("mono "); _client.println(ri.mono);      // force mono mode.
-  _client.print("stereo "); _client.println(ri.stereo);  // has stereo signal
-  // _client.print("rds ");  _client.println(ri.rds);       // has rds signal
+  respondJSONObject("mono", ri.mono);      // force mono mode.
+  respondJSONObject("stereo", ri.stereo);  // has stereo signal
+  // respondJSONObject("rds", ri.rds);       // has rds signal
 
   // return rds information 
-  _client.print("servicename ");  _client.println(rdsServiceName);
-  _client.print("rdstext ");  _client.println(rdsText);
+  respondJSONObject("servicename", rdsServiceName);
+  respondJSONObject("rdstext", rdsText);
 
   // return audio related features
   AUDIO_INFO ai;
   radio.getAudioInfo(&ai);
 
-  _client.print("vol ");       _client.println(ai.volume);
-  _client.print("mute ");      _client.println(ai.mute);
-  _client.print("softmute ");  _client.println(ai.softmute);
-  _client.print("bassboost "); _client.println(ai.bassBoost);
+  respondJSONObject("vol", ai.volume);
+  respondJSONObject("mute", ai.mute);
+  respondJSONObject("softmute", ai.softmute);
+  respondJSONObject("bassboost", ai.bassBoost);
+
+  respondJSONObject("end", "no", true);
+
+  _client.print("}");
 
 } // respondSystemInfo()
 
