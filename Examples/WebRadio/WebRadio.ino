@@ -254,11 +254,13 @@ SdFile   root;
 
 // ----- http response texts -----
 
+#define CRLF F("\r\n")
+
 #define HTTP_200_CT   F("HTTP/1.1 200 OK\r\nContent-Type: ")
 #define HTTPERR_404   F("HTTP/1.1 404 Not Found\nContent-Type: text/html\r\n")
 #define HTTP_GENERAL  F("Server: Arduino\r\nConnection: close\r\n")
 #define HTTP_NOCACHE  F("Cache-Control: no-cache\r\n")
-#define HTTP_ENDHEAD  F("\r\n")
+#define HTTP_ENDHEAD  CRLF
 
 // ----- html frame for generated response -----
 
@@ -292,7 +294,7 @@ void setup() {
   // DEBUGTEXT(F("Starting network..."));
 
   int result = Ethernet.begin(mac);  // Ethernet.begin(mac, ip); if there is no DHCP
-
+  
   DEBUGVAR(F("Ethernet Result"), result);
   DEBUGTEXT(F("Configuration:"));
   DEBUGIP(F(" localIP: "), localIP);
@@ -389,7 +391,7 @@ char *_ctCopyWord(char *text, char *word, int len)
 void respondHeaderContentType(char *type)
 {
   // DEBUGFUNC0("respondHeaderContentType");
-  _client.print(HTTP_200_CT); _client.print(type); _client.print("\r\n");
+  _client.print(HTTP_200_CT); _client.print(type); _client.print(CRLF);
   _client.print(HTTP_GENERAL);
 } // respondHeaderContentType()
 
@@ -445,7 +447,7 @@ void respondSystemInfo()
 } // respondSystemInfo()
 
 
-// read a text line from _client into the requestLine buffer.
+/// Read one line of text from _client into the _readBuffer.
 void readRequestLine()
 {
   uint8_t index = 0;
@@ -470,7 +472,9 @@ void readRequestLine()
       // add the character to the buffer
       _readBuffer[index++] = c;
 
-      // start tossing out data when buffer is full.
+      // When lines are too long, just ignore the last characters.
+      // If that happens in your application ther might be a header line that is out of interest
+      // or use a bigger line buffer by incrementing BUFSIZ.
       if (index >= BUFSIZ) index = BUFSIZ - 1;
 
     } // if
@@ -494,7 +498,7 @@ void respondFileContent()
   p = strrchr(_httpURI, '.');
   if (p != NULL) _fileType = p + 1;
 
-  Serial.print("Serve:"); Serial.println(_httpURI);
+  // Serial.print("Serve:"); Serial.println(_httpURI);
 
   File f = SD.open(_httpURI, O_READ);
   if (!f) {
@@ -521,7 +525,7 @@ void respondFileContent()
     } // if
 
     // respond the number of file bytes.
-    _client.print("Content-Length: "); _client.print(f.size()); _client.print("\r\n");
+    _client.print("Content-Length: "); _client.print(f.size()); _client.print(CRLF);
 
     // end of headers: respond Blank Line.
     _client.print(HTTP_ENDHEAD);
@@ -530,7 +534,7 @@ void respondFileContent()
     // using the _readBuffer
     size_t len;
     do {
-      len = f.readBytes((uint8_t*)_readBuffer, 32);
+      len = f.readBytes((uint8_t*)_readBuffer, BUFSIZ);
       _client.write((uint8_t*)_readBuffer, len);
     } while (len > 0);
     f.close();
@@ -545,7 +549,7 @@ void loopWebServer(unsigned long now) {
   // static bool moreData = false;
   int index = 0;
   char c;
-  char *p, *t;
+  char *p;
 
   File f;
 
@@ -556,10 +560,11 @@ void loopWebServer(unsigned long now) {
       // DEBUGTEXT('>');
       while (_client.connected()) {
         if (_client.available()) {
+          // Data is available...
 
           if (webstate == WEBSERVER_IDLE) {
-            // got some new data from a new client
-            // read a http header and parse all information.
+            // Got a new request from a new client.
+            // Read a http header and parse all information.
 
             // read the first line into the line buffer requestLine
             readRequestLine();
@@ -639,7 +644,7 @@ void loopWebServer(unsigned long now) {
 
             if ((len > 0) && (len < sizeof(_readBuffer))) {
               _httpContentLen -= len;
-              _readBuffer[len] = NUL; _readBuffer[32] = NUL;
+              _readBuffer[len] = NUL; // _readBuffer[32] = NUL;
               // DEBUGVAR("data", _readBuffer);
             }
             // DEBUGVAR("_httpContentLen", _httpContentLen);
@@ -651,12 +656,35 @@ void loopWebServer(unsigned long now) {
             } // if
 
             if (strcmp(_httpURI, "/$radio") == 0) {
+              char *name = NULL; // name of command
+
+              //// search the space
+              //p = strchr(_readBuffer, SPACE);
+              //if (p) {
+              //  *p++ = NUL;
+              //  runRadioCommand(_readBuffer, atoi(p));
+              //} // if              
+
               // search the space
-              p = strchr(_readBuffer, SPACE);
+              // assume only one command like {"vol":6}
+              DEBUGTEXT(_readBuffer);
+              p = strchr(_readBuffer, '{');
+              if (p) p = strchr(p, '"');
+              if (p) p += 1;
+              if (p) {
+                name = p;
+                p = strchr(p, '"');
+              }
               if (p) {
                 *p++ = NUL;
-                runRadioCommand(_readBuffer, atoi(p));
+                p = strchr(p, ':');
+              }
+              if (p) {
+                p += 1;
+                runRadioCommand(name, atoi(p));
               } // if              
+
+
             } // if
           } else if (webstate == PROCESS_PUT) {
             // upload a file

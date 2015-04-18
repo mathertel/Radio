@@ -73,6 +73,7 @@ uint8_t RADIO::getVolume() {
 
 /// Control the bass boost mode of the radio chip.
 /// The base implementation ony stores the value to the internal variable.
+/// @param switchOn true to switch bassBoost mode on, false to switch bassBoost mode off.
 void RADIO::setBassBoost(bool switchOn) {
   _bassBoost = switchOn;
 } // setBassBoost()
@@ -87,11 +88,13 @@ bool RADIO::getBassBoost() {
 
 // ----- mono control -----
 
+/// The base implementation ony stores the value to the internal variable.
 void RADIO::setMono(bool switchOn) {
   _mono = switchOn;
 } // setMono()
 
 
+/// The base implementation returns only the value in the internal variable.
 bool RADIO::getMono() {
   return(_mono);
 } // getMono()
@@ -99,11 +102,13 @@ bool RADIO::getMono() {
 
 // ----- mute control -----
 
+/// The base implementation ony stores the value to the internal variable.
 void RADIO::setMute(bool switchOn) {
   _mute = switchOn;
 } // setMute()
 
 
+/// The base implementation returns only the value in the internal variable.
 bool RADIO::getMute() {
   return(_mute);
 } // getMute()
@@ -111,11 +116,13 @@ bool RADIO::getMute() {
 
 // ----- softmute control -----
 
+/// The base implementation ony stores the value to the internal variable.
 void RADIO::setSoftMute(bool switchOn) {
   _softMute = switchOn;
 } // setSoftMute()
 
 
+/// The base implementation returns only the value in the internal variable.
 bool RADIO::getSoftMute() {
   return(_softMute);
 } // getSoftMute()

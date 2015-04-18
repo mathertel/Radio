@@ -1,658 +1,663 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>Radio</title>
-  <script type='text/javascript' src='/controls/jcl.js'></script>
-  <style type="text/css">
-      #label, #mode, #freq, #band {
-        font-size: 1.8em;
-      }
-
-      #servicename {
-        font-size: 1.8em;
-      }
+<title>Radio</title>
+<script type='text/javascript' src='jcl.js'></script>
+<style type="text/css">
+#label, #mode, #freq, #band {
+font-size: 1.8em;
+}
+
+#servicename {
+font-size: 1.8em;
+}
 
-      #rdstext {
-        font-size: 1.2em;
-        width:90%;
-        word-wrap:normal;
-      }
+#rdstext {
+font-size: 1.2em;
+width: 90%;
+word-wrap: normal;
+}
 
-      button {
-        font-size: 1.2em;
-        border: 0.2em solid gray;
-        border-radius: 0.5em;
-      }
-
-        button.activ {
-          background-color: #acc1e4 !important;
-          border-color: #203050 !important;
-        }
-
-
-      #slb {
-        background-image: url(/controls/images/sliderBK.gif);
-        background-position: left top;
-        background-repeat: repeat-x;
-      }
-
-      [draggable=true] {
-        -khtml-user-drag: element;
-      }
-  </style>
-
-  <script type='text/javascript'>
-    var radioValues = new Object();
-    var timer;
-
-    // DataOutput.js
-    jcl.DataOutputBehavior = {
-
-      // --- Attributes
-      nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
-
-      datatype: "", /// <summary>The datatype of the input element.</summary>
-      prec: "", /// <summary>Precision for numeric types.</summary>
-
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
-      helptext: "", /// <summary>the helptext is displayed when the field is empty and has no focus.</summary>
-
-      init: function () {
-        /// <summary>Initialze the JavaScript control.</summary>
-        if (this.eventname) {
-          OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
-        } // if
-
-        this.setDatatype(this.datatype);
-      }, // init
-
-
-      // --- OpenAjax event handler ---
-      handleEvent: function (eventName, eventData) {
-        this.setData(eventData);
-      }, // handleEvent
-
-
-      setData: function (val) {
-        /// <summary>Display a new value.</summary>
-        var s = this._toString(val);
-        if (this.innerText != s)
-          this.innerText = s;
-      }, // setData
-
-
-      setDatatype: function (newType) {
-        /// <summary>If a datatype is given and if the nls functionality is present
-        /// use the nls functionality to support the special datatype conversion functions.</summary>
-        if (typeof (jcl.nls) != "undefined") {
-          if ((newType) && (jcl.nls[newType])) {
-            this.datatype = newType;
-          } else {
-            this.datatype = "string";
-          } // if
-          this._toString = jcl.nls[this.datatype].toString;
-        } // if
-      }, // setDatatype
-
-      _toString: function (v) { return (v); }
-
-    } // jcl.DataOutputBehavior
-
-
-    // DataPreset.js
-    jcl.DataPresetBehavior = {
-
-      // --- Attributes
-      nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
-
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
-      helptext: "", /// <summary>the helptext is displayed when the field is empty and has no focus.</summary>
-
-      presetvalue: "", ///
-
-      init: function () {
-        /// <summary>Initialze the JavaScript control.</summary>
-        if (this.eventname)
-          OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
-      }, // init
-
-      onclick: function (evt) {
-        /// <summary>Handle the event when the mouse button is pressed.</summary>
-        if ((this.eventname != null) && (this.eventname != "")) {
-          OpenAjax.hub.publish(jcl.BuildFullEventname(this), this.presetvalue);
-        } // if
-      }, // onclick
-
-      // --- OpenAjax event handler ---
-      handleEvent: function (eventName, eventData) {
-        /// <summary>if the current value is the preset value of this button mark it as active.</summary>
-        if (eventData == this.presetvalue) {
-          jcl.addClassName(this, "activ");
-        } else {
-          jcl.removeClassName(this, "activ");
-        } // if
-      } // handleEvent
-
-    } // jcl.DataPresetBehavior
-
-
-    // DataToggleBehavior.js
-    // used for a button that toggles data 0 and 1.
-    // 1 ist active.
-    jcl.DataToggleBehavior = {
-
-      // --- Attributes
-      nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
-
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
-
-      init: function () {
-        /// <summary>Initialze the JavaScript control.</summary>
-        if (this.eventname) {
-          OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
-        } // if
-        this._value = 0;
-      }, // init
-
-      // --- OpenAjax event handler ---
-      handleEvent: function (eventName, eventData) {
-        this.setData(eventData);
-      }, // handleEvent
-
-
-      onclick: function (evt) {
-        /// <summary>Handle the event when the mouse button is pressed.</summary>
-        evt = evt || window.event;
-        var t = evt.target || evt.srcElement;
-
-        if ((this.eventname != null) && (this.eventname != "")) {
-          OpenAjax.hub.publish(this.eventname, 1 - this._value);
-        } // if
-      },
-
-      setData: function (val) {
-        /// <summary>Display the new value.</summary>
-        if (this._value != val) {
-          if (val == 1) {
-            jcl.addClassName(this, "activ");
-          } else {
-            jcl.removeClassName(this, "activ");
-          } // if
-          this._value = val;
-        } // if
-      } // setData
-
-    } // jcl.DataToggleBehavior
-
-
-    // HSlider.js
-    // Javascript Behaviour for the HSlider Control
-    // Copyright (c) by Matthias Hertel, http://www.mathertel.de
-    // This work is licensed under a BSD style license. See http://www.mathertel.de/License.aspx
-    // -----
-    // 17.09.2005 PropHSlider was created by Matthias Hertel
-    // 25.08.2007 HSlider was created from PropHSlider
-    // 18.12.2007 Simplifications and documentation.
-    // 06.01.2008 documentation and simplifications
-
-    jcl.HSliderBehavior = {
-      /// <summary>This control implements is a horizontal moveable rectangle that acts as a slider.
-      /// It can be attached to an OpenAjax event and acts as a subscriber and publisher.</summary>
-      /// <example>A page that uses this control ist available at:<br />
-      /// <a href="http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx">
-      /// http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx</a></example>
-
-      _knob: null, /// <summary>Reference to the movable knob obj.</summary>
-      _lastValue: -1, /// <summary>last published value to avoid doublicate events.</summary>
-      _x: 0, /// <summary>Offset between mouse and the knob.</summary>
-      _maxright: 0, /// <summary>rightmost position of the knob.</summary>
-      _xOffset: 0, /// <summary>x-offset of the region the knob is allowed to be moved.</summary>
-
-      minvalue: 0, /// <summary>The value that is reached on the leftmost position of the knob.</summary>
-      maxvalue: 100, /// <summary>The value that is reached on the rightmost position of the knob.</summary>
-      unit: 1, /// <summary>The unit of the oublished values. All values can be divided by this value without any reminder
-      /// if the value is determined by using the HSlider.</summary>
-
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
-
-      init: function () {
-        var p;
-        /// <summary>Initialze the JavaScript control.</summary>
-        this._removeTextNodes(this);
-
-        this.eventname = jcl.BuildFullEventname(this);
-
-        if (this.eventname) {
-          OpenAjax.hub.subscribe(this.eventname, this._handleEvent, this);
-        } // if
-
-        // find the moveable knob
-        this._knob = jcl.getElementsByClassName(this, "knob")[0];
-        p = this._knob.parentNode;
-
-        this._maxright = p.offsetWidth - this._knob.offsetWidth;
-
-        this.minvalue = parseInt(this.minvalue);
-        this.maxvalue = parseInt(this.maxvalue);
-        this.unit = parseInt(this.unit);
-        this._lastValue = this.minvalue;
-      }, // init
-
-
-      // --- events
-
-      onmousedown: function (evt) {
-        /// <summary>Handle the event when the mouse button is pressed.</summary>
-        evt = evt || window.event;
-        var t = evt.target || evt.srcElement;
-        var left = this._lastValue;
-
-        // if not clicked on a defined element use one element up.
-        if (!t.className) t = t.parentElement;
-
-        if (jcl.hasClassName(t, "knob")) {
-          this.MoveStart(evt);
-
-        } else if (jcl.hasClassName(t, "minus")) {
-          left = parseInt(left) - this.unit;
-          if (left < this.minvalue) left = this.minvalue;
-
-        } else if (jcl.hasClassName(t, "plus")) {
-          left = parseInt(left) + this.unit;
-          if (left > this.maxvalue) left = this.maxvalue;
-        } // if
-
-        if (left != this._lastValue) {
-          if ((this.eventname != null) && (this.eventname != "")) {
-            OpenAjax.hub.publish(this.eventname, left);
-          } // if
-          this._lastValue = left;
-        } // if
-      }, // onmousedown
-
-
-      ontouchstart: function (evt) {
-        /// <summary>Handle the event when a touch operation starts.</summary>
-        var t = evt.targetTouches[0].target;
-        if (t.className == "knob") {
-          this.TouchStart(evt);
-        } // if
-      }, // ontouchstart:
-
-
-      ontouchmove: function (evt) {
-        /// <summary>Handle the event when a touch point moves.</summary>
-        var mo = jcl.currentMoving;
-        if (mo != null) {
-          evt.preventDefault();
-
-          var left = evt.targetTouches[0].pageX - this._x - this._xOffset;
-          left = Math.min(this._maxright, Math.max(0, left));
-          this._knob.style.left = left + "px";
-
-          left = Math.round(left * (this.maxvalue - this.minvalue) / this._maxright + this.minvalue);
-          left = Math.round(left / parseInt(this.unit)) * parseInt(this.unit);
-
-          if (left != this._lastValue) {
-            if ((this.eventname != null) && (this.eventname != "")) {
-              OpenAjax.hub.publish(this.eventname, left);
-            } // if
-          } // if
-        } // if
-
-        this._lastValue = left;
-      }, // ontouchmove:
-
-
-      _onmousemove: function (evt) {
-        /// <summary>Handle the mouse button move event. This handler will be attached to the document level.</summary>
-        evt = evt || window.event;
-        jcl.currentMoving.MoveIt(evt);
-      }, // onmousemove
-
-
-      _onmouseup: function (evt) {
-        /// <summary>Handle the mouse button up event. This handler will be attached to the document level.</summary>
-        evt = evt || window.event;
-        jcl.currentMoving.MoveEnd(evt);
-      }, // onmouseup
-
-
-      // --- methods
-
-      MoveStart: function (evt) {
-        /// <summary>Start sliding the knob.</summary>
-        this._xOffset = 0;
-        var obj = this._knob.offsetParent;
-        while (obj != null) {
-          this._xOffset += obj.offsetLeft;
-          obj = obj.offsetParent;
-        } // while
-
-        // calculate mousepointer-knob delta
-        this._x = evt.clientX - (this._knob.offsetLeft + this._xOffset);
-
-        jcl.currentMoving = this; // make it globally evailable when mouse is leaving this object.
-        jcl.AttachEvent(document, "onmousemove", this._onmousemove);
-        jcl.AttachEvent(document, "onmouseup", this._onmouseup);
-        // cancel selecting anything
-        evt.cancelBubble = true;
-        evt.returnValue = false;
-      }, // MoveStart
-
-
-      TouchStart: function (evt) {
-        this._xOffset = 0;
-        var obj = this._knob.offsetParent;
-        while (obj != null) {
-          this._xOffset += obj.offsetLeft;
-          obj = obj.offsetParent;
-        } // while
-
-        // calculate mousepointer-knob delta
-        this._x = evt.targetTouches[0].pageX - (this._knob.offsetLeft + this._xOffset);
-        jcl.currentMoving = this;
-      }, // TouchStart
-
-
-      MoveIt: function (evt) {
-        /// <summary>Move the knob element and eventually publish a new event.</summary>
-        var left = evt.clientX - this._x - this._xOffset;
-        left = Math.min(this._maxright, Math.max(0, left));
-        this._knob.style.left = left + "px";
-
-        left = Math.round(left * (this.maxvalue - this.minvalue) / this._maxright + this.minvalue);
-        left = Math.round(left / parseInt(this.unit)) * parseInt(this.unit);
-
-        if (left != this._lastValue) {
-          if ((this.eventname != null) && (this.eventname != "")) {
-            OpenAjax.hub.publish(this.eventname, left);
-          } // if
-
-        } // if
-
-        this._lastValue = left;
-        // cancel selecting anything
-        evt.cancelBubble = true;
-        evt.returnValue = false;
-      }, // MoveIt
-
-
-      MoveEnd: function () {
-        /// <summary>Handle the end of a moving gesture.</summary>
-        if (this._knob != null) {
-          jcl.DetachEvent(document, "onmousemove", this._onmousemove);
-          jcl.DetachEvent(document, "onmouseup", this._onmouseup);
-          jcl.currentMoving = null;
-        } // if
-      }, // MoveEnd
-
-
-      // --- OpenAjax event handler ---
-
-      _handleEvent: function (eventName, eventData) {
-        /// <summary>Handle OpenAjax events.</summary>
-        var knob = this._knob;
-        if ((knob != null) && (this._lastValue != eventData)) {
-          this._lastValue = eventData;
-          eventData = eventData - this.minvalue;
-          eventData = Math.round(eventData * this._maxright / (this.maxvalue - this.minvalue));
-          eventData = Math.min(this._maxright, Math.max(0, eventData));
-          knob.style.left = eventData + "px";
-        } // if
-      }, // _handleEvent
-
-
-      _removeTextNodes: function (n) {
-        /// <summary>remove all textnodes from the control to avoid unwanted spaces.</summary>
-        var obj = n.firstChild;
-        while (obj != null) {
-          var nextObj = obj.nextSibling;
-          if (obj.nodeType == 3)
-            obj.parentNode.removeChild(obj);
-          obj = nextObj;
-        } // while
-      } // _removeTextNodes
-
-    } // jcl.HSliderBehavior
-
-
-    /// ----- ajax functions -----
-
-    var xhr = new XMLHttpRequest();
-
-    function postData(url, data) {
-      // enable cookieless sessions:
-      var cs = document.location.href.match(/\/\(.*\)\//);
-      if (cs) {
-        url = url.split('/');
-        url[3] += cs[0].substr(0, cs[0].length - 1);
-        url = url.join('/');
-      } // if
-
-      // sync call
-      xhr.open("POST", url, false);
-
-      xhr.send(data);
-      return (xhr.responseText);
-    } // postData
-
-
-    function getData(url) {
-      // enable cookieless sessions:
-      var cs = document.location.href.match(/\/\(.*\)\//);
-      if (cs) {
-        url = url.split('/');
-        url[3] += cs[0].substr(0, cs[0].length - 1);
-        url = url.join('/');
-      } // if
-
-      // sync call
-      xhr.open("GET", url, false);
-      xhr.timeout = 3000;
-      xhr.send();
-      cs = xhr.responseText;
-      return (cs);
-    } // getData
-
-
-    // ----- jcl functions -----
-
-    // elem.classList.contains("aClass");
-    jcl.hasClassName = function (elem, className) {
-      var cn = elem.className;
-      if ((cn != null) && (cn != ""))
-        return (cn.match("\\b" + className + "\\b") != null);
-      else
-        return (false)
-    }; // hasClassName
-
-
-
-    function upd() {
-      var data = getData('/$radio');
-      data = JSON.parse(data);
-      for (var n in data) {
-        if (radioValues[n] != data[n])
-          OpenAjax.hub.publish('radio.' + n, data[n]);
-      } // for
-      timer = window.setTimeout(upd, 1200);
-    } // upd()
-  </script>
+button {
+font-size: 1.2em;
+border: 0.2em solid gray;
+border-radius: 0.5em;
+}
+
+button.activ {
+background-color: #acc1e4 !important;
+border-color: #203050 !important;
+}
+
+
+#slb {
+background-image: url(/controls/images/sliderBK.gif);
+background-position: left top;
+background-repeat: repeat-x;
+}
+
+[draggable=true] {
+-khtml-user-drag: element;
+}
+</style>
+
+<script type='text/javascript'>
+var radioValues = new Object();
+var timer;
+
+// DataOutput.js
+jcl.DataOutputBehavior = {
+
+// --- Attributes
+nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+
+datatype: "", /// <summary>The datatype of the input element.</summary>
+prec: "", /// <summary>Precision for numeric types.</summary>
+
+eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+helptext: "", /// <summary>the helptext is displayed when the field is empty and has no focus.</summary>
+
+init: function () {
+/// <summary>Initialze the JavaScript control.</summary>
+if (this.eventname) {
+OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
+} // if
+
+this.setDatatype(this.datatype);
+}, // init
+
+
+// --- OpenAjax event handler ---
+handleEvent: function (eventName, eventData) {
+this.setData(eventData);
+}, // handleEvent
+
+
+setData: function (val) {
+/// <summary>Display a new value.</summary>
+var s = this._toString(val);
+if (this.innerText != s)
+this.innerText = s;
+}, // setData
+
+
+setDatatype: function (newType) {
+/// <summary>If a datatype is given and if the nls functionality is present
+/// use the nls functionality to support the special datatype conversion functions.</summary>
+if (typeof (jcl.nls) != "undefined") {
+if ((newType) && (jcl.nls[newType])) {
+this.datatype = newType;
+} else {
+this.datatype = "string";
+} // if
+this._toString = jcl.nls[this.datatype].toString;
+} // if
+}, // setDatatype
+
+_toString: function (v) { return (v); }
+
+} // jcl.DataOutputBehavior
+
+
+// DataPreset.js
+jcl.DataPresetBehavior = {
+
+// --- Attributes
+nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+
+eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+helptext: "", /// <summary>the helptext is displayed when the field is empty and has no focus.</summary>
+
+presetvalue: "", ///
+
+init: function () {
+/// <summary>Initialze the JavaScript control.</summary>
+if (this.eventname)
+OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
+}, // init
+
+onclick: function (evt) {
+/// <summary>Handle the event when the mouse button is pressed.</summary>
+if ((this.eventname != null) && (this.eventname != "")) {
+OpenAjax.hub.publish(jcl.BuildFullEventname(this), this.presetvalue);
+} // if
+}, // onclick
+
+// --- OpenAjax event handler ---
+handleEvent: function (eventName, eventData) {
+/// <summary>if the current value is the preset value of this button mark it as active.</summary>
+if (eventData == this.presetvalue) {
+jcl.addClassName(this, "activ");
+} else {
+jcl.removeClassName(this, "activ");
+} // if
+} // handleEvent
+
+} // jcl.DataPresetBehavior
+
+
+// DataToggleBehavior.js
+// used for a button that toggles data 0 and 1.
+// 1 ist active.
+jcl.DataToggleBehavior = {
+
+// --- Attributes
+nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+
+eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+
+init: function () {
+/// <summary>Initialze the JavaScript control.</summary>
+if (this.eventname) {
+OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
+} // if
+this._value = 0;
+}, // init
+
+// --- OpenAjax event handler ---
+handleEvent: function (eventName, eventData) {
+this.setData(eventData);
+}, // handleEvent
+
+
+onclick: function (evt) {
+/// <summary>Handle the event when the mouse button is pressed.</summary>
+evt = evt || window.event;
+var t = evt.target || evt.srcElement;
+
+if ((this.eventname != null) && (this.eventname != "")) {
+OpenAjax.hub.publish(this.eventname, 1 - this._value);
+} // if
+},
+
+setData: function (val) {
+/// <summary>Display the new value.</summary>
+if (this._value != val) {
+if (val == 1) {
+jcl.addClassName(this, "activ");
+} else {
+jcl.removeClassName(this, "activ");
+} // if
+this._value = val;
+} // if
+} // setData
+
+} // jcl.DataToggleBehavior
+
+
+// HSlider.js
+// Javascript Behaviour for the HSlider Control
+// Copyright (c) by Matthias Hertel, http://www.mathertel.de
+// This work is licensed under a BSD style license. See http://www.mathertel.de/License.aspx
+// -----
+// 17.09.2005 PropHSlider was created by Matthias Hertel
+// 25.08.2007 HSlider was created from PropHSlider
+// 18.12.2007 Simplifications and documentation.
+// 06.01.2008 documentation and simplifications
+
+jcl.HSliderBehavior = {
+/// <summary>This control implements is a horizontal moveable rectangle that acts as a slider.
+/// It can be attached to an OpenAjax event and acts as a subscriber and publisher.</summary>
+/// <example>A page that uses this control ist available at:<br />
+/// <a href="http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx">
+/// http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx</a></example>
+
+_knob: null, /// <summary>Reference to the movable knob obj.</summary>
+_lastValue: -1, /// <summary>last published value to avoid doublicate events.</summary>
+_x: 0, /// <summary>Offset between mouse and the knob.</summary>
+_maxright: 0, /// <summary>rightmost position of the knob.</summary>
+_xOffset: 0, /// <summary>x-offset of the region the knob is allowed to be moved.</summary>
+
+minvalue: 0, /// <summary>The value that is reached on the leftmost position of the knob.</summary>
+maxvalue: 100, /// <summary>The value that is reached on the rightmost position of the knob.</summary>
+unit: 1, /// <summary>The unit of the oublished values. All values can be divided by this value without any reminder
+/// if the value is determined by using the HSlider.</summary>
+
+eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+
+init: function () {
+var p;
+/// <summary>Initialze the JavaScript control.</summary>
+this._removeTextNodes(this);
+
+this.eventname = jcl.BuildFullEventname(this);
+
+if (this.eventname) {
+OpenAjax.hub.subscribe(this.eventname, this._handleEvent, this);
+} // if
+
+// find the moveable knob
+this._knob = jcl.getElementsByClassName(this, "knob")[0];
+p = this._knob.parentNode;
+
+this._maxright = p.offsetWidth - this._knob.offsetWidth;
+
+this.minvalue = parseInt(this.minvalue);
+this.maxvalue = parseInt(this.maxvalue);
+this.unit = parseInt(this.unit);
+this._lastValue = this.minvalue;
+}, // init
+
+
+// --- events
+
+onmousedown: function (evt) {
+/// <summary>Handle the event when the mouse button is pressed.</summary>
+evt = evt || window.event;
+var t = evt.target || evt.srcElement;
+var left = this._lastValue;
+
+// if not clicked on a defined element use one element up.
+if (!t.className) t = t.parentElement;
+
+if (jcl.hasClassName(t, "knob")) {
+this.MoveStart(evt);
+
+} else if (jcl.hasClassName(t, "minus")) {
+left = parseInt(left) - this.unit;
+if (left < this.minvalue) left = this.minvalue;
+
+} else if (jcl.hasClassName(t, "plus")) {
+left = parseInt(left) + this.unit;
+if (left > this.maxvalue) left = this.maxvalue;
+} // if
+
+if (left != this._lastValue) {
+if ((this.eventname != null) && (this.eventname != "")) {
+OpenAjax.hub.publish(this.eventname, left);
+} // if
+this._lastValue = left;
+} // if
+}, // onmousedown
+
+
+ontouchstart: function (evt) {
+/// <summary>Handle the event when a touch operation starts.</summary>
+var t = evt.targetTouches[0].target;
+if (t.className == "knob") {
+this.TouchStart(evt);
+} // if
+}, // ontouchstart:
+
+
+ontouchmove: function (evt) {
+/// <summary>Handle the event when a touch point moves.</summary>
+var mo = jcl.currentMoving;
+if (mo != null) {
+evt.preventDefault();
+
+var left = evt.targetTouches[0].pageX - this._x - this._xOffset;
+left = Math.min(this._maxright, Math.max(0, left));
+this._knob.style.left = left + "px";
+
+left = Math.round(left * (this.maxvalue - this.minvalue) / this._maxright + this.minvalue);
+left = Math.round(left / parseInt(this.unit)) * parseInt(this.unit);
+
+if (left != this._lastValue) {
+if ((this.eventname != null) && (this.eventname != "")) {
+OpenAjax.hub.publish(this.eventname, left);
+} // if
+} // if
+} // if
+
+this._lastValue = left;
+}, // ontouchmove:
+
+
+_onmousemove: function (evt) {
+/// <summary>Handle the mouse button move event. This handler will be attached to the document level.</summary>
+evt = evt || window.event;
+jcl.currentMoving.MoveIt(evt);
+}, // onmousemove
+
+
+_onmouseup: function (evt) {
+/// <summary>Handle the mouse button up event. This handler will be attached to the document level.</summary>
+evt = evt || window.event;
+jcl.currentMoving.MoveEnd(evt);
+}, // onmouseup
+
+
+// --- methods
+
+MoveStart: function (evt) {
+/// <summary>Start sliding the knob.</summary>
+this._xOffset = 0;
+var obj = this._knob.offsetParent;
+while (obj != null) {
+this._xOffset += obj.offsetLeft;
+obj = obj.offsetParent;
+} // while
+
+// calculate mousepointer-knob delta
+this._x = evt.clientX - (this._knob.offsetLeft + this._xOffset);
+
+jcl.currentMoving = this; // make it globally evailable when mouse is leaving this object.
+jcl.AttachEvent(document, "onmousemove", this._onmousemove);
+jcl.AttachEvent(document, "onmouseup", this._onmouseup);
+// cancel selecting anything
+evt.cancelBubble = true;
+evt.returnValue = false;
+}, // MoveStart
+
+
+TouchStart: function (evt) {
+this._xOffset = 0;
+var obj = this._knob.offsetParent;
+while (obj != null) {
+this._xOffset += obj.offsetLeft;
+obj = obj.offsetParent;
+} // while
+
+// calculate mousepointer-knob delta
+this._x = evt.targetTouches[0].pageX - (this._knob.offsetLeft + this._xOffset);
+jcl.currentMoving = this;
+}, // TouchStart
+
+
+MoveIt: function (evt) {
+/// <summary>Move the knob element and eventually publish a new event.</summary>
+var left = evt.clientX - this._x - this._xOffset;
+left = Math.min(this._maxright, Math.max(0, left));
+this._knob.style.left = left + "px";
+
+left = Math.round(left * (this.maxvalue - this.minvalue) / this._maxright + this.minvalue);
+left = Math.round(left / parseInt(this.unit)) * parseInt(this.unit);
+
+if (left != this._lastValue) {
+if ((this.eventname != null) && (this.eventname != "")) {
+OpenAjax.hub.publish(this.eventname, left);
+} // if
+
+} // if
+
+this._lastValue = left;
+// cancel selecting anything
+evt.cancelBubble = true;
+evt.returnValue = false;
+}, // MoveIt
+
+
+MoveEnd: function () {
+/// <summary>Handle the end of a moving gesture.</summary>
+if (this._knob != null) {
+jcl.DetachEvent(document, "onmousemove", this._onmousemove);
+jcl.DetachEvent(document, "onmouseup", this._onmouseup);
+jcl.currentMoving = null;
+} // if
+}, // MoveEnd
+
+
+// --- OpenAjax event handler ---
+
+_handleEvent: function (eventName, eventData) {
+/// <summary>Handle OpenAjax events.</summary>
+var knob = this._knob;
+if ((knob != null) && (this._lastValue != eventData)) {
+this._lastValue = eventData;
+eventData = eventData - this.minvalue;
+eventData = Math.round(eventData * this._maxright / (this.maxvalue - this.minvalue));
+eventData = Math.min(this._maxright, Math.max(0, eventData));
+knob.style.left = eventData + "px";
+} // if
+}, // _handleEvent
+
+
+_removeTextNodes: function (n) {
+/// <summary>remove all textnodes from the control to avoid unwanted spaces.</summary>
+var obj = n.firstChild;
+while (obj != null) {
+var nextObj = obj.nextSibling;
+if (obj.nodeType == 3)
+obj.parentNode.removeChild(obj);
+obj = nextObj;
+} // while
+} // _removeTextNodes
+
+} // jcl.HSliderBehavior
+
+
+/// ----- ajax functions -----
+
+var xhr = new XMLHttpRequest();
+
+function postData(url, data) {
+// enable cookieless sessions:
+var cs = document.location.href.match(/\/\(.*\)\//);
+if (cs) {
+url = url.split('/');
+url[3] += cs[0].substr(0, cs[0].length - 1);
+url = url.join('/');
+} // if
+
+// sync call
+xhr.open("POST", url, false);
+
+xhr.send(data);
+return (xhr.responseText);
+} // postData
+
+
+function getData(url) {
+// enable cookieless sessions:
+var cs = document.location.href.match(/\/\(.*\)\//);
+if (cs) {
+url = url.split('/');
+url[3] += cs[0].substr(0, cs[0].length - 1);
+url = url.join('/');
+} // if
+
+// sync call
+xhr.open("GET", url, false);
+xhr.timeout = 3000;
+xhr.send();
+cs = xhr.responseText;
+return (cs);
+} // getData
+
+
+// ----- jcl functions -----
+
+// elem.classList.contains("aClass");
+jcl.hasClassName = function (elem, className) {
+var cn = elem.className;
+if ((cn != null) && (cn != ""))
+return (cn.match("\\b" + className + "\\b") != null);
+else
+return (false)
+}; // hasClassName
+
+
+
+function upd() {
+try {
+var data = getData('/$radio');
+data = JSON.parse(data);
+for (var n in data) {
+  if (radioValues[n] != data[n]) {
+    radioValues[n] = data[n];
+    OpenAjax.hub.publish('radio.' + n, data[n]);
+  }
+} // for
+} catch (e) { }
+timer = window.setTimeout(upd, 1200);
+
+} // upd()
+</script>
 </head>
 
 <body style="background-color:#F0F0F0">
-  <table style="background-color:transparent;border-collapse:separate;border-spacing:0.2em;empty-cells:show;float:left">
-    <colgroup style="background-color:silver">
-      <col style="width: 100px">
-      <col style="width: 100px">
-      <col style="width: 200px">
-    </colgroup>
+<table style="background-color:transparent;border-collapse:separate;border-spacing:0.2em;empty-cells:show;float:left">
+<colgroup style="background-color:silver">
+<col style="width: 100px">
+<col style="width: 100px">
+<col style="width: 200px">
+</colgroup>
 
-    <tbody>
-      <tr>
-        <td><span id="mode">Radio</span></td>
-        <td style="text-align:right"><span id="freq" class="PropOutput" style="text-align: right" eventname="radio.freq">9840</span></td>
-        <td><span id="band">MHz</span></td>
-      </tr>
+<tbody>
+<tr>
+<td><span id="mode">Radio</span></td>
+<td style="text-align:right"><span id="freq" class="PropOutput" style="text-align: right" eventname="radio.freq">9840</span></td>
+<td><span id="band">MHz</span></td>
+</tr>
 
-      <tr><td colspan="3" style="text-align:center;height:30px;"><span id="servicename" eventname="radio.servicename">#RDS</span></td></tr>
-      <tr><td colspan="3" style="text-align:center;height:60px;"><span id="rdstext" eventname="radio.rdstext">#RDSTEXT</span></td></tr>
-      <tr>
-        <td colspan="3">
-          <button id="station1" eventname="radio.freq" presetvalue="8930">hr3</button>
-          <button id="station2" eventname="radio.freq" presetvalue="10020">planet</button>
-          <button id="station3" eventname="radio.freq" presetvalue="10110">SWR3</button>
-          <button id="station4" eventname="radio.freq" presetvalue="10090">FFH</button>
-        </td>
-      </tr>
+<tr><td colspan="3" style="text-align:center;height:30px;"><span id="servicename" eventname="radio.servicename">#RDS</span></td></tr>
+<tr><td colspan="3" style="text-align:center;height:60px;"><span id="rdstext" eventname="radio.rdstext">#RDSTEXT</span></td></tr>
+<tr>
+<td colspan="3">
+<button id="station1" eventname="radio.freq" presetvalue="8930">hr3</button>
+<button id="station2" eventname="radio.freq" presetvalue="10020">planet</button>
+<button id="station3" eventname="radio.freq" presetvalue="10110">SWR3</button>
+<button id="station4" eventname="radio.freq" presetvalue="10090">FFH</button>
+</td>
+</tr>
 
-      <tr>
-        <td style="text-align:right"><span id="label">Freq:</span></td>
-        <td colspan="2" style="text-align:center;padding:2px">
-          <div class="HSlider" id="ctlF" style="font-size:12px;display:inline-block" eventname="radio.freq" minvalue="8750" maxvalue="10800" unit="10">
-            <div class="minus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-right:0.2em">
-              <div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&lt;</div>
-            </div>
-            <div style="height:2.2em;width:16.4em;position:relative;display:inline-block">
-              <div style="width:16em;height:0.6em;top:0.6em;border:0.2em solid gray;border-radius: 0.5em;position:absolute;background-color:silver"></div>
-              <div class="knob" style="width:0.6em;height:1.8em;border:0.2em solid black;border-radius: 0.5em;position:absolute;background-color:silver"></div>
-            </div>
-            <div class="plus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-left:0.2em">
-              <div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&gt;</div>
-            </div>
-          </div>
-        </td>
-      </tr>
+<tr>
+<td style="text-align:right"><span id="label">Freq:</span></td>
+<td colspan="2" style="text-align:center;padding:2px">
+<div class="HSlider" id="ctlF" style="font-size:12px;display:inline-block" eventname="radio.freq" minvalue="8750" maxvalue="10800" unit="10">
+<div class="minus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-right:0.2em">
+<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&lt;</div>
+</div>
+<div style="height:2.2em;width:16.4em;position:relative;display:inline-block">
+<div style="width:16em;height:0.6em;top:0.6em;border:0.2em solid gray;border-radius: 0.5em;position:absolute;background-color:silver"></div>
+<div class="knob" style="width:0.6em;height:1.8em;border:0.2em solid black;border-radius: 0.5em;position:absolute;background-color:silver"></div>
+</div>
+<div class="plus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-left:0.2em">
+<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&gt;</div>
+</div>
+</div>
+</td>
+</tr>
 
-      <tr>
-        <td style="text-align:right"><span id="label">Vol:</span></td>
-        <td colspan="2" style="text-align:center;padding:2px">
-          <div class="HSlider" id="ctlV" style="font-size:12px;display:inline-block" eventname="radio.vol" minvalue="0" maxvalue="15" unit="1">
-            <div class="minus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-right:0.2em">
-              <div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&lt;</div>
-            </div>
-            <div style="height:2.2em;width:16.4em;position:relative;display:inline-block">
-              <div style="width:16em;height:0.6em;top:0.6em;border:0.2em solid gray;border-radius: 0.5em;position:absolute;background-color:silver"></div>
-              <div class="knob" style="width:0.6em;height:1.8em;border:0.2em solid black;border-radius: 0.5em;position:absolute;background-color:silver"></div>
-            </div>
-            <div class="plus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-left:0.2em">
-              <div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&gt;</div>
-            </div>
-          </div>
-        </td>
-      </tr>
+<tr>
+<td style="text-align:right"><span id="label">Vol:</span></td>
+<td colspan="2" style="text-align:center;padding:2px">
+<div class="HSlider" id="ctlV" style="font-size:12px;display:inline-block" eventname="radio.vol" minvalue="0" maxvalue="15" unit="1">
+<div class="minus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-right:0.2em">
+<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&lt;</div>
+</div>
+<div style="height:2.2em;width:16.4em;position:relative;display:inline-block">
+<div style="width:16em;height:0.6em;top:0.6em;border:0.2em solid gray;border-radius: 0.5em;position:absolute;background-color:silver"></div>
+<div class="knob" style="width:0.6em;height:1.8em;border:0.2em solid black;border-radius: 0.5em;position:absolute;background-color:silver"></div>
+</div>
+<div class="plus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-left:0.2em">
+<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&gt;</div>
+</div>
+</div>
+</td>
+</tr>
 
-      <tr>
-        <td colspan="3">
-          <button id="ctlM" eventname="radio.mute">Mute</button>
-          <button id="ctlSM" eventname="radio.softmute">SoftMute</button>
-          <button id="ctlMono" eventname="radio.mono">Mono</button>
-          <button id="ctlBB" eventname="radio.bassboost">BassBoost</button>
+<tr>
+<td colspan="3">
+<button id="ctlM" eventname="radio.mute">Mute</button>
+<button id="ctlSM" eventname="radio.softmute">SoftMute</button>
+<button id="ctlMono" eventname="radio.mono">Mono</button>
+<button id="ctlBB" eventname="radio.bassboost">BassBoost</button>
 
-          &nbsp;
-          <button onclick="upd()">update</button>
-          <button onclick="alert(JSON.stringify(radioValues))">?</button>
-        </td>
-      </tr>
+&nbsp;
+<button onclick="upd()">update</button>
+<button onclick="alert(JSON.stringify(radioValues))">?</button>
+</td>
+</tr>
 
-    </tbody>
-  </table>
+</tbody>
+</table>
 <p>About this server: <a href="about.htm">about.htm</a></p>
 
-  <script defer type="text/javascript">
-    // attach some behaviors to html elements
-    jcl.LoadBehaviour("freq", jcl.DataOutputBehavior);
-    // patch the data formatting function.
-    freq._toString = function (v) {
-      v = String(v);
-      var l = v.length - 2;
-      return (v.substr(0, l) + "." + v.substr(l));
-    }
+<script defer type="text/javascript">
+// attach some behaviors to html elements
+jcl.LoadBehaviour("freq", jcl.DataOutputBehavior);
+// patch the data formatting function.
+freq._toString = function (v) {
+v = String(v);
+var l = v.length - 2;
+return (v.substr(0, l) + "." + v.substr(l));
+}
 
-    jcl.LoadBehaviour("servicename", jcl.DataOutputBehavior);
-    jcl.LoadBehaviour("rdstext", jcl.DataOutputBehavior);
+jcl.LoadBehaviour("servicename", jcl.DataOutputBehavior);
+jcl.LoadBehaviour("rdstext", jcl.DataOutputBehavior);
 
-    jcl.LoadBehaviour("ctlF", jcl.HSliderBehavior);
-    jcl.LoadBehaviour("ctlV", jcl.HSliderBehavior);
-    jcl.LoadBehaviour("ctlM", jcl.DataToggleBehavior);
-    jcl.LoadBehaviour("ctlSM", jcl.DataToggleBehavior);
-    jcl.LoadBehaviour("ctlMono", jcl.DataToggleBehavior);
-    jcl.LoadBehaviour("ctlBB", jcl.DataToggleBehavior);
+jcl.LoadBehaviour("ctlF", jcl.HSliderBehavior);
+jcl.LoadBehaviour("ctlV", jcl.HSliderBehavior);
+jcl.LoadBehaviour("ctlM", jcl.DataToggleBehavior);
+jcl.LoadBehaviour("ctlSM", jcl.DataToggleBehavior);
+jcl.LoadBehaviour("ctlMono", jcl.DataToggleBehavior);
+jcl.LoadBehaviour("ctlBB", jcl.DataToggleBehavior);
 
-    jcl.LoadBehaviour("station1", jcl.DataPresetBehavior);
-    jcl.LoadBehaviour("station2", jcl.DataPresetBehavior);
-    jcl.LoadBehaviour("station3", jcl.DataPresetBehavior);
-    jcl.LoadBehaviour("station4", jcl.DataPresetBehavior);
+jcl.LoadBehaviour("station1", jcl.DataPresetBehavior);
+jcl.LoadBehaviour("station2", jcl.DataPresetBehavior);
+jcl.LoadBehaviour("station3", jcl.DataPresetBehavior);
+jcl.LoadBehaviour("station4", jcl.DataPresetBehavior);
 
-    // register for events that change the radio parameters
-    function changeRadio(eventName, eventData) {
-      var evn = jcl.LocalEventName(eventName);
-      if (radioValues[evn] != eventData)
-        postData('/$radio', evn + ' ' + eventData)
-      radioValues[evn] = eventData;
-    } // dumpevent
-    OpenAjax.hub.subscribe("radio.*", changeRadio);
+// register for events that change the radio parameters
+function changeRadio(eventName, eventData) {
+var evn = jcl.LocalEventName(eventName);
+if (radioValues[evn] != eventData)
+  postData('/$radio', '{"' + evn + '":' + eventData + '}')
+radioValues[evn] = eventData;
+} // dumpevent
+OpenAjax.hub.subscribe("radio.*", changeRadio);
 
-    timer = window.setTimeout(upd, 1200);
-  </script>
-
-
-  <div id="oa_log" style="display:block;border: solid 1px blue; font-size:11px; height: 14em; width:360px; padding:1px;overflow: hidden">
-    <h3 style="margin: 0px">OpenAjax hub event log:</h3>
-  </div>
-
-  <script type="text/javascript">
-    obj = document.getElementById("oa_log");
-    obj.dumpevent = function (eventName, eventData) {
-      this.Dump(eventName + ":" + this._objToText(eventData));
-    } // dumpevent
-
-    obj.Dump = function (txt) {
-      var p = window.document.createElement("div");
-      this.appendChild(p);
-      p.innerText = txt;
-
-      if (this.childNodes.length > 12)
-        this.removeChild(this.childNodes[1]);
-    } // GetValue
+timer = window.setTimeout(upd, 1200);
+</script>
 
 
-    // get some pretty printable object notation in one line
-    obj._objToText = function (obj) {
-      var s = "";
+<div id="oa_log" style="display:block;border: solid 1px blue; font-size:11px; height: 14em; width:360px; padding:1px;overflow: hidden">
+<h3 style="margin: 0px">OpenAjax hub event log:</h3>
+</div>
 
-      if (obj == null) {
-        s = "(null)";
-      } else if (obj.constructor == String) {
-        s = "\"" + obj + "\"";
-      } else if (typeof (obj) == "function") {
-        s += " [function]" + obj;
+<script type="text/javascript">
+obj = document.getElementById("oa_log");
+obj.dumpevent = function (eventName, eventData) {
+this.Dump(eventName + ":" + this._objToText(eventData));
+} // dumpevent
 
-      } else if (obj.constructor == Array) {
-        s += "[";
-        for (n = 0; n < obj[p].length; n++) {
-          if (n > 0) s += ", ";
-          s += obj[n];
-        }
-        s += "]";
+obj.Dump = function (txt) {
+var p = window.document.createElement("div");
+this.appendChild(p);
+p.innerText = txt;
 
-      } else if (obj.constructor == Object) {
-        s += "{";
-        for (n in obj) {
-          s += n + ": " + obj[n] + ", ";
-        }
-        s += "}";
+if (this.childNodes.length > 12)
+this.removeChild(this.childNodes[1]);
+} // GetValue
 
-      } else {
-        s = obj.toString();
-      }
-      return (s);
-    } // _objToText
 
-    OpenAjax.hub.subscribe("**", "dumpevent", obj);
-    OpenAjax.hub.registerLibrary("OpenAjaxEventLog", "http://www.mathertel.de/OpenAjax/OpenAjaxEventLog");
-  </script>
+// get some pretty printable object notation in one line
+obj._objToText = function (obj) {
+var s = "";
+
+if (obj == null) {
+s = "(null)";
+} else if (obj.constructor == String) {
+s = "\"" + obj + "\"";
+} else if (typeof (obj) == "function") {
+s += " [function]" + obj;
+
+} else if (obj.constructor == Array) {
+s += "[";
+for (n = 0; n < obj[p].length; n++) {
+if (n > 0) s += ", ";
+s += obj[n];
+}
+s += "]";
+
+} else if (obj.constructor == Object) {
+s += "{";
+for (n in obj) {
+s += n + ": " + obj[n] + ", ";
+}
+s += "}";
+
+} else {
+s = obj.toString();
+}
+return (s);
+} // _objToText
+
+OpenAjax.hub.subscribe("**", "dumpevent", obj);
+OpenAjax.hub.registerLibrary("OpenAjaxEventLog", "http://www.mathertel.de/OpenAjax/OpenAjaxEventLog");
+</script>
 
 </body>
 </html>

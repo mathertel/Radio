@@ -122,12 +122,13 @@
 
 // ----- implement
 
-// initialize the extra variables in SI4705
+/// Initialize the extra variables in SI4705
 SI4705::SI4705() {
 }
 
 /// Initialize the library and the chip.
 /// Set all internal variables to the standard values.
+/// @return bool The return value is true when a SI4705 chip was found.
 bool SI4705::init() {
   bool result = false; // no chip found yet.
   DEBUG_FUNC0("init");
@@ -174,7 +175,8 @@ bool SI4705::init() {
 } // init()
 
 
-// Switch all functions of the chip off and power down.
+/// Switch all functions of the chip off by powering down.
+/// @return void
 void SI4705::term()
 {
   DEBUG_FUNC0("term");
@@ -182,9 +184,11 @@ void SI4705::term()
 } // term
 
 
-// ----- Volume control -----
+// ----- Audio output control -----
 
-/// set the volume in the range 0..15. This is mapped to the internal range 0..64
+/// This function maps the newVolume value to the range 0..64 that is available in this chip.
+/// @param newVolume The new volume level of audio output.
+/// @return void
 void SI4705::setVolume(uint8_t newVolume)
 {
   DEBUG_FUNC1("setVolume", newVolume);
@@ -196,6 +200,8 @@ void SI4705::setVolume(uint8_t newVolume)
 
 
 /// BassBoost is not supported by the SI4705 chip.
+/// @param switchOn this functions ignores the switchOn parameter and always sets bassBoost to false.
+/// @return void
 void SI4705::setBassBoost(bool switchOn)
 {
   DEBUG_FUNC1("setBassBoost", switchOn);
@@ -204,8 +210,9 @@ void SI4705::setBassBoost(bool switchOn)
 
 
 /// Control the mono mode of the radio chip
-/// In mono mode the stereo decoding will be switched off completely 
-/// and the noise is typically reduced.
+/// In mono mode the stereo decoding will be switched off completely  and the noise is typically reduced.
+/// @param switchOn The new state of the mono mode. True to switch on, false to switch off.
+/// @return void
 void SI4705::setMono(bool switchOn)
 {
   DEBUG_FUNC1("setMono", switchOn);
@@ -225,7 +232,8 @@ void SI4705::setMono(bool switchOn)
 
 /// Control the mute mode of the radio chip
 /// In mute mode no output will be produced by the radio chip.
-/// @param switchOn true to switch mute mode on, false to switch mute mode off.
+/// @param switchOn The new state of the mute mode. True to switch on, false to switch off.
+/// @return void
 void SI4705::setMute(bool switchOn) {
   DEBUG_FUNC1("setMute", switchOn);
   RADIO::setMute(switchOn);
@@ -256,6 +264,8 @@ void SI4705::setMute(bool switchOn) {
 // ----- Band and frequency control methods -----
 
 /// Start using the new band for receiving.
+/// @param newBand The new band to be received.
+/// @return void
 void SI4705::setBand(RADIO_BAND newBand) {
   DEBUG_FUNC1("setBand", newBand);
   if (newBand == RADIO_BAND_FM) {
@@ -274,10 +284,9 @@ void SI4705::setBand(RADIO_BAND newBand) {
 } // setBand()
 
 
-/**
- * @brief Retrieve the real frequency from the chip after automatic tuning.
- * @return RADIO_FREQ the current frequency.
- */
+
+/// Retrieve the real frequency from the chip after manual or automatic tuning.
+/// @return RADIO_FREQ the current frequency.
 RADIO_FREQ SI4705::getFrequency() {
   // DEBUG_FUNC0("getFrequency");
   _readStatusData(CMD_FM_TUNE_STATUS, 0x03, tuneStatus, sizeof(tuneStatus));
@@ -291,7 +300,7 @@ RADIO_FREQ SI4705::getFrequency() {
 /// The new frequency is stored for later retrieval by the base class.\n
 /// Because the chip may change the frequency automatically (when seeking)
 /// the stored value might not be the current frequency.
-/// @param newF is the new frequency.
+/// @param newF The new frequency to be received.
 /// @return void
 void SI4705::setFrequency(RADIO_FREQ newF) {
   DEBUG_FUNC1("setFrequency", newF);
