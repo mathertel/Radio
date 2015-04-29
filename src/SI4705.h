@@ -3,18 +3,21 @@
 /// \brief Library header file for the radio library to control the SI4705 radio chip.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
-/// This library enables the use of the Radio Chip SI4703.
+/// This library enables the use of the Radio Chip SI4705.
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
-/// History:
-/// --------
+/// ChangeLog:
+/// ----------
 /// * 05.12.2014 created.
 /// * 30.01.2015 working first version.
+/// * 07.02.2015 cleanup
+/// * 15.02.2015 RDS is working.
+/// * 27.03.2015 scanning is working. No changes to default settings needed.
 
 
 #ifndef SI4705_h

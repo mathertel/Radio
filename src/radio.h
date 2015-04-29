@@ -3,7 +3,7 @@
 /// \brief Library header file for the radio libraries to control radio chips.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
@@ -19,13 +19,14 @@
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
-/// History:
-/// --------
+/// ChangeLog:
+/// ----------
 /// * 08.07.2014 creation of the common radio class.
 /// * 15.07.2014 examples working with RDA5807M.
 /// * 26.08.2014 examples working with SI4703.
 /// * 31.08.2014 Doxygen style comments added.
 /// * 05.02.2015 mainpage content added.
+/// * 29.04.2015 clear RDS function, need to clear RDS info after tuning.
 ///
 /// TODO:
 /// --------
@@ -185,6 +186,7 @@ class RADIO {
   // ----- Supporting RDS for FM bands -----
 
   virtual void checkRDS(); ///< Check if RDS Data is available and good.
+  virtual void clearRDS(); ///< Clear RDS data in the attached RDS Receiver by sending 0,0,0,0.
   virtual void attachReceiveRDS(receiveRDSFunction newFunction); ///< Register a RDS processor function.
 
   // ----- Utilitys -----

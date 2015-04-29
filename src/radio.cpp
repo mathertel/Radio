@@ -2,7 +2,7 @@
 /// \brief Library implementation for the radio libraries to control radio chips.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
@@ -17,12 +17,7 @@
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
-/// History:
-/// --------
-/// * 08.07.2014 creation of the common radio class.
-/// * 15.07.2014 examples working with RDA5807M.
-/// * 26.08.2014 examples working with SI4703.
-/// * 31.08.2014 Doxygen style comments added.
+/// ChangeLog see: radio.h 
 
 #include "Arduino.h"
 
@@ -207,8 +202,17 @@ void RADIO::getAudioInfo(AUDIO_INFO *info) {
 } // getAudioInfo()
 
 
-// check if RDS Data is available and good
+/// In the general radio implementation there is no chip for RDS.
+/// This function needs to be implemented for radio chips with RDS receiving functionality.
 void RADIO::checkRDS() { /* no chip : nothing to check */ }
+
+
+/// Send a 0.0.0.0 to the RDS receiver if there is any attached.
+/// This is to point out that there is a new situation and all existing data should be invalid from now on.
+void RADIO::clearRDS() { 
+  if (_sendRDS)
+    _sendRDS(0, 0, 0, 0);
+} // clearRDS()
 
 
 // send valid and good data to the RDS processor via newFunction

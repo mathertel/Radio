@@ -3,7 +3,7 @@
 /// \brief Implementation for the radio library to control the SI4705 radio chip.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
@@ -13,13 +13,7 @@
 ///
 /// Many hints can be found in AN332: http://www.silabs.com/Support%20Documents/TechnicalDocs/AN332.pdf
 ///
-/// History:
-/// --------
-/// * 05.12.2014 created.
-/// * 30.01.2015 working first version.
-/// * 07.02.2015 cleanup
-/// * 15.02.2015 RDS is working.
-/// * 27.03.2015 scanning is working. No changes to default settings needed.
+/// ChangeLog see SI4705.h.
 
 #include <Arduino.h>
 #include <Wire.h>     // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
@@ -308,7 +302,7 @@ void SI4705::setFrequency(RADIO_FREQ newF) {
   _sendCommand(5, CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)& 0xff, 0);
 
   // reset the RDSParser
-  if (_sendRDS) _sendRDS(0, 0, 0, 0);
+  clearRDS();
 } // setFrequency()
 
 
@@ -323,7 +317,7 @@ void SI4705::seekUp(bool toNextSender) {
     // start tuning
     _sendCommand(2, CMD_FM_SEEK_START, 0x0C);
     // reset the RDSParser
-    if (_sendRDS) _sendRDS(0, 0, 0, 0);
+    clearRDS();
 
   } // if
 
@@ -341,7 +335,7 @@ void SI4705::seekDown(bool toNextSender) {
     // start tuning
     _sendCommand(2, CMD_FM_SEEK_START, 0x04);
     // reset the RDSParser
-    if (_sendRDS) _sendRDS(0, 0, 0, 0);
+    clearRDS();
 
   } // if
 

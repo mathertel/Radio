@@ -2,7 +2,7 @@
 /// \brief Radio implementation using a web frontend served by the Arduino.
 /// 
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
@@ -21,7 +21,7 @@
 /// A button for scanning upwards on pin A11.
 
 /// ChangeLog:
-/// --------
+/// ----------
 /// * 06.11.2014 created.
 /// * 22.11.2014 working.
 /// * 07.02.2015 more complete implementation
@@ -846,7 +846,6 @@ void respondJSONObject(char *name, int value, bool lastValue = false)
 
 /// Response to a $info request and return all information of the current radio operation.
 /// Format al data as in JSON Format.\n
-/// Format all data to the format NAME blank VALUE\r\n.
 void respondRadioData()
 {
   // DEBUGFUNC0("respondRadioData");

@@ -3,7 +3,7 @@
 /// \brief RDS Parser class implementation.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
+/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
@@ -11,11 +11,9 @@
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
-/// History:
-/// --------
-/// * 01.09.2014 created and RDS sender name working.
-/// * 01.11.2014 RDS time added.
-/// * 27.03.2015 Reset RDS data by sending a 0 in blockA in the case the frequency changes.
+/// ChangeLog see RDSParser.h.
+
+
 
 #include "RDSParser.h"
 
@@ -32,7 +30,6 @@ void RDSParser::init() {
   strcpy(_PSName2, _PSName1);
   strcpy(programServiceName, "        ");
   memset(_RDSText, 0, sizeof(_RDSText));
-  strcpy(_RDSText, _PSName1);
   _lastTextIDX = 0;
 } // init()
 
@@ -57,19 +54,12 @@ void RDSParser::attachTimeCallback(receiveTimeFunction newFunction)
 void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4)
 {
   // DEBUG_FUNC0("process");
-
-  //int  i_rdsnew=0;
   uint8_t  idx; // index of rdsText
   char c1, c2;
   char *p;
 
   uint16_t mins; ///< RDS time in minutes
   uint8_t off;   ///< RDS time offset and sign
-
-  //int i_x,i_hh,i_mm,i_ofs;
-  //long l_mjd;
-  //String s_rds="0123456789.123456789.123456789.123456789.123456789.123456789.123";
-  //
 
   // Serial.print('('); Serial.print(block1, HEX); Serial.print(' '); Serial.print(block2, HEX); Serial.print(' '); Serial.print(block3, HEX); Serial.print(' '); Serial.println(block4, HEX);
 
@@ -141,7 +131,7 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
       // when this bit is toggled the whole buffer should be cleared.
       _last_textAB = _textAB;
       memset(_RDSText, 0, sizeof(_RDSText));
-      Serial.println("T>CLEAR");
+      // Serial.println("T>CLEAR");
     } // if
 
 
@@ -150,7 +140,7 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     _RDSText[idx] = (block3 & 0x00FF); idx++;
 
     // new data is 2 chars from block 4
-    _RDSText[idx] = (block4 >> 8); idx++;
+    _RDSText[idx] = (block4 >> 8);     idx++;
     _RDSText[idx] = (block4 & 0x00FF); idx++;
 
     // Serial.print(' '); Serial.println(_RDSText);
@@ -158,15 +148,6 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     break;
 
   case 0x4A:
-    //(D363 4541 BE29 1A02
-    //  >> 18:40
-    //(D363 4541 BE29 1AC2
-    //  >> 18:43
-    //(D363 4541 BE29 1B02
-    //  >> 18:44
-         
-    // Serial.print('('); Serial.print(block1, HEX); Serial.print(' '); Serial.print(block2, HEX); Serial.print(' '); Serial.print(block3, HEX); Serial.print(' '); Serial.println(block4, HEX);
-
     // Clock time and date
     off = (block4)& 0x3F; // 6 bits
     mins = (block4 >> 6) & 0x3F; // 6 bits
@@ -175,12 +156,11 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     // adjust offset
     if (off & 0x20) {
       mins -= 30 * (off & 0x1F);
-    }
-    else {
+    } else {
       mins += 30 * (off & 0x1F);
     }
 
-    Serial.print(" >>"); Serial.print(mins/60); Serial.print(':'); Serial.println(mins % 60);
+    Serial.print(" >>"); Serial.print(mins / 60); Serial.print(':'); Serial.println(mins % 60);
 
     if ((_sendTime) && (mins != _lastRDSMinutes)) {
       _lastRDSMinutes = mins;
@@ -188,7 +168,7 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     } // if
     break;
 
-  case 0x6A: 
+  case 0x6A:
     // IH
     break;
 
