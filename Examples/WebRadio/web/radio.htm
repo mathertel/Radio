@@ -4,12 +4,16 @@
 <title>Radio</title>
 <script type='text/javascript' src='jcl.js'></script>
 <style type="text/css">
-#label, #mode, #freq, #band {
-font-size: 1.8em;
+html {
+font-size: 12pt;
+}
+
+#label, #mode, #band, #freq {
+font-size: 1.6em;
 }
 
 #servicename {
-font-size: 1.8em;
+font-size: 1.2em;
 }
 
 #rdstext {
@@ -29,11 +33,56 @@ background-color: #acc1e4 !important;
 border-color: #203050 !important;
 }
 
+td {
+text-align: center;
+}
 
-#slb {
-background-image: url(/controls/images/sliderBK.gif);
-background-position: left top;
-background-repeat: repeat-x;
+.HSlider {
+display: inline-block;
+}
+
+.HSlider .minus, .HSlider .plus {
+position: relative;
+display: inline-block;
+margin-right: 0.1em;
+height: 1em;
+width: 1em;
+border: 0.2em solid gray;
+border-radius: 0.4em;
+}
+
+.HSlider .minus span, .HSlider .plus span {
+font-weight: bold;
+width: 1em;
+top: -0.08em;
+position: absolute;
+}
+
+.HSlider .slider {
+height: 1em;
+width: 16.4em;
+padding: 0.2em;
+position: relative;
+display: inline-block;
+}
+
+.HSlider .ruler {
+height: 0.4em;
+top: 0.3em;
+border: 0.2em solid gray;
+border-radius: 0.5em;
+position: absolute;
+background-color: silver;
+}
+
+.HSlider .knob {
+width: 0.6em;
+height: 1em;
+top: 0;
+border: 0.2em solid black;
+border-radius: 0.4em;
+position: absolute;
+background-color: silver;
 }
 
 [draggable=true] {
@@ -55,7 +104,6 @@ datatype: "", /// <summary>The datatype of the input element.</summary>
 prec: "", /// <summary>Precision for numeric types.</summary>
 
 eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
-helptext: "", /// <summary>the helptext is displayed when the field is empty and has no focus.</summary>
 
 init: function () {
 /// <summary>Initialze the JavaScript control.</summary>
@@ -106,7 +154,6 @@ jcl.DataPresetBehavior = {
 nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
 
 eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
-helptext: "", /// <summary>the helptext is displayed when the field is empty and has no focus.</summary>
 
 presetvalue: "", ///
 
@@ -134,6 +181,27 @@ jcl.removeClassName(this, "activ");
 } // handleEvent
 
 } // jcl.DataPresetBehavior
+
+
+// Command.js
+jcl.CommandBehavior = {
+
+// --- Attributes
+nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+
+eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+
+init: function () {
+/// <summary>Initialze the JavaScript control.</summary>
+}, // init
+
+onclick: function (evt) {
+/// <summary>Handle the event when the mouse button is pressed.</summary>
+if ((this.eventname != null) && (this.eventname != "")) {
+OpenAjax.hub.publish(jcl.BuildFullEventname(this), 1);
+} // if
+} // onclick
+} // jcl.CommandBehavior
 
 
 // DataToggleBehavior.js
@@ -474,10 +542,10 @@ try {
 var data = getData('/$radio');
 data = JSON.parse(data);
 for (var n in data) {
-  if (radioValues[n] != data[n]) {
-    radioValues[n] = data[n];
-    OpenAjax.hub.publish('radio.' + n, data[n]);
-  }
+if (radioValues[n] != data[n]) {
+radioValues[n] = data[n];
+OpenAjax.hub.publish('radio.' + n, data[n]);
+}
 } // for
 } catch (e) { }
 timer = window.setTimeout(upd, 1200);
@@ -487,7 +555,7 @@ timer = window.setTimeout(upd, 1200);
 </head>
 
 <body style="background-color:#F0F0F0">
-<table style="background-color:transparent;border-collapse:separate;border-spacing:0.2em;empty-cells:show;float:left">
+<table style="background-color:transparent;border-collapse:separate;border-spacing:0.2em;empty-cells:show;xfloat:left">
 <colgroup style="background-color:silver">
 <col style="width: 100px">
 <col style="width: 100px">
@@ -498,7 +566,7 @@ timer = window.setTimeout(upd, 1200);
 <tr>
 <td><span id="mode">Radio</span></td>
 <td style="text-align:right"><span id="freq" class="PropOutput" style="text-align: right" eventname="radio.freq">9840</span></td>
-<td><span id="band">MHz</span></td>
+<td style="text-align:left"><span id="band">MHz</span></td>
 </tr>
 
 <tr><td colspan="3" style="text-align:center;height:30px;"><span id="servicename" eventname="radio.servicename">#RDS</span></td></tr>
@@ -516,35 +584,36 @@ timer = window.setTimeout(upd, 1200);
 <tr>
 <td style="text-align:right"><span id="label">Freq:</span></td>
 <td colspan="2" style="text-align:center;padding:2px">
-<div class="HSlider" id="ctlF" style="font-size:12px;display:inline-block" eventname="radio.freq" minvalue="8750" maxvalue="10800" unit="10">
-<div class="minus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-right:0.2em">
-<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&lt;</div>
+<div id="ctlSD" eventname="radio.seekdown" style="height:1em;width:1.6em;border:0.2em solid gray;border-radius: 0.4em;position:relative;display:inline-block">
+<span style="font-weight:bold;width:1.6em;top:-0.08em;position:absolute">&lt;&lt;</span>
 </div>
-<div style="height:2.2em;width:16.4em;position:relative;display:inline-block">
-<div style="width:16em;height:0.6em;top:0.6em;border:0.2em solid gray;border-radius: 0.5em;position:absolute;background-color:silver"></div>
-<div class="knob" style="width:0.6em;height:1.8em;border:0.2em solid black;border-radius: 0.5em;position:absolute;background-color:silver"></div>
+
+<div class="HSlider" id="ctlF" eventname="radio.freq" minvalue="8750" maxvalue="10800" unit="10">
+<div class="minus"><span>&lt;</span></div>
+<div class="slider">
+<div class="ruler" style="width:16em;"></div>
+<div class="knob"></div>
 </div>
-<div class="plus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-left:0.2em">
-<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&gt;</div>
+<div class="plus"><span>&gt;</span></div>
 </div>
+<div id="ctlSU" eventname="radio.seekup"
+style="height:1em;width:1.6em;border:0.2em solid gray;border-radius: 0.4em;position:relative;display:inline-block">
+<span style="font-weight:bold;width:1.6em;top:-0.08em;position:absolute">&gt;&gt;</span>
 </div>
+
 </td>
 </tr>
 
 <tr>
 <td style="text-align:right"><span id="label">Vol:</span></td>
 <td colspan="2" style="text-align:center;padding:2px">
-<div class="HSlider" id="ctlV" style="font-size:12px;display:inline-block" eventname="radio.vol" minvalue="0" maxvalue="15" unit="1">
-<div class="minus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-right:0.2em">
-<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&lt;</div>
+<div class="HSlider" id="ctlV" eventname="radio.vol" minvalue="0" maxvalue="15" unit="1">
+<div class="minus"><span>&lt;</span></div>
+<div class="slider">
+<div class="ruler" style="width:16em;"></div>
+<div class="knob"></div>
 </div>
-<div style="height:2.2em;width:16.4em;position:relative;display:inline-block">
-<div style="width:16em;height:0.6em;top:0.6em;border:0.2em solid gray;border-radius: 0.5em;position:absolute;background-color:silver"></div>
-<div class="knob" style="width:0.6em;height:1.8em;border:0.2em solid black;border-radius: 0.5em;position:absolute;background-color:silver"></div>
-</div>
-<div class="plus" style="height:1.8em;width:1.8em;border:0.2em solid gray;border-radius: 0.5em;position:relative;display:inline-block;margin-left:0.2em">
-<div style="font-size:1.8em;font-weight:bold;width:1em;height:1em;top:-0.05em;position:absolute">&gt;</div>
-</div>
+<div class="plus"><span>&gt;</span></div>
 </div>
 </td>
 </tr>
@@ -590,12 +659,17 @@ jcl.LoadBehaviour("station1", jcl.DataPresetBehavior);
 jcl.LoadBehaviour("station2", jcl.DataPresetBehavior);
 jcl.LoadBehaviour("station3", jcl.DataPresetBehavior);
 jcl.LoadBehaviour("station4", jcl.DataPresetBehavior);
+jcl.LoadBehaviour("station5", jcl.DataPresetBehavior);
+
+jcl.LoadBehaviour("ctlSD", jcl.CommandBehavior);
+jcl.LoadBehaviour("ctlSU", jcl.CommandBehavior);
+
 
 // register for events that change the radio parameters
 function changeRadio(eventName, eventData) {
 var evn = jcl.LocalEventName(eventName);
-if (radioValues[evn] != eventData)
-  postData('/$radio', '{"' + evn + '":' + eventData + '}')
+if ((evn.substr(0, 4) == "seek") || (radioValues[evn] != eventData))
+postData('/$radio', '{"' + evn + '":' + eventData + '}')
 radioValues[evn] = eventData;
 } // dumpevent
 OpenAjax.hub.subscribe("radio.*", changeRadio);
@@ -604,7 +678,7 @@ timer = window.setTimeout(upd, 1200);
 </script>
 
 
-<div id="oa_log" style="display:block;border: solid 1px blue; font-size:11px; height: 14em; width:360px; padding:1px;overflow: hidden">
+<div id="oa_log" style="display:block;border: solid 1px blue; font-size:11px; height: 14em; width:400px; padding:1px;overflow: hidden">
 <h3 style="margin: 0px">OpenAjax hub event log:</h3>
 </div>
 

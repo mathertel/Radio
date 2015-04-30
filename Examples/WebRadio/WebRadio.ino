@@ -1027,6 +1027,10 @@ void runRadioCommand(char *cmd, int16_t value) {
     radio.setSoftMute(value > 0);
   } else if (strcmp(cmd, "bassboost") == 0) {
     radio.setBassBoost(value > 0);
+
+  } else if (strcmp(cmd, "seekup") == 0) {
+    radio.seekUp(true);
+
   } // if
 } // runRadioCommand()
 
