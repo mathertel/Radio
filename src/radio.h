@@ -87,7 +87,7 @@
 
 /// callback function for passing RDS data.
 extern "C" {
-  typedef void (*receiveRDSFunction)(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4);
+  typedef void(*receiveRDSFunction)(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4);
 }
 
 
@@ -96,14 +96,14 @@ extern "C" {
 /// Band datatype.
 /// The BANDs a receiver probably can implement.
 enum RADIO_BAND {
-  RADIO_BAND_NONE    = 0, ///< No band selected.
+  RADIO_BAND_NONE = 0, ///< No band selected.
 
-  RADIO_BAND_FM      = 1, ///< FM band 87.5 – 108 MHz (USA, Europe) selected.
+  RADIO_BAND_FM = 1, ///< FM band 87.5 – 108 MHz (USA, Europe) selected.
   RADIO_BAND_FMWORLD = 2, ///< FM band 76 – 108 MHz (Japan, Worldwide) selected.
-  RADIO_BAND_AM      = 3, ///< AM band selected.
-  RADIO_BAND_KW      = 4, ///< KW band selected.
+  RADIO_BAND_AM = 3, ///< AM band selected.
+  RADIO_BAND_KW = 4, ///< KW band selected.
 
-  RADIO_BAND_MAX     = 4  ///< Maximal band enumeration value.
+  RADIO_BAND_MAX = 4  ///< Maximal band enumeration value.
 };
 
 
@@ -135,8 +135,9 @@ typedef struct AUDIO_INFO {
 
 /// Library to control radio chips in general. This library acts as a base library for the chip specific implementations.
 class RADIO {
-  public:
-    uint8_t MAXVOLUME; ///< max volume level for the radio implementations
+
+public:
+  const uint8_t MAXVOLUME = 15; ///< max volume level for all radio implementations.
 
   RADIO(); ///< create a new object from this class.
 
@@ -148,34 +149,34 @@ class RADIO {
   virtual void    setVolume(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..15.
   virtual uint8_t getVolume();                  ///< Retrieve the current output volume.
 
-  virtual void   setBassBoost(bool switchOn);   ///< Control the bass boost mode of the radio chip.
-  virtual bool   getBassBoost();                ///< Retrieve the current bass boost mode setting.
+  virtual void    setMute(bool switchOn);       ///< Control the mute mode of the radio chip.
+  virtual bool    getMute();                    ///< Retrieve the current mute mode setting.
 
-  virtual void   setMono(bool switchOn);        ///< Control the mono mode of the radio chip.
-  virtual bool   getMono();                     ///< Retrieve the current mono mode setting.
+  virtual void    setSoftMute(bool switchOn);   ///< Control the softmute mode (mute on low signals) of the radio chip.
+  virtual bool    getSoftMute();                ///< Retrieve the current soft mute mode setting.
 
-  virtual void   setMute(bool switchOn);        ///< Control the mute mode of the radio chip.
-  virtual bool   getMute();                     ///< Retrieve the current mute mode setting.
-
-  virtual void   setSoftMute(bool switchOn);    ///< Control the softmute mode (mute on low signals) of the radio chip.
-  virtual bool   getSoftMute();                 ///< Retrieve the current soft mute mode setting.
+  virtual void    setBassBoost(bool switchOn);  ///< Control the bass boost mode of the radio chip.
+  virtual bool    getBassBoost();               ///< Retrieve the current bass boost mode setting.
 
   // ----- Receiver features -----
 
-  virtual void setBand(RADIO_BAND newBand);     ///< Set the current band.
-  virtual RADIO_BAND getBand();                 ///< Retrieve the current band setting.
+  virtual RADIO_FREQ getMinFrequency();     ///< Get the minimum frequency of the current selected band.
+  virtual RADIO_FREQ getMaxFrequency();     ///< Get the maximum frequency of the current selected band.
+  virtual RADIO_FREQ getFrequencyStep();    ///< Get resolution of the current selected band.
 
-  virtual void       setFrequency(RADIO_FREQ newF);  ///< Start using the new frequency for receiving.
-  virtual RADIO_FREQ getFrequency(void);          ///< Retrieve the current tuned frequency.
+  virtual void       setBand(RADIO_BAND newBand);   ///< Set the current band.
+  virtual RADIO_BAND getBand();                     ///< Retrieve the current band setting.
+
+  virtual void       setFrequency(RADIO_FREQ newF); ///< Start using the new frequency for receiving.
+  virtual RADIO_FREQ getFrequency(void);            ///< Retrieve the current tuned frequency.
 
   virtual void       setBandFrequency(RADIO_BAND newBand, RADIO_FREQ newFreq); ///< Set Band and Frequency in one call.
 
   virtual void       seekUp(bool toNextSender = true);   ///< Start a seek upwards from the current frequency.
   virtual void       seekDown(bool toNextSender = true); ///< Start a seek downwards from the current frequency.
 
-  virtual RADIO_FREQ getMinFrequency();   ///< Get the minimum frequency of the current selected band.
-  virtual RADIO_FREQ getMaxFrequency();   ///< Get the maximum frequency of the current selected band.
-  virtual RADIO_FREQ getFrequencyStep();  ///< Get resolution of the current selected band.
+  virtual void       setMono(bool switchOn);   ///< Control the mono mode of the radio chip.
+  virtual bool       getMono();                ///< Retrieve the current mono mode setting.
 
   // ----- combined status functions -----
 
@@ -201,7 +202,7 @@ class RADIO {
   virtual void debugAudioInfo(); ///< Print out all audio information.
   virtual void debugStatus();    ///< Send debug information about actual available chip functionality and other internal things.
 
-  protected:
+protected:
   bool _debugEnabled; ///< Set by debugEnable() and controls debugging functionality.
 
   uint8_t _volume;    ///< Last set volume level.
@@ -221,7 +222,7 @@ class RADIO {
 
   void _printHex4(uint16_t val); ///> Prints a register as 4 character hexadecimal code with leading zeros.
 
-  private:
+private:
   void int16_to_s(char *s, uint16_t val); ///< Converts a int16 number to a string, similar to itoa, but using the format "00000".
 
 }; // class RADIO

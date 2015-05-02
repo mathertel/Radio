@@ -24,12 +24,14 @@
 #define SI4705_h
 
 #include <arduino.h>
+
+// The wire library is used for the communication with the radio chip.
 #include <Wire.h>
 
+// Include the radio library that is extended by the SI4705 library.
 #include <radio.h>
 
 // ----- library definition -----
-
 
 /// Library to control the SI4705 radio chip.
 class SI4705 : public RADIO {
@@ -39,20 +41,21 @@ public:
   bool   init();  ///< Initialize the library and the chip.
   void   term();  ///< Terminate all radio functions in the chip.
 
-  // Control of the audio features
+  // ----- Audion functions -----
 
-  /// Control the volume output of the radio chip in the range 0..15.
-  void   setVolume(uint8_t newVolume);
+  void    setVolume(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..15.
+  void    setMute(bool switchOn);       ///< Control the mute mode of the radio chip.
+  void    setSoftMute(bool switchOn);   ///< Control the softmute mode (mute on low signals) of the radio chip.
 
-  /// Control the bass boost mode of the radio chip.
-  void   setBassBoost(bool switchOn);
+  // Overwrite audio functions that are not supported.
+  void    setBassBoost(bool switchOn);  ///< regardless of the given parameter, the Bass Boost will never switch on.
+
+  // ----- Radio receiver functions -----
 
   /// Control mono/stereo mode of the radio chip
   void   setMono(bool switchOn); // Switch to mono mode.
 
   /// Control the mute mode of the radio chip
-  void   setMute(bool switchOn);
-
   // Control of the core receiver
 
   // Control the frequency
@@ -80,8 +83,9 @@ private:
   // store the current status values
   uint8_t _status;        ///< the status after sending a command
   uint8_t tuneStatus[8];
-  uint8_t rsqStatus[8];
+  uint8_t rsqStatus[1+7];
   uint8_t rdsStatusx[1+12];
+  uint8_t agcStatus[1+2];
 
   /// structure used to read RDS information from the SI4705 radio chip.
   union {

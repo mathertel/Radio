@@ -34,13 +34,11 @@
 /// Don't change the radio chip (yet).
 RADIO::RADIO() {
   memset(this, 0, sizeof(RADIO));
-  MAXVOLUME = 15; 
 } // RADIO()
 
 
 /// The RADIO class doesn't implement a concrete chip so nothing has to be initialized.
 bool RADIO::init() {
-  DEBUG_FUNC0("init");
   return(false);
 } // init()
 
@@ -48,7 +46,6 @@ bool RADIO::init() {
 /// switch the power off
 /// The RADIO class doesn't implement a concrete chip so nothing has to be terminated.
 void RADIO::term() {
-  DEBUG_FUNC0("term");
 } // term()
 
 
@@ -129,24 +126,18 @@ bool RADIO::getSoftMute() {
 
 /// Start using the new band for receiving.
 void RADIO::setBand(RADIO_BAND newBand) {
-  RADIO_FREQ l, h, s;
-
   _band = newBand;
   if (newBand == RADIO_BAND_FM) {
-    l = 8700;
-    h = 10800;
-    s = 10;
+    _freqLow = 8700;
+    _freqHigh = 10800;
+    _freqSteps = 10;
 
   }
   else if (newBand == RADIO_BAND_FMWORLD) {
-    l = 7600;
-    h = 10800;
-    s = 10;
+    _freqLow = 7600;
+    _freqHigh = 10800;
+    _freqSteps = 10;
   } // if
-
-  _freqHigh = h;
-  _freqLow = l;
-  _freqSteps = s;
 } // setBand()
 
 
@@ -283,7 +274,7 @@ void RADIO::debugAudioInfo() {
 
 /// The RADIO class doesn't have interesting status information so nothing is sent.
 void RADIO::debugStatus() {
-  DEBUG_FUNC0("debugStatus");
+  // no output.
 } // debugStatus
 
 

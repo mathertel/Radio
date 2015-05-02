@@ -32,12 +32,14 @@
 
 // ----- Radio chip specific definitions including the registers
 
-// Commands & parameter Constants
+// Commands and Parameter definitions
 
-#define	CMD_POWER_UP	    0x01	//	Power up device and mode selection.
-#define	CMD_POWER_UP_1_FUNC_FM 0x00
-#define	CMD_POWER_UP_1_XOSCEN  0x10
-#define	CMD_POWER_UP_2_GPO2OEN 0x40
+#define	CMD_POWER_UP	         0x01  // Power up device and mode selection.
+#define	CMD_POWER_UP_1_FUNC_FM   0x00
+#define	CMD_POWER_UP_1_XOSCEN    0x10
+#define	CMD_POWER_UP_1_PATCH     0x20
+#define	CMD_POWER_UP_1_GPO2OEN   0x40
+#define	CMD_POWER_UP_1_CTSIEN    0x80
 #define	CMD_POWER_UP_2_ANALOGOUT 0x05
 
 #define	CMD_GET_REV	        0x10	//	Returns revision information on the device.
@@ -56,63 +58,52 @@
 #define	CMD_FM_AGC_STATUS	0x27	//	Queries the current AGC settings All
 #define	CMD_FM_AGC_OVERRIDE	0x28	//	Override AGC setting by disabling and forcing it to a fixed value
 
-#define	CMD_GPIO_CTL	    0x80	//	Configures GPO1, 2, and 3 as output or Hi-Z.
-#define	CMD_GPIO_SET	    0x81	//	Sets GPO1, 2, and 3 output level (low or high).
+#define	CMD_GPIO_CTL	     0x80	//	Configures GPO1, 2, and 3 as output or Hi-Z.
+#define	CMD_GPIO_CTL_GPO1OEN 0x02
+#define	CMD_GPIO_CTL_GPO2OEN 0x04
+#define	CMD_GPIO_CTL_GPO3OEN 0x08
 
-#define PROP_GPO_IEN        0x0001
+#define	CMD_GPIO_SET           0x81   //  Sets GPO1, 2, and 3 output level (low or high).
+#define	CMD_GPIO_SET_GPO1LEVEL 0x02
+#define	CMD_GPIO_SET_GPO2LEVEL 0x04
+#define	CMD_GPIO_SET_GPO3LEVEL 0x08
+
+// Property and Parameter definitions
+
+#define PROP_GPO_IEN          0x0001
 #define PROP_GPO_IEN_STCIEN   0x01
 #define PROP_GPO_IEN_RDSIEN   0x04
 
-#define PROP_FM_DEEMPHASIS   0x1100
+// Deemphasis time constant.
+#define PROP_FM_DEEMPHASIS     0x1100
 #define PROP_FM_DEEMPHASIS_50  0x01
 
 // setup the antenna input pin
-#define PROP_FM_ANTENNA_INPUT 0x1107
+#define PROP_FM_ANTENNA_INPUT       0x1107
 #define PROP_FM_ANTENNA_INPUT_FMI   0x00
 #define PROP_FM_ANTENNA_INPUT_SHORT 0x01
 
+// FM_MAX_TUNE_ERROR
+// #define FM_MAX_TUNE_ERROR      0x1108
+
 #define PROP_FM_SEEK_FREQ_SPACING 0x1402
 
-// rds properties
-#define PROP_RDS_INTERRUPT_SOURCE 0x1500
+#define PROP_RDS_INTERRUPT_SOURCE         0x1500
 #define PROP_RDS_INTERRUPT_SOURCE_RDSRECV 0x01
 
 #define PROP_RDS_INT_FIFO_COUNT 0x1501
 
 #define PROP_RDS_CONFIG 0x1502
 
-
 #define PROP_RX_VOLUME 0x4000
 
-#define PROP_X0 0x1500
-#define PROP_X1 0x1501
-#define PROP_X2 0x1502
-
-// #define PROP_FM_BLEND_STEREO_THRESHOLD      0x1105
-// #define PROP_FM_BLEND_MONO_THRESHOLD      0x1106
-
-
 #define PROP_FM_BLEND_RSSI_STEREO_THRESHOLD 0x1800 
-#define PROP_FM_BLEND_RSSI_MONO_THRESHOLD 0x1801
+#define PROP_FM_BLEND_RSSI_MONO_THRESHOLD   0x1801
 
-// FM_MAX_TUNE_ERROR
-// #define FM_MAX_TUNE_ERROR      0x1108
-
-#define PROP_RX_HARD_MUTE 0x4001 
-
-//Write : 20 0 22 2E 0
-//Write : 22 3
-
-//Write : 12 0 0 1 0 5  xx
-//Write : 12 0 0 1 0 1  Property 0x0001. GPO_IEN: STCIEN
-
-//Write : 12 0 15 0 0 1
-//Write : 12 0 15 1 0 4
-//Write : 12 0 15 2 EF 1
-//Write : 20 0 22 E2 0
-//Write : 12 0 40 0 0 20
-//Write : 81 0
-//Write : 80 2
+#define PROP_RX_HARD_MUTE       0x4001 
+#define PROP_RX_HARD_MUTE_RIGHT 0x01 
+#define PROP_RX_HARD_MUTE_LEFT  0x02 
+#define PROP_RX_HARD_MUTE_BOTH  0x03 
 
 // ----- implement
 
@@ -130,37 +121,26 @@ bool SI4705::init() {
   // Now that the unit is reset and I2C inteface mode, we need to begin I2C
   Wire.begin();
 
-  // power up in FM mode and analog outputs.
-  _sendCommand(3, CMD_POWER_UP, CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_2_GPO2OEN | CMD_POWER_UP_1_FUNC_FM, CMD_POWER_UP_2_ANALOGOUT); // 
-  // delay(200);
+  // powering up is done by specifying the band etc. so it's implemented in setBand
+  setBand(RADIO_BAND_FM);
 
   // set some common properties
   _setProperty(PROP_FM_ANTENNA_INPUT, PROP_FM_ANTENNA_INPUT_SHORT);
-  _setProperty(PROP_FM_DEEMPHASIS, PROP_FM_DEEMPHASIS_50); // for Europe 50 deemphasis
-  _setProperty(PROP_FM_SEEK_FREQ_SPACING, 10); // in 100kHz spacing
+
+#if defined(ELVRADIO)
+  // enable GPO1 output for mute function
+  _sendCommand(2, CMD_GPIO_CTL, CMD_GPIO_CTL_GPO1OEN);
+#endif
 
   // set volume to 0 and mute so no noise gets out here.
   _setProperty(PROP_RX_VOLUME, 0);
 
   // Set mute bits in the fm receiver
-  _setProperty(PROP_RX_HARD_MUTE, 0x03);
-
-#if defined(ELVRADIO)
-  // mute the ELV board by using GPO1
-  _sendCommand(2, CMD_GPIO_CTL, 0x02);
-  _sendCommand(2, CMD_GPIO_SET, 0x02);
-#endif
+  setMute(true);
 
   _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN); //  | PROP_GPO_IEN_RDSIEN ????
 
-
-  // _sendCommand(2, 0x22, 0x03);
-
   // RDS
-  //_setProperty(0x1500, 0x0001);
-  //_setProperty(0x1501, 0x0004);
-  //_setProperty(0x1502, 0xEF01);
-
   _setProperty(PROP_RDS_INTERRUPT_SOURCE, PROP_RDS_INTERRUPT_SOURCE_RDSRECV); // Set the CTS status bit after receiving RDS data.
   _setProperty(PROP_RDS_INT_FIFO_COUNT, 4);
   _setProperty(PROP_RDS_CONFIG, 0xFF01); // accept all correctable data and enable rds
@@ -173,7 +153,6 @@ bool SI4705::init() {
 /// @return void
 void SI4705::term()
 {
-  DEBUG_FUNC0("term");
   _sendCommand(1, CMD_POWER_DOWN);
 } // term
 
@@ -185,7 +164,6 @@ void SI4705::term()
 /// @return void
 void SI4705::setVolume(uint8_t newVolume)
 {
-  DEBUG_FUNC1("setVolume", newVolume);
   if (newVolume > 15) newVolume = 15;
 
   RADIO::setVolume(newVolume);
@@ -193,12 +171,49 @@ void SI4705::setVolume(uint8_t newVolume)
 } // setVolume()
 
 
+/// Control the mute mode of the radio chip
+/// In mute mode no output will be produced by the radio chip.
+/// @param switchOn The new state of the mute mode. True to switch on, false to switch off.
+/// @return void
+void SI4705::setMute(bool switchOn) {
+  RADIO::setMute(switchOn);
+
+  if (switchOn) {
+    // Set mute bits in the fm receiver
+    _setProperty(PROP_RX_HARD_MUTE, PROP_RX_HARD_MUTE_BOTH);
+
+#if defined(ELVRADIO)
+    // mute the ELV board by using GPO1
+    _sendCommand(2, CMD_GPIO_SET, CMD_GPIO_SET_GPO1LEVEL);
+#endif
+
+  } else {
+    // clear mute bits in the fm receiver
+    _setProperty(PROP_RX_HARD_MUTE, 0x00);
+
+#if defined(ELVRADIO)
+    // unmute the ELV board by using GPO1
+    _sendCommand(2, CMD_GPIO_SET, 0);
+#endif
+  } // if
+} // setMute()
+
+
+/// Control the softmute mode of the radio chip
+/// If switched on the radio output is muted when no sender was found.
+/// @param switchOn The new state of the softmute mode. True to switch on, false to switch off.
+/// @return void
+void SI4705::setSoftMute(bool switchOn) {
+  RADIO::setSoftMute(switchOn);
+
+} // setSoftMute()
+
+
 /// BassBoost is not supported by the SI4705 chip.
 /// @param switchOn this functions ignores the switchOn parameter and always sets bassBoost to false.
 /// @return void
 void SI4705::setBassBoost(bool switchOn)
 {
-  DEBUG_FUNC1("setBassBoost", switchOn);
   RADIO::setBassBoost(false);
 } // setBassBoost()
 
@@ -209,50 +224,18 @@ void SI4705::setBassBoost(bool switchOn)
 /// @return void
 void SI4705::setMono(bool switchOn)
 {
-  DEBUG_FUNC1("setMono", switchOn);
   RADIO::setMono(switchOn);
   if (switchOn) {
     // disable automatic stereo feature
     _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 127);
-    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 127);
+    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD,   127);
 
   } else {
     // Automatic stereo feature on.
     _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 0x0031); // default = 49
-    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 0x001E); // default = 30
+    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD,   0x001E); // default = 30
   } // if
 } // setMono
-
-
-/// Control the mute mode of the radio chip
-/// In mute mode no output will be produced by the radio chip.
-/// @param switchOn The new state of the mute mode. True to switch on, false to switch off.
-/// @return void
-void SI4705::setMute(bool switchOn) {
-  DEBUG_FUNC1("setMute", switchOn);
-  RADIO::setMute(switchOn);
-
-  if (switchOn) {
-    // Set mute bits in the fm receiver
-    _setProperty(PROP_RX_HARD_MUTE, 0x03);
-
-#if defined(ELVRADIO)
-    // mute the ELV board by using GPO1
-    _sendCommand(2, CMD_GPIO_CTL, 0x02);
-    _sendCommand(2, CMD_GPIO_SET, 0x02);
-#endif
-
-  } else {
-    // clear mute bits in the fm receiver
-    _setProperty(PROP_RX_HARD_MUTE, 0x00);
-
-#if defined(ELVRADIO)
-    // unmute the ELV board by using GPO1
-    _sendCommand(2, CMD_GPIO_CTL, 0x02);
-    _sendCommand(2, CMD_GPIO_SET, 0x00);
-#endif
-  } // if
-} // setMute()
 
 
 // ----- Band and frequency control methods -----
@@ -261,14 +244,15 @@ void SI4705::setMute(bool switchOn) {
 /// @param newBand The new band to be received.
 /// @return void
 void SI4705::setBand(RADIO_BAND newBand) {
-  DEBUG_FUNC1("setBand", newBand);
   if (newBand == RADIO_BAND_FM) {
+    // set band boundaries and steps 
     RADIO::setBand(newBand);
-    _sendCommand(3, CMD_POWER_UP, CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_2_GPO2OEN | CMD_POWER_UP_1_FUNC_FM, CMD_POWER_UP_2_ANALOGOUT);
-    delay(200);
-    _setProperty(PROP_FM_DEEMPHASIS, PROP_FM_DEEMPHASIS_50); // for Europe 50 deemphasis
 
-    _freqSteps = 10;
+    // powering up in FM mode, analog outputs, crystal oscillator, GPO2 enabled for interrupts.
+    _sendCommand(3, CMD_POWER_UP, (CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_1_GPO2OEN | CMD_POWER_UP_1_FUNC_FM), CMD_POWER_UP_2_ANALOGOUT);
+    // delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
+    delay(500);
+    _setProperty(PROP_FM_DEEMPHASIS, PROP_FM_DEEMPHASIS_50); // for Europe 50 deemphasis
     _setProperty(PROP_FM_SEEK_FREQ_SPACING, _freqSteps); // in 100kHz spacing
 
   } else {
@@ -282,10 +266,8 @@ void SI4705::setBand(RADIO_BAND newBand) {
 /// Retrieve the real frequency from the chip after manual or automatic tuning.
 /// @return RADIO_FREQ the current frequency.
 RADIO_FREQ SI4705::getFrequency() {
-  // DEBUG_FUNC0("getFrequency");
   _readStatusData(CMD_FM_TUNE_STATUS, 0x03, tuneStatus, sizeof(tuneStatus));
   _freq = (tuneStatus[2] << 8) + tuneStatus[3];
-
   return (_freq);
 }  // getFrequency
 
@@ -297,7 +279,6 @@ RADIO_FREQ SI4705::getFrequency() {
 /// @param newF The new frequency to be received.
 /// @return void
 void SI4705::setFrequency(RADIO_FREQ newF) {
-  DEBUG_FUNC1("setFrequency", newF);
   RADIO::setFrequency(newF);
   _sendCommand(5, CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)& 0xff, 0);
 
@@ -412,8 +393,6 @@ uint16_t SI4705::_read16(void)
 
 
 void SI4705::getRadioInfo(RADIO_INFO *info) {
-  // DEBUG_FUNC0("getRadioInfo");
-
   RADIO::getRadioInfo(info);
 
   _readStatusData(CMD_FM_TUNE_STATUS, 0x01, tuneStatus, sizeof(tuneStatus));
@@ -435,7 +414,6 @@ void SI4705::getAudioInfo(AUDIO_INFO *info) {
 
 void SI4705::checkRDS()
 {
-  // DEBUG_FUNC0("checkRDS");
   if (_sendRDS) {
     // fetch the interrupt status first
     uint8_t status = _readStatus();
@@ -477,23 +455,29 @@ void SI4705::debugStatus()
   Serial.print(tuneStatus[7]); Serial.print(' ');
   Serial.println();
 
-  _readStatusData(CMD_FM_RSQ_STATUS, 0x01, rsqStatus, sizeof(rsqStatus));
   Serial.print("RSQ-Status: ");
+  _readStatusData(CMD_FM_RSQ_STATUS, 0x01, rsqStatus, sizeof(rsqStatus));
   Serial.print(rsqStatus[0], HEX); Serial.print(' ');
   Serial.print(rsqStatus[1], HEX); Serial.print(' ');
   Serial.print(rsqStatus[2], HEX); Serial.print(' ');
   Serial.print(rsqStatus[3], HEX); Serial.print(' ');
-  Serial.print("RSSI:"); Serial.print(tuneStatus[4]); Serial.print(' ');
-  Serial.print("SNR:");  Serial.print(tuneStatus[5]); Serial.print(' ');
-  Serial.print("MULT:"); Serial.print(tuneStatus[6]); Serial.print(' ');
   Serial.print(rsqStatus[7], HEX); Serial.print(' ');
+  Serial.println();
 
-  _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
   Serial.print("RDS-Status: ");
+  _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
   for (uint8_t n = 0; n < 12; n++) {
     Serial.print(rsqStatus[n], HEX); Serial.print(' ');
   } // for
+  Serial.println();
 
+  // AGC settings and status
+  Serial.print("AGC-Status: ");
+  _readStatusData(CMD_FM_AGC_STATUS, 0x01, agcStatus, sizeof(agcStatus));
+  Serial.print(agcStatus[0], HEX); Serial.print(' ');
+  Serial.print(agcStatus[1], HEX); Serial.print(' ');
+  Serial.print(agcStatus[2], HEX); Serial.print(' ');
+  Serial.println();
 
 } // debugStatus
 
