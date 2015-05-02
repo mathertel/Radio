@@ -27,13 +27,14 @@
 /// * 07.02.2015 more complete implementation
 /// * 14.02.2015 works with no ethernet available (start radio first then Internet but slow).
 /// * 17.04.2015 Return JSON format.
+/// * 01.05.2015 faster WebServer responses by using a buffer.
 
 // There are several tasks that have to be done when the radio is running.
 // Therefore all these tasks are handled this way:
 // * The setupNNN function has to initialize all the IO and variables to work.
 // * The loopNNN function will be called as often as possible by passing the current (relative) time.
 
- 
+
 #include <SPI.h>
 #include <Wire.h>
 
@@ -115,22 +116,18 @@ char rdsText[64 + 2];
 SI4705  radio;    // Create an instance of a SI4705 chip radio.
 // TEA5767  radio;    // Create an instance of a TEA5767 chip radio.
 
+
 /// The lcd object has to be defined by using a LCD library that supports the standard functions
 /// When using a I2C->LCD library ??? the I2C bus can be used to control then radio chip and the lcd.
 
 /// get a LCD instance
 LiquidCrystal_PCF8574 lcd(0x27);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
-/// next time for lcd update the frequency
-unsigned long nextFreqTime = 0;
-
-/// next time for lcd update the radio information
-unsigned long nextRadioInfoTime = 0;
-
+unsigned long nextFreqTime = 0;      ///< next time for lcd update the frequency.
+unsigned long nextRadioInfoTime = 0; ///< next time for lcd update the radio information
 
 /// get a RDS parser
 RDSParser rds;
-
 
 /// State definition for this radio implementation.
 enum RADIO_STATE {
@@ -148,8 +145,6 @@ enum RADIO_STATE {
 
 RADIO_STATE state; ///< The state variable is used for parsing input characters.
 RADIO_STATE rot_state;
-
-void respondRadioData();
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -190,8 +185,10 @@ http://WIZnetEFFEED/$list
 #define LF '\n'
 #define SPACE ' '
 
+#define REDIRECT_FNAME "/redirect.htm" ///< The filename on the disk that is used when requesting the root of the web.
+
 // How big our line buffer should be. 80 is plenty!
-#define BUFSIZ 80
+#define BUFSIZ 128
 
 enum WebServerState {
   WEBSERVER_OFF,    // not running
@@ -233,98 +230,85 @@ EthernetClient _client;
 
 WebServerState webstate;
 
-char _readBuffer[BUFSIZ]; ///< a buffer that is used to read a line from the request header.
+char _readBuffer[BUFSIZ]; ///< a buffer that is used to read a line from the request header and for reading file content.
 char _writeBuffer[BUFSIZ]; ///< a buffer that is used to compose a line for the reponse.
 
 char _httpVerb[6]; // HTTP verb from the first line of the request
 char _httpURI[40]; // HTTP URI from the first line of the request
 
-char *_fileType;
-
 int _httpContentLen;
-
-
-/************ SDCARD STUFF ************/
-SdFile   root;
-
-// error nmumbers and texts
-#define ERR_CARDINIT 101 // card.init failed!
-#define ERR_VOLINIT  102 // vol.init failed!
-#define ERR_OPENROOT 103 // openRoot failed!
 
 // ----- http response texts -----
 
 #define CRLF F("\r\n")
 
 #define HTTP_200_CT   F("HTTP/1.1 200 OK\r\nContent-Type: ")
-#define HTTPERR_404   F("HTTP/1.1 404 Not Found\nContent-Type: text/html\r\n")
+#define HTTPERR_404   F("HTTP/1.1 404 Not Found\r\n")
 #define HTTP_GENERAL  F("Server: Arduino\r\nConnection: close\r\n")
 #define HTTP_NOCACHE  F("Cache-Control: no-cache\r\n")
 #define HTTP_ENDHEAD  CRLF
 
 // ----- html frame for generated response -----
 
-#define HTML_OPEN  F("<html><head></head><body>")
+#define HTML_OPEN  "<html><head></head><body>"
 // <h2>File Not Found!</h2>
 #define HTML_CLOSE F("</body></html>")
 
+/// ----- forwards -----
 
-/// ----- Main functions setup() and loop() -----
+void runRadioJSONCommand(char *cmd, int16_t value);
+void runRadioSerialCommand(char cmd, int16_t value);
 
-void setup() {
-  Serial.begin(57600);
-  // DEBUGTEXT(F("Initializing LCD..."));
-  setupLCD();
+void setupRadio();
+void loopRadio(unsigned long now);
+void respondRadioData();
 
-  // DEBUGTEXT(F("Initializing Radio..."));
-  lcd.print("Radio...");
-  setupRadio();
+void loopSerial(unsigned long now);
+void loopWebServer(unsigned long now);
+void loopButtons(unsigned long now);
 
-  // Initialize the SD card.
-  // see if the card is present and can be initialized:
-  // DEBUGTEXT(F("Initializing SD card..."));
-  SD.begin(4);
 
-  delay(2500);
+// ----- LCD output functions -----
 
-  webstate = WEBSERVER_OFF;
-
-  // Let's start the network
-  lcd.print("Net...");
-  // DEBUGTEXT(F("Starting network..."));
-
-  int result = Ethernet.begin(mac);  // Ethernet.begin(mac, ip); if there is no DHCP
-  
-  DEBUGVAR(F("Ethernet Result"), result);
-  DEBUGTEXT(F("Configuration:"));
-  DEBUGIP(F(" localIP: "), localIP);
-  DEBUGIP(F(" subnetMask: "), subnetMask);
-  DEBUGIP(F(" dnsServerIP: "), dnsServerIP);
-  DEBUGIP(F(" gatewayIP: "), gatewayIP);
-
-  if (result) {
-    // Let's start the server
-    DEBUGTEXT(F("Starting the server..."));
-    server.begin();
-    webstate = WEBSERVER_IDLE;
-  }
-  DEBUGVAR(F("Free RAM"), FreeRam());
-
+/// Setup the LCD display.
+void setupLCD() {
+  // Initialize the lcd
+  lcd.begin(16, 2);
+  lcd.setBacklight(1);
   lcd.clear();
-} // setup()
+} // setupLCD()
 
 
-// constantly look for the things, that have to be done.
-void loop()
-{
-  unsigned long now = millis();
+/// Constantly check for new LCD data to be displayed.
+void loopLCD(unsigned long now) {
+  static RADIO_FREQ lastf = 0;
+  RADIO_FREQ f = 0;
 
-  loopWebServer(now);
-  loopButtons(now);
-  loopSerial(now);
-  loopRadio(now);
-  loopLCD(now);
-} // loop()
+  // update the display of the frequency from time to time
+  if (now > nextFreqTime) {
+    f = radio.getFrequency();
+    if (f != lastf) {
+      // don't display a Service Name while frequency is no stable.
+      DisplayServiceName("        ");
+      DisplayFrequency();
+      lastf = f;
+      nextFreqTime = now + 400;
+    } else {
+      nextFreqTime = now + 1000;
+    } // if
+  } // if
+
+  // update the display of the radio information from time to time
+  if (now > nextRadioInfoTime) {
+    RADIO_INFO info;
+    radio.getRadioInfo(&info);
+    lcd.setCursor(14, 0);
+    lcd.print(info.rssi);
+    nextRadioInfoTime = now + 8000;
+  } // if
+
+} // loopLCD()
+
 
 
 
@@ -384,6 +368,62 @@ char *_ctCopyWord(char *text, char *word, int len)
 } // _ctCopyWord()
 
 
+/// Append a text at the given buffer.
+/// Return new end of buffer.
+char *appendText(char *buffer, char *txt)
+{
+  while (*txt) {
+    *buffer++ = *txt++;
+  }
+  *buffer = NUL;
+  return(buffer);
+} // appendText()
+
+
+/// Append a string with enclosing quotes at the given buffer.
+/// Return new end of buffer.
+char *appendString(char *buffer, char *txt)
+{
+  *buffer++ = '\"';
+  while (*txt) {
+    *buffer++ = *txt++;
+  }
+  *buffer++ = '\"';
+  *buffer = NUL;
+  return(buffer);
+} // appendString()
+
+
+/// Append a numeric value at the given buffer.
+/// Return new end of buffer.
+char *appendNumber(char *buffer, int value) {
+  char    digits[8];
+  uint8_t n = 0;
+
+  if (value < 0) {
+    // Add a minus sign on negative values.
+    *buffer++ = '-';
+    value = -value;
+  } else if (value == 0) {
+    // adda zero if no digits
+    *buffer++ = '0';
+  }// if
+
+  // extract digits in reverse order
+  while (value > 0) {
+    digits[n++] = value % 10;
+    value /= 10;
+  } // while
+
+  // copy digits to string.
+  while (n > 0) *buffer++ = '0' + digits[--n];
+  *buffer = NUL;
+  return(buffer);
+} // appendNumber();
+
+
+
+
 // ----- Respond Header functions -----
 // One call of these function is used to send back a valid reponse header with content type or error information.
 
@@ -399,13 +439,10 @@ void respondHeaderContentType(char *type)
 // Response no and send not found html
 void respondHeaderNotFound()
 {
-  // DEBUGFUNC0("respondHeaderNotFound");
+  DEBUGFUNC0("respondHeaderNotFound");
   _client.print(HTTPERR_404);
   _client.print(HTTP_GENERAL);
   _client.print(HTTP_ENDHEAD);
-  _client.print(HTML_OPEN);
-  _client.print("<h2>File Not Found!</h2>");
-  _client.print(HTML_CLOSE);
 } // respondHeaderNotFound()
 
 
@@ -416,18 +453,40 @@ void respondHeaderNotFound()
 // The root.ls call needs a lot of stack space to complete so probably this will not work on Arduino Uno.
 void respondFileList()
 {
+  char *p;
   respondHeaderContentType("text/html");
   _client.print(HTTP_ENDHEAD);
 
-  _client.print(HTML_OPEN);
-  _client.print(F("<h2>Files on SD:</h2>"));
-  _client.write("<pre>");
+  p = _writeBuffer;
+  p = appendText(p, HTML_OPEN);
+  p = appendText(p, "<h2>Files on SD:</h2>");
+  p = appendText(p, "<pre>");
+  _client.write(_writeBuffer);
+
   // Recursive list of all directories
-  File root = SD.open("\\");
-  // root.ls
-  // root.ls((Print *)&_client, LS_R | LS_DATE | LS_SIZE);
-  // todo: implement ls()
-  _client.print("</pre>");
+  File dir = SD.open("/");
+  while (true) {
+    File entry = dir.openNextFile();
+
+    if (!entry) break; // no more files 
+      
+    p = _writeBuffer;
+    p = appendText(p, entry.name());
+    p = appendText(p, "\t");
+
+    if (entry.isDirectory()) {
+      p = appendText(p, "&lt;dir&gt;"); 
+    } else {
+      // files have sizes
+      p = appendNumber(p, entry.size());
+    }
+    p = appendText(p, "\r\n");
+    _client.write(_writeBuffer);
+    entry.close();
+  } // while ()
+  dir.close();
+
+  _client.write("</pre>");
   _client.print(HTML_CLOSE);
 } // respondFileList()
 
@@ -480,33 +539,27 @@ void readRequestLine()
     } // if
   } // while
   _readBuffer[index] = NUL;
-
-  // if (_client.connected()) DEBUGTEXT("still connected...");
-  // DEBUGTEXT(_readBuffer);
 } // readRequestLine()
 
 
-// Serve a static file from the SD disk.
-// Responds the content of a file given by _httpURI.
-void respondFileContent()
+/// Responds the content of a file from the SD disk given by fName.
+void respondFileContent(char *fName)
 {
   char *p;
-
-  _fileType = NULL;
+  char *fileType = NULL;
+  size_t len;
 
   // check for fileType
-  p = strrchr(_httpURI, '.');
-  if (p != NULL) _fileType = p + 1;
+  p = strrchr(fName, '.');
+  if (p != NULL) fileType = p + 1;
 
-  // Serial.print("Serve:"); Serial.println(_httpURI);
-
-  File f = SD.open(_httpURI, O_READ);
-  if (!f) {
+  File f = SD.open(fName, O_READ);
+  if (! f) {
     respondHeaderNotFound();
 
   } else {
     // respond the content type
-    p = _ctFind(CONTENTTYPES, _fileType);
+    p = _ctFind(CONTENTTYPES, fileType);
     if (p) {
       p = _ctNextWord(p);
       p = _ctCopyWord(p, _writeBuffer, sizeof(_writeBuffer));
@@ -532,17 +585,18 @@ void respondFileContent()
 
     // using a buffer is up to 10 times faster than transferring byte by byte
     // using the _readBuffer
-    size_t len;
     do {
-      len = f.readBytes((uint8_t*)_readBuffer, BUFSIZ);
+      len = f.read((uint8_t*)_readBuffer, BUFSIZ);
       _client.write((uint8_t*)_readBuffer, len);
     } while (len > 0);
     f.close();
   } // if
+
 } // respondFileContent()
 
 
-// constantly look for incomming webserver requests and answer them...
+/// This is the main webserver routine.
+/// Constantly look for incomming webserver requests and answer them...
 void loopWebServer(unsigned long now) {
   static unsigned long timeout;
 
@@ -554,10 +608,12 @@ void loopWebServer(unsigned long now) {
   File f;
 
   if (webstate != WEBSERVER_OFF) {
+    // Find a socket that has data available and return a client for this port.
+    // In the EthernetServer actually there is always a client with the port == MAX_SOCK_NUM returned but it has no data.
     _client = server.available();
 
     if (_client) {
-      // DEBUGTEXT('>');
+      // Answer this webserver request until done and then close the port.
       while (_client.connected()) {
         if (_client.available()) {
           // Data is available...
@@ -621,14 +677,14 @@ void loopWebServer(unsigned long now) {
               respondRadioData();
 
             } else if (memcmp(_httpURI, "/", 1 + 1) == 0) {
-              // redirect if no file path was given.
+              // The root of the web server is requested, but this is not a file.
+              // So redirect if no file path was given.
               // Because this is a complicated task there is a special file "redirect.htm" that contains all the stuff needed for this.
-              strcpy(_httpURI, "/redirect.htm");
-              respondFileContent();
+              respondFileContent(REDIRECT_FNAME);
 
             } else {
               // ----- Respond the content of a file -----
-              respondFileContent();
+              respondFileContent(_httpURI);
             } // if
 
             // GET requests will never have a content so its all done.
@@ -645,9 +701,7 @@ void loopWebServer(unsigned long now) {
             if ((len > 0) && (len < sizeof(_readBuffer))) {
               _httpContentLen -= len;
               _readBuffer[len] = NUL; // _readBuffer[32] = NUL;
-              // DEBUGVAR("data", _readBuffer);
             }
-            // DEBUGVAR("_httpContentLen", _httpContentLen);
 
             if (_httpContentLen == 0) {
               respondHeaderContentType("text/html");
@@ -658,16 +712,9 @@ void loopWebServer(unsigned long now) {
             if (strcmp(_httpURI, "/$radio") == 0) {
               char *name = NULL; // name of command
 
-              //// search the space
-              //p = strchr(_readBuffer, SPACE);
-              //if (p) {
-              //  *p++ = NUL;
-              //  runRadioCommand(_readBuffer, atoi(p));
-              //} // if              
-
-              // search the space
+              // simple parsing of the JSON request.
               // assume only one command like {"vol":6}
-              DEBUGTEXT(_readBuffer);
+              // DEBUGTEXT(_readBuffer);
               p = strchr(_readBuffer, '{');
               if (p) p = strchr(p, '"');
               if (p) p += 1;
@@ -681,11 +728,11 @@ void loopWebServer(unsigned long now) {
               }
               if (p) {
                 p += 1;
-                runRadioCommand(name, atoi(p));
+                runRadioJSONCommand(name, atoi(p));
               } // if              
 
-
             } // if
+
           } else if (webstate == PROCESS_PUT) {
             // upload a file
             int len;
@@ -736,6 +783,7 @@ void loopWebServer(unsigned long now) {
 } // loopWebServer()
 
 
+/// ----- LCD functions -----
 
 /// Update the Frequency on the LCD display.
 void DisplayFrequency()
@@ -814,34 +862,38 @@ void DisplaySoftMute(uint8_t v)
   lcd.print("SMUTE: "); lcd.print(v);
 } // DisplaySoftMute()
 
+// ----- JSON helper functions -----
+
+/// The JSON functions use the _writeBuffer to contruct the complete text before writing.
 
 /// Send a JSON object to the client.
 void respondJSONObject(char *name, char *value, bool lastValue = false)
 {
-  _writeBuffer[0] = '\"';
-  strcpy(_writeBuffer + 1, name);
-  strcat(_writeBuffer, "\":\"");
-  strcat(_writeBuffer, value);
-  strcat(_writeBuffer, "\"");
-  if (!lastValue) strcat(_writeBuffer, ",");
+  char *p = _writeBuffer;
+
+  p = appendString(p, name);
+  *p++ = ':';
+  p = appendString(p, value);
+
+  if (!lastValue) *p++ = ',';
+  *p = NUL;
   _client.print(_writeBuffer);
-}
+} // respondJSONObject()
 
 
 /// Send a JSON object to the client.
 void respondJSONObject(char *name, int value, bool lastValue = false)
 {
-  char *p;
+  char *p = _writeBuffer;
 
-  _writeBuffer[0] = '\"';
-  strcpy(_writeBuffer + 1, name);
-  strcat(_writeBuffer, "\":");
-  // strcat(_writeBuffer, value);
-  p = _writeBuffer + strlen(_writeBuffer);
-  itoa(value, p, 10);
-  if (!lastValue) strcat(_writeBuffer, ",");
+  p = appendString(p, name);
+  *p++ = ':';
+  p = appendNumber(p, value);
+
+  if (!lastValue) *p++ = ',';
+  *p = NUL;
   _client.print(_writeBuffer);
-}
+} // respondJSONObject()
 
 
 /// Response to a $info request and return all information of the current radio operation.
@@ -878,13 +930,11 @@ void respondRadioData()
   respondJSONObject("vol", ai.volume);
   respondJSONObject("mute", ai.mute);
   respondJSONObject("softmute", ai.softmute);
-  respondJSONObject("bassboost", ai.bassBoost);
-
-  respondJSONObject("end", "no", true);
+  respondJSONObject("bassboost", ai.bassBoost, true);
 
   _client.print("}");
 
-} // respondSystemInfo()
+} // respondRadioData()
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1014,7 +1064,7 @@ void loopRadio(unsigned long now) {
 /// See the "?" command for available commands.
 /// \param cmd The command word.
 /// \param value An optional parameter for the command.
-void runRadioCommand(char *cmd, int16_t value) {
+void runRadioJSONCommand(char *cmd, int16_t value) {
   if (strcmp(cmd, "freq") == 0) {
     radio.setFrequency(value);
   } else if (strcmp(cmd, "vol") == 0) {
@@ -1032,11 +1082,10 @@ void runRadioCommand(char *cmd, int16_t value) {
     radio.seekUp(true);
 
   } // if
-} // runRadioCommand()
+} // runRadioJSONCommand()
 
 
 // ----- Check for commands on the Serial interface -----
-// ----- Setup and run the radio -----
 
 /// setupSerial
 
@@ -1068,7 +1117,7 @@ void loopSerial(unsigned long now) {
         value = (value * 10) + (c - '0');
       } else {
         // not a value -> execute
-        runSerialCommand(command, value);
+        runRadioSerialCommand(command, value);
         command = ' ';
         state = STATE_PARSECOMMAND;
         value = 0;
@@ -1079,7 +1128,10 @@ void loopSerial(unsigned long now) {
 } // loopSerial
 
 
-void runSerialCommand(char cmd, int16_t value)
+/// interpret a command for the radio chip used on the Serial input.
+/// It's a single char command and an optional numeric value.
+/// See help output on the '?' command for syntax.
+void runRadioSerialCommand(char cmd, int16_t value)
 {
   if (cmd == '?') {
     Serial.println();
@@ -1126,7 +1178,14 @@ void runSerialCommand(char cmd, int16_t value)
       radio.setFrequency(preset[i_sidx]);
     } // if
 
-  } else if (cmd == 'f') { radio.setFrequency(value); } else if (cmd == 'v') { radio.setVolume(value); } else if (cmd == 'm') { radio.setMute(value > 0); }
+  } else if (cmd == 'f') {
+    radio.setFrequency(value);
+  } else if (cmd == 'v') {
+    radio.setVolume(value);
+  } else if (cmd == 'm') {
+    radio.setMute(value > 0);
+    delay(4000);
+  }
 
   else if (cmd == '.') { radio.seekUp(false); } else if (cmd == ':') { radio.seekUp(true); } else if (cmd == ',') { radio.seekDown(false); } else if (cmd == ';') { radio.seekDown(true); }
 
@@ -1159,7 +1218,7 @@ void runSerialCommand(char cmd, int16_t value)
   else if (cmd == 'x') { radio.debugStatus(); }
 
 
-} // runSerialCommand()
+} // runRadioSerialCommand()
 
 
 /// ----- Rotary encoder and buttons -----
@@ -1218,44 +1277,63 @@ void loopButtons(unsigned long now) {
 } // loopButtons
 
 
-/// Setup the LCD display.
-void setupLCD() {
-  // Initialize the lcd
-  lcd.begin(16, 2);
-  lcd.setBacklight(1);
+/// ----- Main functions setup() and loop() -----
+
+void setup() {
+  Serial.begin(57600);
+  // DEBUGTEXT(F("Initializing LCD..."));
+  setupLCD();
+
+  // DEBUGTEXT(F("Initializing Radio..."));
+  lcd.print("Radio...");
+  setupRadio();
+
+  // Initialize the SD card.
+  // see if the card is present and can be initialized:
   lcd.clear();
-} // setupLCD()
+  lcd.print("Card...");
+  SD.begin(4);
+
+  // Initialize web server.
+  webstate = WEBSERVER_OFF;
+
+  // Let's start the network
+  lcd.clear();
+  lcd.print("Net...");
+
+  int result = Ethernet.begin(mac);  // Ethernet.begin(mac, ip); if there is no DHCP
+
+  DEBUGVAR(F("Ethernet Result"), result);
+  DEBUGTEXT(F("Configuration:"));
+  DEBUGIP(F(" localIP: "), localIP);
+  DEBUGIP(F(" subnetMask: "), subnetMask);
+  DEBUGIP(F(" dnsServerIP: "), dnsServerIP);
+  DEBUGIP(F(" gatewayIP: "), gatewayIP);
+
+  if (result) {
+    // Let's start the server
+    DEBUGTEXT(F("Starting the server..."));
+    server.begin();
+    webstate = WEBSERVER_IDLE;
+  }
+  DEBUGVAR(F("Free RAM"), FreeRam());
+
+  lcd.clear();
+} // setup()
 
 
-/// Constantly check for new LCD data to be displayed.
-void loopLCD(unsigned long now) {
-  static RADIO_FREQ lastf = 0;
-  RADIO_FREQ f = 0;
+// constantly look for the things, that have to be done.
+void loop()
+{
+  unsigned long now = millis();
 
-  // update the display of the frequency from time to time
-  if (now > nextFreqTime) {
-    f = radio.getFrequency();
-    if (f != lastf) {
-      // don't display a Service Name while frequency is no stable.
-      DisplayServiceName("        ");
-      DisplayFrequency();
-      lastf = f;
-      nextFreqTime = now + 400;
-    } else {
-      nextFreqTime = now + 1000;
-    } // if
-  } // if
+  loopWebServer(now);
+  loopButtons(now);
+  loopSerial(now);
+  loopRadio(now);
+  loopLCD(now);
+} // loop()
 
-  // update the display of the radio information from time to time
-  if (now > nextRadioInfoTime) {
-    RADIO_INFO info;
-    radio.getRadioInfo(&info);
-    lcd.setCursor(14, 0);
-    lcd.print(info.rssi);
-    nextRadioInfoTime = now + 8000;
-  } // if
-
-} // loopLCD()
 
 // End.
 

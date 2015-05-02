@@ -26,6 +26,8 @@ button {
 font-size: 1.2em;
 border: 0.2em solid gray;
 border-radius: 0.5em;
+padding-left: 0.2em;
+padding-right: 0.2em;
 }
 
 button.activ {
@@ -51,9 +53,9 @@ border: 0.2em solid gray;
 border-radius: 0.4em;
 }
 
-.HSlider .minus span, .HSlider .plus span {
+.HSlider .minus div, .HSlider .plus div {
 font-weight: bold;
-width: 1em;
+width: 1em; height: 1em;
 top: -0.08em;
 position: absolute;
 }
@@ -517,7 +519,7 @@ url = url.join('/');
 
 // sync call
 xhr.open("GET", url, false);
-xhr.timeout = 3000;
+// xhr.timeout = 3000;
 xhr.send();
 cs = xhr.responseText;
 return (cs);
@@ -538,7 +540,7 @@ return (false)
 
 
 function upd() {
-try {
+  try {
 var data = getData('/$radio');
 data = JSON.parse(data);
 for (var n in data) {
@@ -559,7 +561,7 @@ timer = window.setTimeout(upd, 1200);
 <colgroup style="background-color:silver">
 <col style="width: 100px">
 <col style="width: 100px">
-<col style="width: 200px">
+<col style="width: 400px">
 </colgroup>
 
 <tbody>
@@ -585,20 +587,20 @@ timer = window.setTimeout(upd, 1200);
 <td style="text-align:right"><span id="label">Freq:</span></td>
 <td colspan="2" style="text-align:center;padding:2px">
 <div id="ctlSD" eventname="radio.seekdown" style="height:1em;width:1.6em;border:0.2em solid gray;border-radius: 0.4em;position:relative;display:inline-block">
-<span style="font-weight:bold;width:1.6em;top:-0.08em;position:absolute">&lt;&lt;</span>
+<div style="font-weight:bold;width:1.6em;top:-0.08em;position:absolute">&lt;&lt;</div>
 </div>
 
 <div class="HSlider" id="ctlF" eventname="radio.freq" minvalue="8750" maxvalue="10800" unit="10">
-<div class="minus"><span>&lt;</span></div>
+<div class="minus"><div>&lt;</div></div>
 <div class="slider">
 <div class="ruler" style="width:16em;"></div>
 <div class="knob"></div>
 </div>
-<div class="plus"><span>&gt;</span></div>
+<div class="plus"><div>&gt;</div></div>
 </div>
 <div id="ctlSU" eventname="radio.seekup"
 style="height:1em;width:1.6em;border:0.2em solid gray;border-radius: 0.4em;position:relative;display:inline-block">
-<span style="font-weight:bold;width:1.6em;top:-0.08em;position:absolute">&gt;&gt;</span>
+<div style="font-weight:bold;width:1.6em;top:-0.08em;position:absolute">&gt;&gt;</div>
 </div>
 
 </td>
@@ -608,12 +610,12 @@ style="height:1em;width:1.6em;border:0.2em solid gray;border-radius: 0.4em;posit
 <td style="text-align:right"><span id="label">Vol:</span></td>
 <td colspan="2" style="text-align:center;padding:2px">
 <div class="HSlider" id="ctlV" eventname="radio.vol" minvalue="0" maxvalue="15" unit="1">
-<div class="minus"><span>&lt;</span></div>
+<div class="minus"><div>&lt;</div></div>
 <div class="slider">
 <div class="ruler" style="width:16em;"></div>
 <div class="knob"></div>
 </div>
-<div class="plus"><span>&gt;</span></div>
+<div class="plus"><div>&gt;</div></div>
 </div>
 </td>
 </tr>
