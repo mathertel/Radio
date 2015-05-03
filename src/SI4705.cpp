@@ -86,7 +86,21 @@
 // FM_MAX_TUNE_ERROR
 // #define FM_MAX_TUNE_ERROR      0x1108
 
-#define PROP_FM_SEEK_FREQ_SPACING 0x1402
+// #define FM_SOFT_MUTE_RATE            0x1300 // not in use any more
+#define FM_SOFT_MUTE_SLOPE           0x1301
+#define FM_SOFT_MUTE_MAX_ATTENUATION 0x1302
+#define FM_SOFT_MUTE_SNR_THRESHOLD   0x1303
+#define FM_SOFT_MUTE_RELEASE_RATE    0x1304
+#define FM_SOFT_MUTE_ATTACK_RATE     0x1305
+
+//  si47xx_set_property(FM_SOFT_MUTE_RATE, 64);
+//  si47xx_set_property(FM_SOFT_MUTE_MAX_ATTENUATION, 16);
+//  si47xx_set_property(FM_SOFT_MUTE_SNR_THRESHOLD, 4);
+
+
+#define PROP_FM_SEEK_FREQ_SPACING   0x1402
+#define FM_SEEK_TUNE_SNR_THRESHOLD  0x1403 
+#define FM_SEEK_TUNE_RSSI_TRESHOLD  0x1404
 
 #define PROP_RDS_INTERRUPT_SOURCE         0x1500
 #define PROP_RDS_INTERRUPT_SOURCE_RDSRECV 0x01
@@ -137,6 +151,7 @@ bool SI4705::init() {
 
   // Set mute bits in the fm receiver
   setMute(true);
+  setSoftMute(true);
 
   _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN); //  | PROP_GPO_IEN_RDSIEN ????
 
@@ -205,7 +220,14 @@ void SI4705::setMute(bool switchOn) {
 /// @return void
 void SI4705::setSoftMute(bool switchOn) {
   RADIO::setSoftMute(switchOn);
-  /// t.b.d.
+
+  if (switchOn) {
+    // to enable the softmute mode the attenuation is set to 0x10.
+    _setProperty(FM_SOFT_MUTE_MAX_ATTENUATION, 0x14);
+  } else {
+    // to disable the softmute mode the attenuation is set to 0.  
+    _setProperty(FM_SOFT_MUTE_MAX_ATTENUATION, 0x00);
+  }
 } // setSoftMute()
 
 
@@ -289,7 +311,6 @@ void SI4705::setFrequency(RADIO_FREQ newF) {
 
 /// Start seek mode upwards.
 void SI4705::seekUp(bool toNextSender) {
-  DEBUG_FUNC0("seekUp");
   if (! toNextSender) {
     RADIO_FREQ newF = getFrequency() + _freqSteps;
     setFrequency(newF);
@@ -299,15 +320,12 @@ void SI4705::seekUp(bool toNextSender) {
     _sendCommand(2, CMD_FM_SEEK_START, 0x0C);
     // reset the RDSParser
     clearRDS();
-
   } // if
-
 } // seekUp()
 
 
 /// Start seek mode downwards.
 void SI4705::seekDown(bool toNextSender) {
-  DEBUG_FUNC0("seekUp");
   if (!toNextSender) {
     RADIO_FREQ newF = getFrequency() - _freqSteps;
     setFrequency(newF);
@@ -317,15 +335,11 @@ void SI4705::seekDown(bool toNextSender) {
     _sendCommand(2, CMD_FM_SEEK_START, 0x04);
     // reset the RDSParser
     clearRDS();
-
   } // if
-
 } // seekDown()
 
 
-
-// Load status information from to the chip
-// only 8 byte status requests are supported. 
+/// Load the status information from to the chip.
 uint8_t SI4705::_readStatus()
 {
   uint8_t value;
@@ -337,61 +351,28 @@ uint8_t SI4705::_readStatus()
   Wire.requestFrom(SI4705_ADR, 1); // We want to read 1 byte only.
   value = Wire.read();
 
-  // DEBUG_VALX("Status", value);
   return(value);
 } // _readStatus()
 
 
-// Load status information from to the chip
-// only 8 byte status requests are supported. 
+/// Load status information from to the chip.
 void SI4705::_readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len)
 {
-  //DEBUG_FUNC0("_readStatusData");
-
   Wire.beginTransmission(SI4705_ADR);
   Wire.write(cmd);
   Wire.write(param);
 
   Wire.endTransmission();
-
-  // Serial.print("_read(");
-  // long startTime = millis();
   Wire.requestFrom(SI4705_ADR, (int)len); //We want to read some bytes.
-
-  //if (millis() - startTime > timeout) {
-  //  return -1;
-  //}
 
   for (uint8_t n = 0; n < len; n++) {
     //Read in these bytes   
     values[n] = Wire.read();
   } // for
-
-  //// clean buffer
-  //while (Wire.available() > 0)
-  //{
-  //  Wire.read();
-  //}
-
 } // _readStatusData()
 
 
-// write a register value using 2 bytes into the Wire.
-void SI4705::_write16(uint16_t val)
-{
-  Wire.write(val >> 8); Wire.write(val & 0xFF);
-} // _write16
-
-
-// read a register value using 2 bytes in a row
-uint16_t SI4705::_read16(void)
-{
-  uint8_t hiByte = Wire.read();
-  uint8_t loByte = Wire.read();
-  return((hiByte << 8) + loByte);
-} // _read16
-
-
+/// Return a filled RADIO_INFO with the status of the radio features of the chip.
 void SI4705::getRadioInfo(RADIO_INFO *info) {
   RADIO::getRadioInfo(info);
 
@@ -399,19 +380,23 @@ void SI4705::getRadioInfo(RADIO_INFO *info) {
 
   info->active = true;
   info->rssi = tuneStatus[4];
-  // TODO: bool rds;
   if (tuneStatus[1] & 0x01) info->tuned = true;
-  // TODO: bool mono;
-  // TODO: bool stereo;
 
+  _readStatusData(CMD_FM_RSQ_STATUS, 0x01, rsqStatus, sizeof(rsqStatus));
+  if (rsqStatus[3] & 0x80) info->stereo = true;
+
+  _readStatusData(CMD_FM_RDS_STATUS, 0x05, rdsStatus.buffer, sizeof(rdsStatus));
+  if (rdsStatus.resp2 & 0x01) info->rds = true;
 } // getRadioInfo()
 
 
+/// Return a filled AUIO_INFO with the actual audio settings.
 void SI4705::getAudioInfo(AUDIO_INFO *info) {
   RADIO::getAudioInfo(info);
 } // getAudioInfo()
 
 
+/// Retrieve the next RDS data if available.
 void SI4705::checkRDS()
 {
   if (_sendRDS) {
@@ -431,10 +416,9 @@ void SI4705::checkRDS()
         RDSBLOCKWORD(rdsStatus.blockCH, rdsStatus.blockCL),
         RDSBLOCKWORD(rdsStatus.blockDH, rdsStatus.blockDL));
     } // if
-
   } // if _sendRDS
+} // checkRDS()
 
-} // checkRDS
 
 // ----- Debug functions -----
 
@@ -459,8 +443,8 @@ void SI4705::debugStatus()
   _readStatusData(CMD_FM_RSQ_STATUS, 0x01, rsqStatus, sizeof(rsqStatus));
   Serial.print(rsqStatus[0], HEX); Serial.print(' ');
   Serial.print(rsqStatus[1], HEX); Serial.print(' ');
-  Serial.print(rsqStatus[2], HEX); Serial.print(' ');
-  Serial.print(rsqStatus[3], HEX); Serial.print(' ');
+  Serial.print(rsqStatus[2], HEX); Serial.print(' '); if (rsqStatus[2] & 0x08) Serial.print("SMUTE ");
+  Serial.print(rsqStatus[3], HEX); Serial.print(' '); if (rsqStatus[3] & 0x80) Serial.print("STEREO ");
   Serial.print(rsqStatus[7], HEX); Serial.print(' ');
   Serial.println();
 
@@ -490,37 +474,27 @@ void SI4705::_waitEnd() {
 
 /// Send an array of bytes to the radio chip
 void SI4705::_sendCommand(int cnt, int cmd, ...) {
-  Serial.print("_send(");
-
   if (cnt > 8) {
     // see AN332: "Writing more than 8 bytes results in unpredictable device behavior."
-    Serial.println("error: too much parameters!");
+    Serial.println("error: _sendCommand: too much parameters!");
 
   } else {
     Wire.beginTransmission(SI4705_ADR);
     Wire.write(cmd);
-    Serial.print(cmd, HEX); Serial.print(' ');
 
     va_list params;
     va_start(params, cmd);
 
     for (uint8_t i = 1; i < cnt; i++) {
       uint8_t c = va_arg(params, int);
-      Serial.print(c, HEX); Serial.print(' ');
       Wire.write(c);
     }
     Wire.endTransmission();
     va_end(params);
 
-    Serial.print(") >>");
-
     // wait for Command being processed
     Wire.requestFrom(SI4705_ADR, 1); // We want to read the status byte.
     _status = Wire.read();
-
-    Serial.println(_status, HEX);
-
-    delay(100);
   } // if
 
 } // _sendCommand()
@@ -528,8 +502,6 @@ void SI4705::_sendCommand(int cnt, int cmd, ...) {
 
 /// Set a property in the radio chip
 void SI4705::_setProperty(uint16_t prop, uint16_t value) {
-  DEBUG_FUNC2X("_setProperty", prop, value);
-
   Wire.beginTransmission(SI4705_ADR);
   Wire.write(CMD_SET_PROPERTY);
   Wire.write(0);
@@ -540,16 +512,9 @@ void SI4705::_setProperty(uint16_t prop, uint16_t value) {
   Wire.write(value & 0x00FF);
 
   Wire.endTransmission();
-
-  int status;
+  
   Wire.requestFrom(SI4705_ADR, 1); // We want to read the status byte.
-  status = Wire.read();
-
-  Serial.print(">>");
-  Serial.println(status, HEX);
-
-
-  delay(100);
+  _status = Wire.read();
 } // _setProperty()
 
 

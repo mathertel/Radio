@@ -18,6 +18,7 @@
 /// * 07.02.2015 cleanup
 /// * 15.02.2015 RDS is working.
 /// * 27.03.2015 scanning is working. No changes to default settings needed.
+/// * 03.05.2015 softmute is working. 
 
 
 #ifndef SI4705_h
@@ -119,10 +120,6 @@ private:
 
   /// read status information into a buffer
   void _readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len);
-
-
-  void     _write16(uint16_t val);        // Write 16 Bit Value on I2C-Bus
-  uint16_t _read16(void);
 
   void _seek(bool seekUp = true);
   void _waitEnd();
