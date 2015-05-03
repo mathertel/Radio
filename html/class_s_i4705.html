@@ -76,6 +76,7 @@ Inheritance diagram for SI4705:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a9e3b3c047cdc7d07ae03fa68a6c54ada"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a9e3b3c047cdc7d07ae03fa68a6c54ada">SI4705</a> ()</td></tr>
+<tr class="memdesc:a9e3b3c047cdc7d07ae03fa68a6c54ada"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the extra variables in <a class="el" href="class_s_i4705.html" title="Library to control the SI4705 radio chip. ">SI4705</a>.  <a href="#a9e3b3c047cdc7d07ae03fa68a6c54ada">More...</a><br /></td></tr>
 <tr class="separator:a9e3b3c047cdc7d07ae03fa68a6c54ada"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04853d95fc544d03fb98da98861eb9f3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a04853d95fc544d03fb98da98861eb9f3">init</a> ()</td></tr>
 <tr class="memdesc:a04853d95fc544d03fb98da98861eb9f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the library and the chip.  <a href="#a04853d95fc544d03fb98da98861eb9f3">More...</a><br /></td></tr>
@@ -84,24 +85,26 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ac04457011af19a3fbd79780d82157e7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Terminate all radio functions in the chip.  <a href="#ac04457011af19a3fbd79780d82157e7b">More...</a><br /></td></tr>
 <tr class="separator:ac04457011af19a3fbd79780d82157e7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a114664efdb970ea84ed692a5da02a511"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a114664efdb970ea84ed692a5da02a511">setVolume</a> (uint8_t newVolume)</td></tr>
-<tr class="memdesc:a114664efdb970ea84ed692a5da02a511"><td class="mdescLeft">&#160;</td><td class="mdescRight">set the volume in the range 0..15. This is mapped to the internal range 0..64  <a href="#a114664efdb970ea84ed692a5da02a511">More...</a><br /></td></tr>
+<tr class="memdesc:a114664efdb970ea84ed692a5da02a511"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the volume output of the radio chip in the range 0..15.  <a href="#a114664efdb970ea84ed692a5da02a511">More...</a><br /></td></tr>
 <tr class="separator:a114664efdb970ea84ed692a5da02a511"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a798325925b4527302dd40c7ea231586f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a798325925b4527302dd40c7ea231586f">setMute</a> (bool switchOn)</td></tr>
+<tr class="memdesc:a798325925b4527302dd40c7ea231586f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the mute mode of the radio chip.  <a href="#a798325925b4527302dd40c7ea231586f">More...</a><br /></td></tr>
+<tr class="separator:a798325925b4527302dd40c7ea231586f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86aadd6e85fa039f8022cf863f2f9f00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a86aadd6e85fa039f8022cf863f2f9f00">setSoftMute</a> (bool switchOn)</td></tr>
+<tr class="memdesc:a86aadd6e85fa039f8022cf863f2f9f00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the softmute mode (mute on low signals) of the radio chip.  <a href="#a86aadd6e85fa039f8022cf863f2f9f00">More...</a><br /></td></tr>
+<tr class="separator:a86aadd6e85fa039f8022cf863f2f9f00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad349bf3464b1e2bf64a8962794110ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#aad349bf3464b1e2bf64a8962794110ab">setBassBoost</a> (bool switchOn)</td></tr>
-<tr class="memdesc:aad349bf3464b1e2bf64a8962794110ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the bass boost mode of the radio chip.  <a href="#aad349bf3464b1e2bf64a8962794110ab">More...</a><br /></td></tr>
+<tr class="memdesc:aad349bf3464b1e2bf64a8962794110ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">regardless of the given parameter, the Bass Boost will never switch on.  <a href="#aad349bf3464b1e2bf64a8962794110ab">More...</a><br /></td></tr>
 <tr class="separator:aad349bf3464b1e2bf64a8962794110ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b45565fff32b1bb31e357aa32d539cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a7b45565fff32b1bb31e357aa32d539cb">setMono</a> (bool switchOn)</td></tr>
 <tr class="memdesc:a7b45565fff32b1bb31e357aa32d539cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control mono/stereo mode of the radio chip.  <a href="#a7b45565fff32b1bb31e357aa32d539cb">More...</a><br /></td></tr>
 <tr class="separator:a7b45565fff32b1bb31e357aa32d539cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a798325925b4527302dd40c7ea231586f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a798325925b4527302dd40c7ea231586f">setMute</a> (bool switchOn)</td></tr>
-<tr class="memdesc:a798325925b4527302dd40c7ea231586f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the mute mode of the radio chip.  <a href="#a798325925b4527302dd40c7ea231586f">More...</a><br /></td></tr>
-<tr class="separator:a798325925b4527302dd40c7ea231586f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1e3768b6384c9f574268de782d85d95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#aa1e3768b6384c9f574268de782d85d95">setBand</a> (<a class="el" href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a> newBand)</td></tr>
-<tr class="memdesc:aa1e3768b6384c9f574268de782d85d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start using the new band for receiving.  <a href="#aa1e3768b6384c9f574268de782d85d95">More...</a><br /></td></tr>
+<tr class="memdesc:aa1e3768b6384c9f574268de782d85d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the mute mode of the radio chip.  <a href="#aa1e3768b6384c9f574268de782d85d95">More...</a><br /></td></tr>
 <tr class="separator:aa1e3768b6384c9f574268de782d85d95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd90c102278c860efb1687e1e5ff4fd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#acd90c102278c860efb1687e1e5ff4fd8">setFrequency</a> (<a class="el" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a> newF)</td></tr>
 <tr class="separator:acd90c102278c860efb1687e1e5ff4fd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b9bb76488ad5583d17564eb8dc818e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a0b9bb76488ad5583d17564eb8dc818e1">getFrequency</a> (void)</td></tr>
-<tr class="memdesc:a0b9bb76488ad5583d17564eb8dc818e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the real frequency from the chip after automatic tuning.  <a href="#a0b9bb76488ad5583d17564eb8dc818e1">More...</a><br /></td></tr>
 <tr class="separator:a0b9bb76488ad5583d17564eb8dc818e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a591c4452ab5e4bcb841cc96e25c069e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a591c4452ab5e4bcb841cc96e25c069e2">seekUp</a> (bool toNextSender=true)</td></tr>
 <tr class="memdesc:a591c4452ab5e4bcb841cc96e25c069e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start seek mode upwards.  <a href="#a591c4452ab5e4bcb841cc96e25c069e2">More...</a><br /></td></tr>
@@ -110,13 +113,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:acb9ee0aa00d3403d0fda3ea5927fabda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start seek mode downwards.  <a href="#acb9ee0aa00d3403d0fda3ea5927fabda">More...</a><br /></td></tr>
 <tr class="separator:acb9ee0aa00d3403d0fda3ea5927fabda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aafeeff4cfc9b2fad1de30b7ea01b049b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#aafeeff4cfc9b2fad1de30b7ea01b049b">checkRDS</a> ()</td></tr>
-<tr class="memdesc:aafeeff4cfc9b2fad1de30b7ea01b049b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if RDS Data is available and good.  <a href="#aafeeff4cfc9b2fad1de30b7ea01b049b">More...</a><br /></td></tr>
+<tr class="memdesc:aafeeff4cfc9b2fad1de30b7ea01b049b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the next RDS data if available.  <a href="#aafeeff4cfc9b2fad1de30b7ea01b049b">More...</a><br /></td></tr>
 <tr class="separator:aafeeff4cfc9b2fad1de30b7ea01b049b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a348249bec562a42515d0a2f594b2317a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a348249bec562a42515d0a2f594b2317a">getRadioInfo</a> (<a class="el" href="struct_r_a_d_i_o___i_n_f_o.html">RADIO_INFO</a> *info)</td></tr>
-<tr class="memdesc:a348249bec562a42515d0a2f594b2317a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve some information about the current radio function of the chip.  <a href="#a348249bec562a42515d0a2f594b2317a">More...</a><br /></td></tr>
+<tr class="memdesc:a348249bec562a42515d0a2f594b2317a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a filled <a class="el" href="struct_r_a_d_i_o___i_n_f_o.html" title="A structure that contains information about the radio features from the chip. ">RADIO_INFO</a> with the status of the radio features of the chip.  <a href="#a348249bec562a42515d0a2f594b2317a">More...</a><br /></td></tr>
 <tr class="separator:a348249bec562a42515d0a2f594b2317a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c9dcd0b9d70b936d25d3b87eba6b768"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a0c9dcd0b9d70b936d25d3b87eba6b768">getAudioInfo</a> (<a class="el" href="struct_a_u_d_i_o___i_n_f_o.html">AUDIO_INFO</a> *info)</td></tr>
-<tr class="memdesc:a0c9dcd0b9d70b936d25d3b87eba6b768"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve some information about the current audio function of the chip.  <a href="#a0c9dcd0b9d70b936d25d3b87eba6b768">More...</a><br /></td></tr>
+<tr class="memdesc:a0c9dcd0b9d70b936d25d3b87eba6b768"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a filled AUIO_INFO with the actual audio settings.  <a href="#a0c9dcd0b9d70b936d25d3b87eba6b768">More...</a><br /></td></tr>
 <tr class="separator:a0c9dcd0b9d70b936d25d3b87eba6b768"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a251a502608706006a6e7258d9ad6d5ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a251a502608706006a6e7258d9ad6d5ba">debugScan</a> ()</td></tr>
 <tr class="separator:a251a502608706006a6e7258d9ad6d5ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,27 +129,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a70cb0f40aee92ae18ca03bd61303075f"><td class="memItemLeft" align="right" valign="top">virtual uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a70cb0f40aee92ae18ca03bd61303075f">getVolume</a> ()</td></tr>
 <tr class="memdesc:a70cb0f40aee92ae18ca03bd61303075f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current output volume.  <a href="#a70cb0f40aee92ae18ca03bd61303075f">More...</a><br /></td></tr>
 <tr class="separator:a70cb0f40aee92ae18ca03bd61303075f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e611a535d53fa341ade0a52de63a150"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a0e611a535d53fa341ade0a52de63a150">getBassBoost</a> ()</td></tr>
-<tr class="memdesc:a0e611a535d53fa341ade0a52de63a150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current bass boost mode setting.  <a href="#a0e611a535d53fa341ade0a52de63a150">More...</a><br /></td></tr>
-<tr class="separator:a0e611a535d53fa341ade0a52de63a150"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ae2fe66d5e7afe7380ca9cb2c9f637da9">getMono</a> ()</td></tr>
-<tr class="memdesc:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current mono mode setting.  <a href="#ae2fe66d5e7afe7380ca9cb2c9f637da9">More...</a><br /></td></tr>
-<tr class="separator:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60c513be9680016152add6a2d902b573"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a60c513be9680016152add6a2d902b573">getMute</a> ()</td></tr>
 <tr class="memdesc:a60c513be9680016152add6a2d902b573"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current mute mode setting.  <a href="#a60c513be9680016152add6a2d902b573">More...</a><br /></td></tr>
 <tr class="separator:a60c513be9680016152add6a2d902b573"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a930c2848ec61ff651ffd3b2be4ab1cd3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a930c2848ec61ff651ffd3b2be4ab1cd3">setSoftMute</a> (bool switchOn)</td></tr>
-<tr class="memdesc:a930c2848ec61ff651ffd3b2be4ab1cd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the soft mute mode (mute on low signals) on or off.  <a href="#a930c2848ec61ff651ffd3b2be4ab1cd3">More...</a><br /></td></tr>
-<tr class="separator:a930c2848ec61ff651ffd3b2be4ab1cd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7d7b662a858e16af5531ef32a01348e"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ad7d7b662a858e16af5531ef32a01348e">getSoftMute</a> ()</td></tr>
-<tr class="memdesc:ad7d7b662a858e16af5531ef32a01348e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current soft mute mode (mute on low signals) setting.  <a href="#ad7d7b662a858e16af5531ef32a01348e">More...</a><br /></td></tr>
+<tr class="memdesc:ad7d7b662a858e16af5531ef32a01348e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current soft mute mode setting.  <a href="#ad7d7b662a858e16af5531ef32a01348e">More...</a><br /></td></tr>
 <tr class="separator:ad7d7b662a858e16af5531ef32a01348e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4f2525a69db4238af3dce69f3b8171b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ab4f2525a69db4238af3dce69f3b8171b">getBand</a> ()</td></tr>
-<tr class="memdesc:ab4f2525a69db4238af3dce69f3b8171b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current band settings from the chip.  <a href="#ab4f2525a69db4238af3dce69f3b8171b">More...</a><br /></td></tr>
-<tr class="separator:ab4f2525a69db4238af3dce69f3b8171b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04a1d6e75f2d9ced5f3081c591c154e4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a04a1d6e75f2d9ced5f3081c591c154e4">setBandFrequency</a> (<a class="el" href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a> newBand, <a class="el" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a> newFreq)</td></tr>
-<tr class="memdesc:a04a1d6e75f2d9ced5f3081c591c154e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set Band and Frequency in one call.  <a href="#a04a1d6e75f2d9ced5f3081c591c154e4">More...</a><br /></td></tr>
-<tr class="separator:a04a1d6e75f2d9ced5f3081c591c154e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e611a535d53fa341ade0a52de63a150"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a0e611a535d53fa341ade0a52de63a150">getBassBoost</a> ()</td></tr>
+<tr class="memdesc:a0e611a535d53fa341ade0a52de63a150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current bass boost mode setting.  <a href="#a0e611a535d53fa341ade0a52de63a150">More...</a><br /></td></tr>
+<tr class="separator:a0e611a535d53fa341ade0a52de63a150"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ef36a8d9fdf6fad037b259bf62f01b3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a7ef36a8d9fdf6fad037b259bf62f01b3">getMinFrequency</a> ()</td></tr>
 <tr class="memdesc:a7ef36a8d9fdf6fad037b259bf62f01b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum frequency of the current selected band.  <a href="#a7ef36a8d9fdf6fad037b259bf62f01b3">More...</a><br /></td></tr>
 <tr class="separator:a7ef36a8d9fdf6fad037b259bf62f01b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,6 +147,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac53cb14266d3cafc4f8c0e2d461c5052"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ac53cb14266d3cafc4f8c0e2d461c5052">getFrequencyStep</a> ()</td></tr>
 <tr class="memdesc:ac53cb14266d3cafc4f8c0e2d461c5052"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get resolution of the current selected band.  <a href="#ac53cb14266d3cafc4f8c0e2d461c5052">More...</a><br /></td></tr>
 <tr class="separator:ac53cb14266d3cafc4f8c0e2d461c5052"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4f2525a69db4238af3dce69f3b8171b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ab4f2525a69db4238af3dce69f3b8171b">getBand</a> ()</td></tr>
+<tr class="memdesc:ab4f2525a69db4238af3dce69f3b8171b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current band setting.  <a href="#ab4f2525a69db4238af3dce69f3b8171b">More...</a><br /></td></tr>
+<tr class="separator:ab4f2525a69db4238af3dce69f3b8171b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04a1d6e75f2d9ced5f3081c591c154e4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a04a1d6e75f2d9ced5f3081c591c154e4">setBandFrequency</a> (<a class="el" href="radio_8h.html#a90d798068718e16f09d632d46bf64985">RADIO_BAND</a> newBand, <a class="el" href="radio_8h.html#a439b0cff44988e48e2618027047ada19">RADIO_FREQ</a> newFreq)</td></tr>
+<tr class="memdesc:a04a1d6e75f2d9ced5f3081c591c154e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set Band and Frequency in one call.  <a href="#a04a1d6e75f2d9ced5f3081c591c154e4">More...</a><br /></td></tr>
+<tr class="separator:a04a1d6e75f2d9ced5f3081c591c154e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ae2fe66d5e7afe7380ca9cb2c9f637da9">getMono</a> ()</td></tr>
+<tr class="memdesc:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current mono mode setting.  <a href="#ae2fe66d5e7afe7380ca9cb2c9f637da9">More...</a><br /></td></tr>
+<tr class="separator:ae2fe66d5e7afe7380ca9cb2c9f637da9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa173e91a438100b2b8e8599f2ab48f9c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#aa173e91a438100b2b8e8599f2ab48f9c">clearRDS</a> ()</td></tr>
+<tr class="memdesc:aa173e91a438100b2b8e8599f2ab48f9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear RDS data in the attached RDS Receiver by sending 0,0,0,0.  <a href="#aa173e91a438100b2b8e8599f2ab48f9c">More...</a><br /></td></tr>
+<tr class="separator:aa173e91a438100b2b8e8599f2ab48f9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac82d11f9ffaa1f81ab3f46e6f21a7d85"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ac82d11f9ffaa1f81ab3f46e6f21a7d85">attachReceiveRDS</a> (<a class="el" href="radio_8h.html#a065428168c7567c439460ed53a257f4f">receiveRDSFunction</a> newFunction)</td></tr>
 <tr class="memdesc:ac82d11f9ffaa1f81ab3f46e6f21a7d85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a RDS processor function.  <a href="#ac82d11f9ffaa1f81ab3f46e6f21a7d85">More...</a><br /></td></tr>
 <tr class="separator:ac82d11f9ffaa1f81ab3f46e6f21a7d85"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -174,9 +177,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a8eaeff70f12ac3558e235696543f50ec"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a8eaeff70f12ac3558e235696543f50ec">MAXVOLUME</a></td></tr>
-<tr class="memdesc:a8eaeff70f12ac3558e235696543f50ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">max volume level for the radio implementations  <a href="#a8eaeff70f12ac3558e235696543f50ec">More...</a><br /></td></tr>
-<tr class="separator:a8eaeff70f12ac3558e235696543f50ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a837210ae5056091e263c0e11b8d7987a"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a837210ae5056091e263c0e11b8d7987a">MAXVOLUME</a> = 15</td></tr>
+<tr class="memdesc:a837210ae5056091e263c0e11b8d7987a"><td class="mdescLeft">&#160;</td><td class="mdescRight">max volume level for all radio implementations.  <a href="#a837210ae5056091e263c0e11b8d7987a">More...</a><br /></td></tr>
+<tr class="separator:a837210ae5056091e263c0e11b8d7987a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6705490ad1fe4352b0a87a26dcc02932"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a6705490ad1fe4352b0a87a26dcc02932">status</a></td></tr>
 <tr class="separator:a6705490ad1fe4352b0a87a26dcc02932"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8f153123e416fbf7ef4e1b4d5498301"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#ae8f153123e416fbf7ef4e1b4d5498301">resp1</a></td></tr>
@@ -265,10 +268,6 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:ad5a22524af63355bc455b4199806e205"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#ad5a22524af63355bc455b4199806e205">_readStatusData</a> (uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len)</td></tr>
 <tr class="memdesc:ad5a22524af63355bc455b4199806e205"><td class="mdescLeft">&#160;</td><td class="mdescRight">read status information into a buffer  <a href="#ad5a22524af63355bc455b4199806e205">More...</a><br /></td></tr>
 <tr class="separator:ad5a22524af63355bc455b4199806e205"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc9765243f2caf8c82a2c8afee951133"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#afc9765243f2caf8c82a2c8afee951133">_write16</a> (uint16_t val)</td></tr>
-<tr class="separator:afc9765243f2caf8c82a2c8afee951133"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a345f9ce33be169030c070a35e1926e86"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a345f9ce33be169030c070a35e1926e86">_read16</a> (void)</td></tr>
-<tr class="separator:a345f9ce33be169030c070a35e1926e86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77258c51d51ca04ca03408dc40b0493a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a77258c51d51ca04ca03408dc40b0493a">_seek</a> (bool <a class="el" href="class_s_i4705.html#a591c4452ab5e4bcb841cc96e25c069e2">seekUp</a>=true)</td></tr>
 <tr class="separator:a77258c51d51ca04ca03408dc40b0493a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa7eb8cd8856ac140063a94bc17fde14"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#afa7eb8cd8856ac140063a94bc17fde14">_waitEnd</a> ()</td></tr>
@@ -282,10 +281,12 @@ Private Attributes</h2></td></tr>
 <tr class="separator:acfbd45d28694818ea485b82910beb201"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a778ba1c3f394a6fc4c6c8edf45faf7d8"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a778ba1c3f394a6fc4c6c8edf45faf7d8">tuneStatus</a> [8]</td></tr>
 <tr class="separator:a778ba1c3f394a6fc4c6c8edf45faf7d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf41cfc45fd7753b5b3215c6b9c89dba"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#adf41cfc45fd7753b5b3215c6b9c89dba">rsqStatus</a> [8]</td></tr>
-<tr class="separator:adf41cfc45fd7753b5b3215c6b9c89dba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c300a853272ec5d3730f1cf3a058dc3"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a8c300a853272ec5d3730f1cf3a058dc3">rsqStatus</a> [1+7]</td></tr>
+<tr class="separator:a8c300a853272ec5d3730f1cf3a058dc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcf02baee28fdf0ee6513a9cf17f37cd"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#afcf02baee28fdf0ee6513a9cf17f37cd">rdsStatusx</a> [1+12]</td></tr>
 <tr class="separator:afcf02baee28fdf0ee6513a9cf17f37cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a280b1a036312c88145e6fb1c4b0b0c94"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_i4705.html#a280b1a036312c88145e6fb1c4b0b0c94">agcStatus</a> [1+2]</td></tr>
+<tr class="separator:a280b1a036312c88145e6fb1c4b0b0c94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa52df0aad57fa6be6e97c7e8b9aa42be"><td class="memItemLeft" >union {</td></tr>
 <tr class="memitem:a6f2bffa16b30c2399a3806fc74452095"><td class="memItemLeft" >&#160;&#160;&#160;struct {</td></tr>
 <tr class="memitem:ade0ba9f5b3e9e8f6fbbe2273baf78cb3"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="class_s_i4705.html#a6705490ad1fe4352b0a87a26dcc02932">status</a></td></tr>
@@ -338,6 +339,8 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Initialize the extra variables in <a class="el" href="class_s_i4705.html" title="Library to control the SI4705 radio chip. ">SI4705</a>. </p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -367,30 +370,6 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a345f9ce33be169030c070a35e1926e86"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint16_t SI4705::_read16 </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="aae37ded6804b77f7cbe5a810abe6e59e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -413,6 +392,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>read the interrupt status. </p>
+<p>Load the status information from to the chip. </p>
 
 </div>
 </div>
@@ -461,6 +441,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>read status information into a buffer </p>
+<p>Load status information from to the chip. </p>
 
 </div>
 </div>
@@ -593,30 +574,6 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="afc9765243f2caf8c82a2c8afee951133"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SI4705::_write16 </td>
-          <td>(</td>
-          <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>val</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="ac82d11f9ffaa1f81ab3f46e6f21a7d85"></a>
 <div class="memitem">
 <div class="memproto">
@@ -664,9 +621,35 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Check if RDS Data is available and good. </p>
+<p>Retrieve the next RDS data if available. </p>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a86c125b2e2bd24f6f21dbf62329c88bb">RADIO</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa173e91a438100b2b8e8599f2ab48f9c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RADIO::clearRDS </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">inherited</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Clear RDS data in the attached RDS Receiver by sending 0,0,0,0. </p>
+<p>Send a 0.0.0.0 to the RDS receiver if there is any attached. This is to point out that there is a new situation and all existing data should be invalid from now on. </p>
 
 </div>
 </div>
@@ -846,8 +829,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieve some information about the current audio function of the chip. </p>
-<p>Return current settings as far as no chip is required. When using the radio::setXXX methods, no chip specific implementation is needed. </p>
+<p>Return a filled AUIO_INFO with the actual audio settings. </p>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a6678bac33622f030ca6de2a3af705b99">RADIO</a>.</p>
 
@@ -874,7 +856,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieve the current band settings from the chip. </p>
+<p>Retrieve the current band setting. </p>
 
 </div>
 </div>
@@ -925,9 +907,7 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-
-<p>Retrieve the real frequency from the chip after automatic tuning. </p>
-<dl class="section return"><dt>Returns</dt><dd>RADIO_FREQ the current frequency. </dd></dl>
+<p>Retrieve the real frequency from the chip after manual or automatic tuning. </p><dl class="section return"><dt>Returns</dt><dd>RADIO_FREQ the current frequency. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a6c24a47c370af70eac04da097f409620">RADIO</a>.</p>
 
@@ -1030,6 +1010,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Retrieve the current mono mode setting. </p>
+<p>The base implementation returns only the value in the internal variable. </p>
 
 </div>
 </div>
@@ -1055,6 +1036,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Retrieve the current mute mode setting. </p>
+<p>The base implementation returns only the value in the internal variable. </p>
 
 </div>
 </div>
@@ -1080,8 +1062,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieve some information about the current radio function of the chip. </p>
-<p>Return all the Radio settings. This implementation only knows some values from the last settings. </p>
+<p>Return a filled <a class="el" href="struct_r_a_d_i_o___i_n_f_o.html" title="A structure that contains information about the radio features from the chip. ">RADIO_INFO</a> with the status of the radio features of the chip. </p>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a20b6b2b7cc1fbeeb9ab4e91eff38827b">RADIO</a>.</p>
 
@@ -1108,7 +1089,8 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieve the current soft mute mode (mute on low signals) setting. </p>
+<p>Retrieve the current soft mute mode setting. </p>
+<p>The base implementation returns only the value in the internal variable. </p>
 
 </div>
 </div>
@@ -1159,7 +1141,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initialize the library and the chip. </p>
-<p>Initialize the library and the chip. Set all internal variables to the standard values. </p>
+<p>Initialize the library and the chip. Set all internal variables to the standard values. </p><dl class="section return"><dt>Returns</dt><dd>bool The return value is true when a <a class="el" href="class_s_i4705.html" title="Library to control the SI4705 radio chip. ">SI4705</a> chip was found. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a6be0b22842b78a333bc57283553699b7">RADIO</a>.</p>
 
@@ -1243,7 +1225,14 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Start using the new band for receiving. </p>
+<p>Control the mute mode of the radio chip. </p>
+<p>Start using the new band for receiving. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newBand</td><td>The new band to be received. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a45356b3d4c28bdf782857942f200530b">RADIO</a>.</p>
 
@@ -1307,8 +1296,14 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Control the bass boost mode of the radio chip. </p>
-<p>BassBoost is not supported by the <a class="el" href="class_s_i4705.html" title="Library to control the SI4705 radio chip. ">SI4705</a> chip. </p>
+<p>regardless of the given parameter, the Bass Boost will never switch on. </p>
+<p>BassBoost is not supported by the <a class="el" href="class_s_i4705.html" title="Library to control the SI4705 radio chip. ">SI4705</a> chip. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">switchOn</td><td>this functions ignores the switchOn parameter and always sets bassBoost to false. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a7b368aa86bd3d343a72509969848a7ae">RADIO</a>.</p>
 
@@ -1339,7 +1334,7 @@ Private Attributes</h2></td></tr>
 The new frequency is stored for later retrieval by the base class.<br />
 Because the chip may change the frequency automatically (when seeking) the stored value might not be the current frequency. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">newF</td><td>is the new frequency. </td></tr>
+    <tr><td class="paramname">newF</td><td>The new frequency to be received. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1372,7 +1367,13 @@ Because the chip may change the frequency automatically (when seeking) the store
 </div><div class="memdoc">
 
 <p>Control mono/stereo mode of the radio chip. </p>
-<p>Control the mono mode of the radio chip In mono mode the stereo decoding will be switched off completely and the noise is typically reduced. </p>
+<p>Control the mono mode of the radio chip In mono mode the stereo decoding will be switched off completely and the noise is typically reduced. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">switchOn</td><td>The new state of the mono mode. True to switch on, false to switch off. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#af0d8929f1e0855073f042f569b721abd">RADIO</a>.</p>
 
@@ -1403,16 +1404,17 @@ Because the chip may change the frequency automatically (when seeking) the store
 <p>Control the mute mode of the radio chip. </p>
 <p>Control the mute mode of the radio chip In mute mode no output will be produced by the radio chip. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">switchOn</td><td>true to switch mute mode on, false to switch mute mode off. </td></tr>
+    <tr><td class="paramname">switchOn</td><td>The new state of the mute mode. True to switch on, false to switch off. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#ae2b57d02f8e17e823962180d45bbc757">RADIO</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a930c2848ec61ff651ffd3b2be4ab1cd3"></a>
+<a class="anchor" id="a86aadd6e85fa039f8022cf863f2f9f00"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -1420,7 +1422,7 @@ Because the chip may change the frequency automatically (when seeking) the store
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void RADIO::setSoftMute </td>
+          <td class="memname">void SI4705::setSoftMute </td>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>switchOn</em></td><td>)</td>
@@ -1429,14 +1431,21 @@ Because the chip may change the frequency automatically (when seeking) the store
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">inherited</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the soft mute mode (mute on low signals) on or off. </p>
+<p>Control the softmute mode (mute on low signals) of the radio chip. </p>
+<p>Control the softmute mode of the radio chip If switched on the radio output is muted when no sender was found. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">switchOn</td><td>The new state of the softmute mode. True to switch on, false to switch off. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
-<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a34b07cedf3ade8c2d8b765ca208bed5c">RDA5807M</a>, and <a class="el" href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">SI4703</a>.</p>
+<p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a930c2848ec61ff651ffd3b2be4ab1cd3">RADIO</a>.</p>
 
 </div>
 </div>
@@ -1462,7 +1471,14 @@ Because the chip may change the frequency automatically (when seeking) the store
 </table>
 </div><div class="memdoc">
 
-<p>set the volume in the range 0..15. This is mapped to the internal range 0..64 </p>
+<p>Control the volume output of the radio chip in the range 0..15. </p>
+<p>This function maps the newVolume value to the range 0..64 that is available in this chip. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newVolume</td><td>The new volume level of audio output. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a0a205807c94edffec17cb17b438587f0">RADIO</a>.</p>
 
@@ -1490,6 +1506,7 @@ Because the chip may change the frequency automatically (when seeking) the store
 </div><div class="memdoc">
 
 <p>Terminate all radio functions in the chip. </p>
+<p>Switch all functions of the chip off by powering down. </p><dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_r_a_d_i_o.html#a2e79c2a50375ce3fb30e384f9edd323f">RADIO</a>.</p>
 
@@ -1782,6 +1799,26 @@ Because the chip may change the frequency automatically (when seeking) the store
 
 </div>
 </div>
+<a class="anchor" id="a280b1a036312c88145e6fb1c4b0b0c94"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t SI4705::agcStatus[1+2]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="aa163d5069c63cfa2ca4e63d22b2c6b4b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1902,7 +1939,7 @@ Because the chip may change the frequency automatically (when seeking) the store
 
 </div>
 </div>
-<a class="anchor" id="a8eaeff70f12ac3558e235696543f50ec"></a>
+<a class="anchor" id="a837210ae5056091e263c0e11b8d7987a"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -1910,7 +1947,7 @@ Because the chip may change the frequency automatically (when seeking) the store
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t RADIO::MAXVOLUME</td>
+          <td class="memname">const uint8_t RADIO::MAXVOLUME = 15</td>
         </tr>
       </table>
   </td>
@@ -1920,7 +1957,7 @@ Because the chip may change the frequency automatically (when seeking) the store
 </table>
 </div><div class="memdoc">
 
-<p>max volume level for the radio implementations </p>
+<p>max volume level for all radio implementations. </p>
 
 </div>
 </div>
@@ -1994,7 +2031,7 @@ Because the chip may change the frequency automatically (when seeking) the store
 
 </div>
 </div>
-<a class="anchor" id="adf41cfc45fd7753b5b3215c6b9c89dba"></a>
+<a class="anchor" id="a8c300a853272ec5d3730f1cf3a058dc3"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -2002,7 +2039,7 @@ Because the chip may change the frequency automatically (when seeking) the store
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t SI4705::rsqStatus[8]</td>
+          <td class="memname">uint8_t SI4705::rsqStatus[1+7]</td>
         </tr>
       </table>
   </td>
@@ -2053,7 +2090,7 @@ Because the chip may change the frequency automatically (when seeking) the store
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Apr 7 2015 22:43:42 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 3 2015 20:27:44 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

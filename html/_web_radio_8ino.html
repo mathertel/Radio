@@ -57,17 +57,16 @@
 <div class="title">WebRadio.ino File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Radio implementation using a web frontend served by the Arduino.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;SPI.h&gt;</code><br />
 <code>#include &lt;Wire.h&gt;</code><br />
 <code>#include &lt;Dhcp.h&gt;</code><br />
 <code>#include &lt;Dns.h&gt;</code><br />
 <code>#include &lt;Ethernet.h&gt;</code><br />
 <code>#include &lt;SD.h&gt;</code><br />
-<code>#include &lt;<a class="el" href="radio_8h_source.html">RADIO.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="_r_d_a5807_m_8h_source.html">RDA5807M.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="_s_i4703_8h_source.html">SI4703.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="_s_i4705_8h_source.html">SI4705.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="_t_e_a5767_8h_source.html">TEA5767.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="_r_d_s_parser_8h_source.html">RDSParser.h</a>&gt;</code><br />
 <code>#include &lt;LiquidCrystal_PCF8574.h&gt;</code><br />
 <code>#include &lt;RotaryEncoder.h&gt;</code><br />
@@ -76,7 +75,7 @@
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a8b076efcb7d42819add694a070ba1012"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a8b076efcb7d42819add694a070ba1012">ENCODER_FALLBACK</a>&#160;&#160;&#160;(3*1000)</td></tr>
-<tr class="memdesc:a8b076efcb7d42819add694a070ba1012"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="_web_radio_8ino.html">WebRadio.ino</a>.  <a href="#a8b076efcb7d42819add694a070ba1012">More...</a><br /></td></tr>
+<tr class="memdesc:a8b076efcb7d42819add694a070ba1012"><td class="mdescLeft">&#160;</td><td class="mdescRight">after 3 seconds no turning fall back to tune mode.  <a href="#a8b076efcb7d42819add694a070ba1012">More...</a><br /></td></tr>
 <tr class="separator:a8b076efcb7d42819add694a070ba1012"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52ec816ebb31da9a8f9adf9ea690afcd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a52ec816ebb31da9a8f9adf9ea690afcd">DEBUGTEXT</a>(txt)&#160;&#160;&#160;{ Serial.print('&gt;'); Serial.println(txt); }</td></tr>
 <tr class="separator:a52ec816ebb31da9a8f9adf9ea690afcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -96,23 +95,24 @@ Macros</h2></td></tr>
 <tr class="separator:a350c9d6cb81908d59427ee96844d1a9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ff6e798033f03e74730e99f01936f84"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a5ff6e798033f03e74730e99f01936f84">SPACE</a>&#160;&#160;&#160;' '</td></tr>
 <tr class="separator:a5ff6e798033f03e74730e99f01936f84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72a591cf0a96cf23c63df5c78712dabe"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a72a591cf0a96cf23c63df5c78712dabe">BUFSIZ</a>&#160;&#160;&#160;80</td></tr>
+<tr class="memitem:ae5f35d2d994b0722205894c04fe95aaa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ae5f35d2d994b0722205894c04fe95aaa">REDIRECT_FNAME</a>&#160;&#160;&#160;&quot;/redirect.htm&quot;</td></tr>
+<tr class="memdesc:ae5f35d2d994b0722205894c04fe95aaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">The filename on the disk that is used when requesting the root of the web.  <a href="#ae5f35d2d994b0722205894c04fe95aaa">More...</a><br /></td></tr>
+<tr class="separator:ae5f35d2d994b0722205894c04fe95aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72a591cf0a96cf23c63df5c78712dabe"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a72a591cf0a96cf23c63df5c78712dabe">BUFSIZ</a>&#160;&#160;&#160;128</td></tr>
 <tr class="separator:a72a591cf0a96cf23c63df5c78712dabe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7131a822829db355090426cae13b76a2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a7131a822829db355090426cae13b76a2">ERR_CARDINIT</a>&#160;&#160;&#160;101</td></tr>
-<tr class="separator:a7131a822829db355090426cae13b76a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59f2ab80c0d9450c00b94af4160f8d43"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a59f2ab80c0d9450c00b94af4160f8d43">ERR_VOLINIT</a>&#160;&#160;&#160;102</td></tr>
-<tr class="separator:a59f2ab80c0d9450c00b94af4160f8d43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a467bafdfecc844e7a5c2ca614403858b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a467bafdfecc844e7a5c2ca614403858b">ERR_OPENROOT</a>&#160;&#160;&#160;103</td></tr>
-<tr class="separator:a467bafdfecc844e7a5c2ca614403858b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cb23a858b0a21bdaa644b9181dc415f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a6cb23a858b0a21bdaa644b9181dc415f">CRLF</a>&#160;&#160;&#160;F(&quot;\r\n&quot;)</td></tr>
+<tr class="separator:a6cb23a858b0a21bdaa644b9181dc415f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b58af261e1b44aae9dc61e3046f3680"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a5b58af261e1b44aae9dc61e3046f3680">HTTP_200_CT</a>&#160;&#160;&#160;F(&quot;HTTP/1.1 200 OK\r\nContent-Type: &quot;)</td></tr>
 <tr class="separator:a5b58af261e1b44aae9dc61e3046f3680"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd864c3273b50429e30d3b0da9dc8fe6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#afd864c3273b50429e30d3b0da9dc8fe6">HTTPERR_404</a>&#160;&#160;&#160;F(&quot;HTTP/1.1 404 Not Found\nContent-Type: text/html\r\n&quot;)</td></tr>
+<tr class="memitem:afd864c3273b50429e30d3b0da9dc8fe6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#afd864c3273b50429e30d3b0da9dc8fe6">HTTPERR_404</a>&#160;&#160;&#160;F(&quot;HTTP/1.1 404 Not Found\r\n&quot;)</td></tr>
 <tr class="separator:afd864c3273b50429e30d3b0da9dc8fe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c75ba0e850fcb86642afc6f13380e79"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a1c75ba0e850fcb86642afc6f13380e79">HTTP_GENERAL</a>&#160;&#160;&#160;F(&quot;Server: Arduino\r\nConnection: close\r\n&quot;)</td></tr>
 <tr class="separator:a1c75ba0e850fcb86642afc6f13380e79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a625dffaf696270702f9cd4061e9acf33"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a625dffaf696270702f9cd4061e9acf33">HTTP_ENDHEAD</a>&#160;&#160;&#160;F(&quot;\r\n&quot;)</td></tr>
+<tr class="memitem:abc6c59b0346d2dc9cb15f6c7cd5f42a8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#abc6c59b0346d2dc9cb15f6c7cd5f42a8">HTTP_NOCACHE</a>&#160;&#160;&#160;F(&quot;Cache-Control: no-cache\r\n&quot;)</td></tr>
+<tr class="separator:abc6c59b0346d2dc9cb15f6c7cd5f42a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a625dffaf696270702f9cd4061e9acf33"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a625dffaf696270702f9cd4061e9acf33">HTTP_ENDHEAD</a>&#160;&#160;&#160;<a class="el" href="_web_radio_8ino.html#a6cb23a858b0a21bdaa644b9181dc415f">CRLF</a></td></tr>
 <tr class="separator:a625dffaf696270702f9cd4061e9acf33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad98f2a66b6d2325858faa040c3991c62"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ad98f2a66b6d2325858faa040c3991c62">HTML_OPEN</a>&#160;&#160;&#160;F(&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&quot;)</td></tr>
+<tr class="memitem:ad98f2a66b6d2325858faa040c3991c62"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ad98f2a66b6d2325858faa040c3991c62">HTML_OPEN</a>&#160;&#160;&#160;&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&quot;</td></tr>
 <tr class="separator:ad98f2a66b6d2325858faa040c3991c62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a252db9e76c3753fedf0108eff75b04c8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a252db9e76c3753fedf0108eff75b04c8">HTML_CLOSE</a>&#160;&#160;&#160;F(&quot;&lt;/body&gt;&lt;/html&gt;&quot;)</td></tr>
 <tr class="separator:a252db9e76c3753fedf0108eff75b04c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,17 +168,37 @@ Functions</h2></td></tr>
 <tr class="memitem:ac36f4ccdf50eb27d67157242d405ef96"><td class="memItemLeft" align="right" valign="top">LiquidCrystal_PCF8574&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ac36f4ccdf50eb27d67157242d405ef96">lcd</a> (0x27)</td></tr>
 <tr class="memdesc:ac36f4ccdf50eb27d67157242d405ef96"><td class="mdescLeft">&#160;</td><td class="mdescRight">get a LCD instance  <a href="#ac36f4ccdf50eb27d67157242d405ef96">More...</a><br /></td></tr>
 <tr class="separator:ac36f4ccdf50eb27d67157242d405ef96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae634c1220b4d3972c2c947841f354f42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ae634c1220b4d3972c2c947841f354f42">respondRadioData</a> ()</td></tr>
-<tr class="separator:ae634c1220b4d3972c2c947841f354f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4275ff1f2351f410cf3c14dbe44c2392"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="_web_radio_8ino.html#ab99d7af73b3898a672966e7f986abe5d">WebServerState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a4275ff1f2351f410cf3c14dbe44c2392">__attribute__</a> ((packed))</td></tr>
 <tr class="separator:a4275ff1f2351f410cf3c14dbe44c2392"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa26bd0f0bdc5e4c3948e403b7ba4c084"><td class="memItemLeft" align="right" valign="top">EthernetServer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#aa26bd0f0bdc5e4c3948e403b7ba4c084">server</a> (80)</td></tr>
 <tr class="separator:aa26bd0f0bdc5e4c3948e403b7ba4c084"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
-<tr class="memdesc:a4fc01d736fe50cf5b977f755b675f11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">--&mdash; Main functions <a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="--— Main functions setup() and loop() --— ">setup()</a> and <a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> --&mdash;  <a href="#a4fc01d736fe50cf5b977f755b675f11d">More...</a><br /></td></tr>
-<tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
-<tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab054d0bb579e55cc398e9808f4ec2991"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ab054d0bb579e55cc398e9808f4ec2991">runRadioJSONCommand</a> (char *cmd, int16_t value)</td></tr>
+<tr class="memdesc:ab054d0bb579e55cc398e9808f4ec2991"><td class="mdescLeft">&#160;</td><td class="mdescRight">--&mdash; forwards --&mdash;  <a href="#ab054d0bb579e55cc398e9808f4ec2991">More...</a><br /></td></tr>
+<tr class="separator:ab054d0bb579e55cc398e9808f4ec2991"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a597c62589eedd103d0766863a9925e9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a597c62589eedd103d0766863a9925e9c">runRadioSerialCommand</a> (char cmd, int16_t value)</td></tr>
+<tr class="separator:a597c62589eedd103d0766863a9925e9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa39131205ee0bc5bc10475636c635ebf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#aa39131205ee0bc5bc10475636c635ebf">setupRadio</a> ()</td></tr>
+<tr class="memdesc:aa39131205ee0bc5bc10475636c635ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup a FM only radio configuration with I/O for commands and debugging on the Serial port.  <a href="#aa39131205ee0bc5bc10475636c635ebf">More...</a><br /></td></tr>
+<tr class="separator:aa39131205ee0bc5bc10475636c635ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7bbf5477e9a713f6e9ecbf80d5dd09d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ae7bbf5477e9a713f6e9ecbf80d5dd09d">loopRadio</a> (unsigned long now)</td></tr>
+<tr class="memdesc:ae7bbf5477e9a713f6e9ecbf80d5dd09d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check once new radio data.  <a href="#ae7bbf5477e9a713f6e9ecbf80d5dd09d">More...</a><br /></td></tr>
+<tr class="separator:ae7bbf5477e9a713f6e9ecbf80d5dd09d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae634c1220b4d3972c2c947841f354f42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ae634c1220b4d3972c2c947841f354f42">respondRadioData</a> ()</td></tr>
+<tr class="separator:ae634c1220b4d3972c2c947841f354f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8ec0d7f821ab846edd0f172bdbcb01d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ac8ec0d7f821ab846edd0f172bdbcb01d">loopSerial</a> (unsigned long now)</td></tr>
+<tr class="memdesc:ac8ec0d7f821ab846edd0f172bdbcb01d"><td class="mdescLeft">&#160;</td><td class="mdescRight">setupSerial  <a href="#ac8ec0d7f821ab846edd0f172bdbcb01d">More...</a><br /></td></tr>
+<tr class="separator:ac8ec0d7f821ab846edd0f172bdbcb01d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab62ffc4853a0e46b3826d0b409128a8b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ab62ffc4853a0e46b3826d0b409128a8b">loopWebServer</a> (unsigned long now)</td></tr>
+<tr class="separator:ab62ffc4853a0e46b3826d0b409128a8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf096d3578f1ccc1d96023e72ed5a34e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#abf096d3578f1ccc1d96023e72ed5a34e">loopButtons</a> (unsigned long now)</td></tr>
+<tr class="memdesc:abf096d3578f1ccc1d96023e72ed5a34e"><td class="mdescLeft">&#160;</td><td class="mdescRight">&ndash;&mdash; Rotary encoder and buttons &ndash;&mdash;  <a href="#abf096d3578f1ccc1d96023e72ed5a34e">More...</a><br /></td></tr>
+<tr class="separator:abf096d3578f1ccc1d96023e72ed5a34e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90528caab2c5dc2c32f19333b016ae00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a90528caab2c5dc2c32f19333b016ae00">setupLCD</a> ()</td></tr>
+<tr class="memdesc:a90528caab2c5dc2c32f19333b016ae00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup the LCD display.  <a href="#a90528caab2c5dc2c32f19333b016ae00">More...</a><br /></td></tr>
+<tr class="separator:a90528caab2c5dc2c32f19333b016ae00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a365c455e5ce8807a8cf39aa03e88c442"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a365c455e5ce8807a8cf39aa03e88c442">loopLCD</a> (unsigned long now)</td></tr>
+<tr class="memdesc:a365c455e5ce8807a8cf39aa03e88c442"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constantly check for new LCD data to be displayed.  <a href="#a365c455e5ce8807a8cf39aa03e88c442">More...</a><br /></td></tr>
+<tr class="separator:a365c455e5ce8807a8cf39aa03e88c442"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d827f63cfc88614434d1721047a7913"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a0d827f63cfc88614434d1721047a7913">_ctFind</a> (char *table, char *key)</td></tr>
 <tr class="memdesc:a0d827f63cfc88614434d1721047a7913"><td class="mdescLeft">&#160;</td><td class="mdescRight">&ndash;&mdash; Web Server interface &ndash;&mdash;  <a href="#a0d827f63cfc88614434d1721047a7913">More...</a><br /></td></tr>
 <tr class="separator:a0d827f63cfc88614434d1721047a7913"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,6 +206,12 @@ Functions</h2></td></tr>
 <tr class="separator:a5c727265735c2e307a82c6905c537f38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d950fab363483c560d71ee55fd1369f"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a5d950fab363483c560d71ee55fd1369f">_ctCopyWord</a> (char *text, char *word, int len)</td></tr>
 <tr class="separator:a5d950fab363483c560d71ee55fd1369f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f26fb295f4fbbbf81c29bdd98535978"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a9f26fb295f4fbbbf81c29bdd98535978">appendText</a> (char *buffer, char *txt)</td></tr>
+<tr class="separator:a9f26fb295f4fbbbf81c29bdd98535978"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43f430407107558b7b9dfd7f08505a1e"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a43f430407107558b7b9dfd7f08505a1e">appendString</a> (char *buffer, char *txt)</td></tr>
+<tr class="separator:a43f430407107558b7b9dfd7f08505a1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a706ce93215c91b5867a311937b1b7bff"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a706ce93215c91b5867a311937b1b7bff">appendNumber</a> (char *buffer, int value)</td></tr>
+<tr class="separator:a706ce93215c91b5867a311937b1b7bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf0c492c0912ed60dbc7d886864e96dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#adf0c492c0912ed60dbc7d886864e96dd">respondHeaderContentType</a> (char *type)</td></tr>
 <tr class="separator:adf0c492c0912ed60dbc7d886864e96dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4901fd8bfc236f676495b46edfcc70a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a4901fd8bfc236f676495b46edfcc70a7">respondHeaderNotFound</a> ()</td></tr>
@@ -195,13 +221,13 @@ Functions</h2></td></tr>
 <tr class="memitem:a38014e438334f1c02a646f7a8d2ee317"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a38014e438334f1c02a646f7a8d2ee317">respondSystemInfo</a> ()</td></tr>
 <tr class="separator:a38014e438334f1c02a646f7a8d2ee317"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f90b881f628552ee62acbf457bebca3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a1f90b881f628552ee62acbf457bebca3">readRequestLine</a> ()</td></tr>
+<tr class="memdesc:a1f90b881f628552ee62acbf457bebca3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read one line of text from _client into the _readBuffer.  <a href="#a1f90b881f628552ee62acbf457bebca3">More...</a><br /></td></tr>
 <tr class="separator:a1f90b881f628552ee62acbf457bebca3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3be532ecabf61c484912b96797b96b03"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a3be532ecabf61c484912b96797b96b03">respondFileContent</a> ()</td></tr>
-<tr class="separator:a3be532ecabf61c484912b96797b96b03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab62ffc4853a0e46b3826d0b409128a8b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ab62ffc4853a0e46b3826d0b409128a8b">loopWebServer</a> (unsigned long now)</td></tr>
-<tr class="separator:ab62ffc4853a0e46b3826d0b409128a8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b31d0160765d1e7cfd47dfb1c89b5a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a2b31d0160765d1e7cfd47dfb1c89b5a6">respondFileContent</a> (char *fName)</td></tr>
+<tr class="memdesc:a2b31d0160765d1e7cfd47dfb1c89b5a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Responds the content of a file from the SD disk given by fName.  <a href="#a2b31d0160765d1e7cfd47dfb1c89b5a6">More...</a><br /></td></tr>
+<tr class="separator:a2b31d0160765d1e7cfd47dfb1c89b5a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9bebeec197521d5a28a0671f8071e314"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a9bebeec197521d5a28a0671f8071e314">DisplayFrequency</a> ()</td></tr>
-<tr class="memdesc:a9bebeec197521d5a28a0671f8071e314"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the Frequency on the LCD display.  <a href="#a9bebeec197521d5a28a0671f8071e314">More...</a><br /></td></tr>
+<tr class="memdesc:a9bebeec197521d5a28a0671f8071e314"><td class="mdescLeft">&#160;</td><td class="mdescRight">&ndash;&mdash; LCD functions &ndash;&mdash;  <a href="#a9bebeec197521d5a28a0671f8071e314">More...</a><br /></td></tr>
 <tr class="separator:a9bebeec197521d5a28a0671f8071e314"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4f037307e99a514d009f3560c0e785c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#af4f037307e99a514d009f3560c0e785c">DisplayServiceName</a> (char *name)</td></tr>
 <tr class="separator:af4f037307e99a514d009f3560c0e785c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -217,6 +243,12 @@ Functions</h2></td></tr>
 <tr class="memitem:abcdd2c16f0d6f1bb446fc922cc9c11e1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#abcdd2c16f0d6f1bb446fc922cc9c11e1">DisplaySoftMute</a> (uint8_t v)</td></tr>
 <tr class="memdesc:abcdd2c16f0d6f1bb446fc922cc9c11e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Display the current soft mute switch.  <a href="#abcdd2c16f0d6f1bb446fc922cc9c11e1">More...</a><br /></td></tr>
 <tr class="separator:abcdd2c16f0d6f1bb446fc922cc9c11e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af295e34dc944f7cc9efe5c4941d264d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#af295e34dc944f7cc9efe5c4941d264d9">respondJSONObject</a> (char *name, char *value, bool lastValue=false)</td></tr>
+<tr class="memdesc:af295e34dc944f7cc9efe5c4941d264d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The JSON functions use the _writeBuffer to contruct the complete text before writing.  <a href="#af295e34dc944f7cc9efe5c4941d264d9">More...</a><br /></td></tr>
+<tr class="separator:af295e34dc944f7cc9efe5c4941d264d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93234f3096e902043952579dda8f7219"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a93234f3096e902043952579dda8f7219">respondJSONObject</a> (char *name, int value, bool lastValue=false)</td></tr>
+<tr class="memdesc:a93234f3096e902043952579dda8f7219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a JSON object to the client.  <a href="#a93234f3096e902043952579dda8f7219">More...</a><br /></td></tr>
+<tr class="separator:a93234f3096e902043952579dda8f7219"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0806de6ac0e3f8c42f0b9675407f223f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a0806de6ac0e3f8c42f0b9675407f223f">RDS_process</a> (uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4)</td></tr>
 <tr class="separator:a0806de6ac0e3f8c42f0b9675407f223f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afee84672ec762b8cac9f4b3b83754032"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#afee84672ec762b8cac9f4b3b83754032">doMenuClick</a> ()</td></tr>
@@ -225,28 +257,11 @@ Functions</h2></td></tr>
 <tr class="separator:abbc8bb02c4d7dba50f7733ae86018aae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c4665742c6b6eb1f0bb9dde41f7cba3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a9c4665742c6b6eb1f0bb9dde41f7cba3">ISR</a> (PCINT2_vect)</td></tr>
 <tr class="separator:a9c4665742c6b6eb1f0bb9dde41f7cba3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa39131205ee0bc5bc10475636c635ebf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#aa39131205ee0bc5bc10475636c635ebf">setupRadio</a> ()</td></tr>
-<tr class="memdesc:aa39131205ee0bc5bc10475636c635ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup a FM only radio configuration with I/O for commands and debugging on the Serial port.  <a href="#aa39131205ee0bc5bc10475636c635ebf">More...</a><br /></td></tr>
-<tr class="separator:aa39131205ee0bc5bc10475636c635ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7bbf5477e9a713f6e9ecbf80d5dd09d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ae7bbf5477e9a713f6e9ecbf80d5dd09d">loopRadio</a> (unsigned long now)</td></tr>
-<tr class="memdesc:ae7bbf5477e9a713f6e9ecbf80d5dd09d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check once new radio data.  <a href="#ae7bbf5477e9a713f6e9ecbf80d5dd09d">More...</a><br /></td></tr>
-<tr class="separator:ae7bbf5477e9a713f6e9ecbf80d5dd09d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f8a6f95c4b7f00bd361fd7a2537b5da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a0f8a6f95c4b7f00bd361fd7a2537b5da">runRadioCommand</a> (char *cmd, int16_t value)</td></tr>
-<tr class="separator:a0f8a6f95c4b7f00bd361fd7a2537b5da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8ec0d7f821ab846edd0f172bdbcb01d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ac8ec0d7f821ab846edd0f172bdbcb01d">loopSerial</a> (unsigned long now)</td></tr>
-<tr class="memdesc:ac8ec0d7f821ab846edd0f172bdbcb01d"><td class="mdescLeft">&#160;</td><td class="mdescRight">setupSerial  <a href="#ac8ec0d7f821ab846edd0f172bdbcb01d">More...</a><br /></td></tr>
-<tr class="separator:ac8ec0d7f821ab846edd0f172bdbcb01d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e498aeaa655269871e0af4600327998"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a2e498aeaa655269871e0af4600327998">runSerialCommand</a> (char cmd, int16_t value)</td></tr>
-<tr class="separator:a2e498aeaa655269871e0af4600327998"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf096d3578f1ccc1d96023e72ed5a34e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#abf096d3578f1ccc1d96023e72ed5a34e">loopButtons</a> (unsigned long now)</td></tr>
-<tr class="memdesc:abf096d3578f1ccc1d96023e72ed5a34e"><td class="mdescLeft">&#160;</td><td class="mdescRight">&ndash;&mdash; Rotary encoder and buttons &ndash;&mdash;  <a href="#abf096d3578f1ccc1d96023e72ed5a34e">More...</a><br /></td></tr>
-<tr class="separator:abf096d3578f1ccc1d96023e72ed5a34e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90528caab2c5dc2c32f19333b016ae00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a90528caab2c5dc2c32f19333b016ae00">setupLCD</a> ()</td></tr>
-<tr class="memdesc:a90528caab2c5dc2c32f19333b016ae00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup the LCD display.  <a href="#a90528caab2c5dc2c32f19333b016ae00">More...</a><br /></td></tr>
-<tr class="separator:a90528caab2c5dc2c32f19333b016ae00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a365c455e5ce8807a8cf39aa03e88c442"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a365c455e5ce8807a8cf39aa03e88c442">loopLCD</a> (unsigned long now)</td></tr>
-<tr class="memdesc:a365c455e5ce8807a8cf39aa03e88c442"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constantly check for new LCD data to be displayed.  <a href="#a365c455e5ce8807a8cf39aa03e88c442">More...</a><br /></td></tr>
-<tr class="separator:a365c455e5ce8807a8cf39aa03e88c442"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
+<tr class="memdesc:a4fc01d736fe50cf5b977f755b675f11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">--&mdash; Main functions <a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="--— Main functions setup() and loop() --— ">setup()</a> and <a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> --&mdash;  <a href="#a4fc01d736fe50cf5b977f755b675f11d">More...</a><br /></td></tr>
+<tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
+<tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -269,7 +284,7 @@ Variables</h2></td></tr>
 <tr class="memitem:a6357191562b29f82853a2efe1d28edcf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_i4705.html">SI4705</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a6357191562b29f82853a2efe1d28edcf">radio</a></td></tr>
 <tr class="separator:a6357191562b29f82853a2efe1d28edcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4dde7052e7f746987e2101760af8fc3d"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a4dde7052e7f746987e2101760af8fc3d">nextFreqTime</a> = 0</td></tr>
-<tr class="memdesc:a4dde7052e7f746987e2101760af8fc3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">next time for lcd update the frequency  <a href="#a4dde7052e7f746987e2101760af8fc3d">More...</a><br /></td></tr>
+<tr class="memdesc:a4dde7052e7f746987e2101760af8fc3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">next time for lcd update the frequency.  <a href="#a4dde7052e7f746987e2101760af8fc3d">More...</a><br /></td></tr>
 <tr class="separator:a4dde7052e7f746987e2101760af8fc3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea562b79ff18af9328153ff554d131b1"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#aea562b79ff18af9328153ff554d131b1">nextRadioInfoTime</a> = 0</td></tr>
 <tr class="memdesc:aea562b79ff18af9328153ff554d131b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">next time for lcd update the radio information  <a href="#aea562b79ff18af9328153ff554d131b1">More...</a><br /></td></tr>
@@ -305,27 +320,36 @@ Variables</h2></td></tr>
 <tr class="memitem:afec3dc87f5f12eed8fdac75af2b01f3f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_web_radio_8ino.html#ab99d7af73b3898a672966e7f986abe5d">WebServerState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#afec3dc87f5f12eed8fdac75af2b01f3f">webstate</a></td></tr>
 <tr class="separator:afec3dc87f5f12eed8fdac75af2b01f3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d1905542935f3989ce48be5e5d376ba"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a9d1905542935f3989ce48be5e5d376ba">_readBuffer</a> [<a class="el" href="_web_radio_8ino.html#a72a591cf0a96cf23c63df5c78712dabe">BUFSIZ</a>]</td></tr>
+<tr class="memdesc:a9d1905542935f3989ce48be5e5d376ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">a buffer that is used to read a line from the request header and for reading file content.  <a href="#a9d1905542935f3989ce48be5e5d376ba">More...</a><br /></td></tr>
 <tr class="separator:a9d1905542935f3989ce48be5e5d376ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4e25c35ecc14619395d1f11a31f024b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ad4e25c35ecc14619395d1f11a31f024b">_writeBuffer</a> [<a class="el" href="_web_radio_8ino.html#a72a591cf0a96cf23c63df5c78712dabe">BUFSIZ</a>]</td></tr>
+<tr class="memdesc:ad4e25c35ecc14619395d1f11a31f024b"><td class="mdescLeft">&#160;</td><td class="mdescRight">a buffer that is used to compose a line for the reponse.  <a href="#ad4e25c35ecc14619395d1f11a31f024b">More...</a><br /></td></tr>
+<tr class="separator:ad4e25c35ecc14619395d1f11a31f024b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae9ee7df0fdd0fb2dc94428f21b809df"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#aae9ee7df0fdd0fb2dc94428f21b809df">_httpVerb</a> [6]</td></tr>
 <tr class="separator:aae9ee7df0fdd0fb2dc94428f21b809df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac630fbde9b3df97b7d45175dcba0df57"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ac630fbde9b3df97b7d45175dcba0df57">_httpURI</a> [40]</td></tr>
 <tr class="separator:ac630fbde9b3df97b7d45175dcba0df57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a075aa617a944c0c55dabafe54ae3c31b"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a075aa617a944c0c55dabafe54ae3c31b">_fileType</a></td></tr>
-<tr class="separator:a075aa617a944c0c55dabafe54ae3c31b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36bb890f9180282fe331df3cba265b25"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a36bb890f9180282fe331df3cba265b25">_httpContentType</a> [28]</td></tr>
-<tr class="separator:a36bb890f9180282fe331df3cba265b25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab620209f3c12089dae9c82a889557833"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#ab620209f3c12089dae9c82a889557833">_httpContentLen</a></td></tr>
 <tr class="separator:ab620209f3c12089dae9c82a889557833"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04284a6711f66caf6c351007f90d935e"><td class="memItemLeft" align="right" valign="top">SdFile&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a04284a6711f66caf6c351007f90d935e">root</a></td></tr>
-<tr class="separator:a04284a6711f66caf6c351007f90d935e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Macro Definition Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Radio implementation using a web frontend served by the Arduino. </p>
+<dl class="section author"><dt>Author</dt><dd>Matthias Hertel, <a href="http://www.mathertel.de">http://www.mathertel.de</a> </dd></dl>
+<dl class="section copyright"><dt>Copyright</dt><dd>Copyright (c) 2014 by Matthias Hertel.<br />
+This work is licensed under a BSD style license.<br />
+See <a href="http://www.mathertel.de/License.aspx">http://www.mathertel.de/License.aspx</a></dd></dl>
+<p>This is a full function radio implementation ...<br />
+The web site is stored on the SD card. You can find the web content I used in the web folder.<br />
+It can be used with various chips after adjusting the radio object definition.<br />
+ </p><h2>Wiring </h2>
+<p>The hardware setup for this sketch is: Arduino MEGA board with Ethernet shield on top. Arduino UNO has not enough memory. A 2*16 LCD Display in the I2C bus using a PCF8574 board with address 0x27. A Rotary encoder with the data pins on A8 and A9. A Rotary encoder press function on pin A10. A button for scanning upwards on pin A11. </p>
+</div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="a72a591cf0a96cf23c63df5c78712dabe"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BUFSIZ&#160;&#160;&#160;80</td>
+          <td class="memname">#define BUFSIZ&#160;&#160;&#160;128</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -338,6 +362,18 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define CR&#160;&#160;&#160;'\r'</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a6cb23a858b0a21bdaa644b9181dc415f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CRLF&#160;&#160;&#160;F(&quot;\r\n&quot;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -464,49 +500,16 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="_web_radio_8ino.html">WebRadio.ino</a>. </p>
-<h2>History: </h2>
+<p>after 3 seconds no turning fall back to tune mode. </p>
+<h2>ChangeLog: </h2>
 <ul>
 <li>06.11.2014 created.</li>
 <li>22.11.2014 working.</li>
-<li>07.02.2015 more complete implementation after 3 seconds no turning fall back to tune mode. </li>
+<li>07.02.2015 more complete implementation</li>
+<li>14.02.2015 works with no ethernet available (start radio first then Internet but slow).</li>
+<li>17.04.2015 Return JSON format.</li>
+<li>01.05.2015 faster WebServer responses by using a buffer. </li>
 </ul>
-
-</div>
-</div>
-<a class="anchor" id="a7131a822829db355090426cae13b76a2"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ERR_CARDINIT&#160;&#160;&#160;101</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a467bafdfecc844e7a5c2ca614403858b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ERR_OPENROOT&#160;&#160;&#160;103</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a59f2ab80c0d9450c00b94af4160f8d43"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ERR_VOLINIT&#160;&#160;&#160;102</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>
@@ -527,7 +530,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define HTML_OPEN&#160;&#160;&#160;F(&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&quot;)</td>
+          <td class="memname">#define HTML_OPEN&#160;&#160;&#160;&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -551,7 +554,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define HTTP_ENDHEAD&#160;&#160;&#160;F(&quot;\r\n&quot;)</td>
+          <td class="memname">#define HTTP_ENDHEAD&#160;&#160;&#160;<a class="el" href="_web_radio_8ino.html#a6cb23a858b0a21bdaa644b9181dc415f">CRLF</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -570,12 +573,24 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="abc6c59b0346d2dc9cb15f6c7cd5f42a8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HTTP_NOCACHE&#160;&#160;&#160;F(&quot;Cache-Control: no-cache\r\n&quot;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="afd864c3273b50429e30d3b0da9dc8fe6"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define HTTPERR_404&#160;&#160;&#160;F(&quot;HTTP/1.1 404 Not Found\nContent-Type: text/html\r\n&quot;)</td>
+          <td class="memname">#define HTTPERR_404&#160;&#160;&#160;F(&quot;HTTP/1.1 404 Not Found\r\n&quot;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -603,6 +618,20 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae5f35d2d994b0722205894c04fe95aaa"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define REDIRECT_FNAME&#160;&#160;&#160;&quot;/redirect.htm&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The filename on the disk that is used when requesting the root of the web. </p>
 
 </div>
 </div>
@@ -799,6 +828,87 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a706ce93215c91b5867a311937b1b7bff"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* appendNumber </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Append a numeric value at the given buffer. Return new end of buffer. </p>
+
+</div>
+</div>
+<a class="anchor" id="a43f430407107558b7b9dfd7f08505a1e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* appendString </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>txt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Append a string with enclosing quotes at the given buffer. Return new end of buffer. </p>
+
+</div>
+</div>
+<a class="anchor" id="a9f26fb295f4fbbbf81c29bdd98535978"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* appendText </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>txt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Append a text at the given buffer. Return new end of buffer. </p>
+
+</div>
+</div>
 <a class="anchor" id="a9bebeec197521d5a28a0671f8071e314"></a>
 <div class="memitem">
 <div class="memproto">
@@ -812,6 +922,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>&ndash;&mdash; LCD functions &ndash;&mdash; </p>
 <p>Update the Frequency on the LCD display. </p>
 
 </div>
@@ -1125,6 +1236,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>This is the main webserver routine. Constantly look for incomming webserver requests and answer them... </p>
 
 </div>
 </div>
@@ -1207,20 +1319,25 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Read one line of text from _client into the _readBuffer. </p>
+
 </div>
 </div>
-<a class="anchor" id="a3be532ecabf61c484912b96797b96b03"></a>
+<a class="anchor" id="a2b31d0160765d1e7cfd47dfb1c89b5a6"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void respondFileContent </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>fName</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Responds the content of a file from the SD disk given by fName. </p>
 
 </div>
 </div>
@@ -1270,6 +1387,75 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af295e34dc944f7cc9efe5c4941d264d9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void respondJSONObject </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>lastValue</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The JSON functions use the _writeBuffer to contruct the complete text before writing. </p>
+<p>Send a JSON object to the client. </p>
+
+</div>
+</div>
+<a class="anchor" id="a93234f3096e902043952579dda8f7219"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void respondJSONObject </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>lastValue</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Send a JSON object to the client. </p>
+
+</div>
+</div>
 <a class="anchor" id="ae634c1220b4d3972c2c947841f354f42"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1282,8 +1468,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Response to a $info request and return all information of the current radio operation. Format all data to the format NAME blank VALUE<br />
-. </p>
+<p>Response to a $info request and return all information of the current radio operation. Format al data as in JSON Format.<br />
+ </p>
 
 </div>
 </div>
@@ -1302,12 +1488,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0f8a6f95c4b7f00bd361fd7a2537b5da"></a>
+<a class="anchor" id="ab054d0bb579e55cc398e9808f4ec2991"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void runRadioCommand </td>
+          <td class="memname">void runRadioJSONCommand </td>
           <td>(</td>
           <td class="paramtype">char *&#160;</td>
           <td class="paramname"><em>cmd</em>, </td>
@@ -1325,6 +1511,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>--&mdash; forwards --&mdash; </p>
 <p>Execute a command identified by a character and an optional number. See the "?" command for available commands. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cmd</td><td>The command word. </td></tr>
@@ -1335,12 +1523,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a2e498aeaa655269871e0af4600327998"></a>
+<a class="anchor" id="a597c62589eedd103d0766863a9925e9c"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void runSerialCommand </td>
+          <td class="memname">void runRadioSerialCommand </td>
           <td>(</td>
           <td class="paramtype">char&#160;</td>
           <td class="paramname"><em>cmd</em>, </td>
@@ -1358,6 +1546,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>interpret a command for the radio chip used on the Serial input. It's a single char command and an optional numeric value. See help output on the '?' command for syntax. </p>
 
 </div>
 </div>
@@ -1469,36 +1658,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a075aa617a944c0c55dabafe54ae3c31b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char* _fileType</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="ab620209f3c12089dae9c82a889557833"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">int _httpContentLen</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a36bb890f9180282fe331df3cba265b25"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char _httpContentType[28]</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1538,6 +1703,22 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>a buffer that is used to read a line from the request header and for reading file content. </p>
+
+</div>
+</div>
+<a class="anchor" id="ad4e25c35ecc14619395d1f11a31f024b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char _writeBuffer[<a class="el" href="_web_radio_8ino.html#a72a591cf0a96cf23c63df5c78712dabe">BUFSIZ</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>a buffer that is used to compose a line for the reponse. </p>
 
 </div>
 </div>
@@ -1636,7 +1817,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>next time for lcd update the frequency </p>
+<p>next time for lcd update the frequency. </p>
 
 </div>
 </div>
@@ -1798,18 +1979,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a04284a6711f66caf6c351007f90d935e"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">SdFile root</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="ae6bb7ee43b77a3cea104196ef14a7260"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1875,7 +2044,7 @@ Variables</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Apr 7 2015 22:43:41 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 3 2015 20:27:44 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>
