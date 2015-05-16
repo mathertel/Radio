@@ -20,7 +20,7 @@
 /// A Rotary encoder press function on pin A10.
 /// A button for scanning upwards on pin A11.
 
-/// ChangeLog:
+/// ChangeLog: 
 /// ----------
 /// * 06.11.2014 created.
 /// * 22.11.2014 working.
@@ -28,6 +28,7 @@
 /// * 14.02.2015 works with no ethernet available (start radio first then Internet but slow).
 /// * 17.04.2015 Return JSON format.
 /// * 01.05.2015 faster WebServer responses by using a buffer.
+/// * 16.05.2015 Using StringBuffer to collect output at several places for reducing net packages.
 
 // There are several tasks that have to be done when the radio is running.
 // Therefore all these tasks are handled this way:
@@ -59,8 +60,9 @@
 #include <RotaryEncoder.h>
 #include <OneButton.h>
 
-#define  ENCODER_FALLBACK (3*1000)  ///< after 3 seconds no turning fall back to tune mode.
+#include "StringBuffer.h"
 
+#define  ENCODER_FALLBACK (3*1000)  ///< after 3 seconds no turning fall back to tune mode.
 
 RADIO_FREQ preset[] = {
   8770,
@@ -188,7 +190,7 @@ http://WIZnetEFFEED/$list
 #define REDIRECT_FNAME "/redirect.htm" ///< The filename on the disk that is used when requesting the root of the web.
 
 // How big our line buffer should be. 80 is plenty!
-#define BUFSIZ 128
+#define BUFSIZ 256
 
 enum WebServerState {
   WEBSERVER_OFF,    // not running
@@ -242,6 +244,8 @@ int _httpContentLen;
 
 #define CRLF F("\r\n")
 
+#define HTTP_200      F("HTTP/1.1 200 OK\r\n")
+#define HTTP_CT       F("Content-Type: ")
 #define HTTP_200_CT   F("HTTP/1.1 200 OK\r\nContent-Type: ")
 #define HTTPERR_404   F("HTTP/1.1 404 Not Found\r\n")
 #define HTTP_GENERAL  F("Server: Arduino\r\nConnection: close\r\n")
@@ -368,82 +372,33 @@ char *_ctCopyWord(char *text, char *word, int len)
 } // _ctCopyWord()
 
 
-/// Append a text at the given buffer.
-/// Return new end of buffer.
-char *appendText(char *buffer, char *txt)
-{
-  while (*txt) {
-    *buffer++ = *txt++;
-  }
-  *buffer = NUL;
-  return(buffer);
-} // appendText()
-
-
-/// Append a string with enclosing quotes at the given buffer.
-/// Return new end of buffer.
-char *appendString(char *buffer, char *txt)
-{
-  *buffer++ = '\"';
-  while (*txt) {
-    *buffer++ = *txt++;
-  }
-  *buffer++ = '\"';
-  *buffer = NUL;
-  return(buffer);
-} // appendString()
-
-
-/// Append a numeric value at the given buffer.
-/// Return new end of buffer.
-char *appendNumber(char *buffer, int value) {
-  char    digits[8];
-  uint8_t n = 0;
-
-  if (value < 0) {
-    // Add a minus sign on negative values.
-    *buffer++ = '-';
-    value = -value;
-  } else if (value == 0) {
-    // adda zero if no digits
-    *buffer++ = '0';
-  }// if
-
-  // extract digits in reverse order
-  while (value > 0) {
-    digits[n++] = value % 10;
-    value /= 10;
-  } // while
-
-  // copy digits to string.
-  while (n > 0) *buffer++ = '0' + digits[--n];
-  *buffer = NUL;
-  return(buffer);
-} // appendNumber();
-
-
-
-
 // ----- Respond Header functions -----
 // One call of these function is used to send back a valid reponse header with content type or error information.
 
-// Response ok and send the content type.
-void respondHeaderContentType(char *type)
+
+// Response no and send not found html
+void respond404NotFound()
 {
-  // DEBUGFUNC0("respondHeaderContentType");
-  _client.print(HTTP_200_CT); _client.print(type); _client.print(CRLF);
-  _client.print(HTTP_GENERAL);
-} // respondHeaderContentType()
+  // DEBUGFUNC0("respond404NotFound");
+  StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
+  sout.append(HTTPERR_404);
+  sout.append(HTTP_GENERAL);
+  sout.append(HTTP_ENDHEAD);
+  _client.print(_writeBuffer);
+} // respond404NotFound()
 
 
 // Response no and send not found html
-void respondHeaderNotFound()
+void respondEmptyFile()
 {
-  DEBUGFUNC0("respondHeaderNotFound");
-  _client.print(HTTPERR_404);
-  _client.print(HTTP_GENERAL);
-  _client.print(HTTP_ENDHEAD);
-} // respondHeaderNotFound()
+  // DEBUGFUNC0("respondEmptyFile");
+  StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
+  sout.append(HTTP_200_CT); sout.append("text/html"); sout.append(CRLF);
+  sout.append(HTTP_GENERAL);
+  sout.append("Content-Length: 0\r\n");
+  sout.append(HTTP_ENDHEAD);
+  _client.print(_writeBuffer);
+} // respondEmptyFile()
 
 
 // ----- Respond special data -----
@@ -453,15 +408,19 @@ void respondHeaderNotFound()
 // The root.ls call needs a lot of stack space to complete so probably this will not work on Arduino Uno.
 void respondFileList()
 {
+  StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
   char *p;
-  respondHeaderContentType("text/html");
-  _client.print(HTTP_ENDHEAD);
 
-  p = _writeBuffer;
-  p = appendText(p, HTML_OPEN);
-  p = appendText(p, "<h2>Files on SD:</h2>");
-  p = appendText(p, "<pre>");
-  _client.write(_writeBuffer);
+  // send out a header
+  sout.append(HTTP_200_CT); sout.append("text/html"); sout.append(CRLF);
+  sout.append(HTTP_GENERAL);
+  sout.append(HTTP_ENDHEAD);
+  _client.print(_writeBuffer);
+
+  sout.clear();
+  sout.append(HTML_OPEN);
+  sout.append("<h2>Files on SD:</h2>");
+  sout.append("<pre>");
 
   // Recursive list of all directories
   File dir = SD.open("/");
@@ -470,24 +429,31 @@ void respondFileList()
 
     if (!entry) break; // no more files 
       
-    p = _writeBuffer;
-    p = appendText(p, entry.name());
-    p = appendText(p, "\t");
+    sout.append(entry.name());
+    sout.append("\t");
 
     if (entry.isDirectory()) {
-      p = appendText(p, "&lt;dir&gt;"); 
+      sout.append("&lt;dir&gt;");
     } else {
       // files have sizes
-      p = appendNumber(p, entry.size());
+      sout.append(entry.size());
     }
-    p = appendText(p, "\r\n");
-    _client.write(_writeBuffer);
+    sout.append("\r\n");
+
+    // flush buffer out when filled.
+    if (sout.getLength() > BUFSIZ - 32) {
+      _client.print(_writeBuffer);
+      sout.clear();
+    }
+
     entry.close();
   } // while ()
   dir.close();
 
-  _client.write("</pre>");
-  _client.print(HTML_CLOSE);
+  sout.append("</pre>");
+  sout.append(HTML_CLOSE);
+  _client.print(_writeBuffer);
+
 } // respondFileList()
 
 
@@ -495,14 +461,18 @@ void respondFileList()
 // Send some system information to the client
 void respondSystemInfo()
 {
-  respondHeaderContentType("text/html");
-  _client.print(HTTP_ENDHEAD);
+  StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
+  sout.append(HTTP_200_CT); sout.append("text/html"); sout.append(CRLF);
+  sout.append(HTTP_GENERAL);
+  sout.append(HTTP_ENDHEAD);
 
-  _client.print(HTML_OPEN);
-  _client.print("<pre>");
-  _client.print("Free RAM: ");    _client.println(FreeRam());
-  _client.print("</pre>");
-  _client.print(HTML_CLOSE);
+  sout.append(HTML_OPEN);
+  sout.append("<pre>");
+  sout.append("Free RAM: ");  sout.append(FreeRam());
+  sout.append("</pre>");
+  sout.append(HTML_CLOSE);
+
+  _client.print(_writeBuffer);
 } // respondSystemInfo()
 
 
@@ -545,6 +515,8 @@ void readRequestLine()
 /// Responds the content of a file from the SD disk given by fName.
 void respondFileContent(char *fName)
 {
+  StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
+
   char *p;
   char *fileType = NULL;
   size_t len;
@@ -555,33 +527,38 @@ void respondFileContent(char *fName)
 
   File f = SD.open(fName, O_READ);
   if (! f) {
-    respondHeaderNotFound();
+    respond404NotFound();
 
   } else {
     // respond the content type
     p = _ctFind(CONTENTTYPES, fileType);
     if (p) {
+      char ct[32];
       p = _ctNextWord(p);
-      p = _ctCopyWord(p, _writeBuffer, sizeof(_writeBuffer));
-      respondHeaderContentType(_writeBuffer);
+      p = _ctCopyWord(p, ct, sizeof(ct));
+      sout.append(HTTP_200_CT); sout.append(ct); sout.append(CRLF);
+      sout.append(HTTP_GENERAL);
     }
 
     if (p) {
-      _client.print("Cache-Control: ");
+      sout.append("Cache-Control: ");
       if (*p == '1') {
-        _client.print("no-cache\r\n");
+        sout.append("no-cache\r\n");
       } else if (*p == 'C') {
-        _client.print("max-age=600, public\r\n");
+        sout.append("max-age=600, public\r\n");
       } else {
-        _client.print("private\r\n");
+        sout.append("private\r\n");
       }
     } // if
 
     // respond the number of file bytes.
-    _client.print("Content-Length: "); _client.print(f.size()); _client.print(CRLF);
+    sout.append("Content-Length: "); sout.append(f.size()); sout.append(CRLF);
 
     // end of headers: respond Blank Line.
-    _client.print(HTTP_ENDHEAD);
+    sout.append(HTTP_ENDHEAD);
+
+    // and send out buffer.
+    _client.print(_writeBuffer);
 
     // using a buffer is up to 10 times faster than transferring byte by byte
     // using the _readBuffer
@@ -704,8 +681,7 @@ void loopWebServer(unsigned long now) {
             }
 
             if (_httpContentLen == 0) {
-              respondHeaderContentType("text/html");
-              _client.print("Content-Length: 0\r\n");
+              respondEmptyFile();
               webstate = PROCESS_STOP;
             } // if
 
@@ -759,7 +735,7 @@ void loopWebServer(unsigned long now) {
 
           if (webstate == PROCESS_ERR) {
             // everything else is a 404
-            respondHeaderNotFound();
+            respond404NotFound();
             webstate = PROCESS_STOP;
           } // if
 
@@ -862,39 +838,8 @@ void DisplaySoftMute(uint8_t v)
   lcd.print("SMUTE: "); lcd.print(v);
 } // DisplaySoftMute()
 
-// ----- JSON helper functions -----
 
-/// The JSON functions use the _writeBuffer to contruct the complete text before writing.
-
-/// Send a JSON object to the client.
-void respondJSONObject(char *name, char *value, bool lastValue = false)
-{
-  char *p = _writeBuffer;
-
-  p = appendString(p, name);
-  *p++ = ':';
-  p = appendString(p, value);
-
-  if (!lastValue) *p++ = ',';
-  *p = NUL;
-  _client.print(_writeBuffer);
-} // respondJSONObject()
-
-
-/// Send a JSON object to the client.
-void respondJSONObject(char *name, int value, bool lastValue = false)
-{
-  char *p = _writeBuffer;
-
-  p = appendString(p, name);
-  *p++ = ':';
-  p = appendNumber(p, value);
-
-  if (!lastValue) *p++ = ',';
-  *p = NUL;
-  _client.print(_writeBuffer);
-} // respondJSONObject()
-
+// ----- Radio data functions -----
 
 /// Response to a $info request and return all information of the current radio operation.
 /// Format al data as in JSON Format.\n
@@ -902,38 +847,46 @@ void respondRadioData()
 {
   // DEBUGFUNC0("respondRadioData");
   char s[12];
-  respondHeaderContentType("application/json");
-  _client.print(HTTP_NOCACHE);
-  _client.print(HTTP_ENDHEAD);
+  StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
 
-  _client.print("{");
+  // build http header in _writeBuffer and send out.
+  sout.append(HTTP_200);
+  sout.append(HTTP_CT); sout.append("application/json"); sout.append(CRLF);
+  sout.append(HTTP_GENERAL);
+  sout.append(HTTP_NOCACHE);
+  sout.append(HTTP_ENDHEAD);
+  _client.print(_writeBuffer);
 
+  // JSON Data
+  sout.clear();
+  sout.append('{');
+  
   // return frequency
-  respondJSONObject("freq", radio.getFrequency());
-  respondJSONObject("band", radio.getBand());
+  sout.appendJSON("freq", (int)(radio.getFrequency())); sout.append(',');
+  sout.appendJSON("band", (int)(radio.getBand()));  sout.append(',');
 
   // return radio related features
   RADIO_INFO ri;
   radio.getRadioInfo(&ri);
-  respondJSONObject("mono", ri.mono);      // force mono mode.
-  respondJSONObject("stereo", ri.stereo);  // has stereo signal
-  // respondJSONObject("rds", ri.rds);       // has rds signal
+  sout.appendJSON("mono", ri.mono);  sout.append(',');
+  sout.appendJSON("stereo", ri.stereo); sout.append(',');
+  // respondJSONObject("rds", ri.rds); sout.append(',');      // has rds signal
 
   // return rds information 
-  respondJSONObject("servicename", rdsServiceName);
-  respondJSONObject("rdstext", rdsText);
+  sout.appendJSON("servicename", rdsServiceName); sout.append(',');
+  sout.appendJSON("rdstext", rdsText); sout.append(',');
 
   // return audio related features
   AUDIO_INFO ai;
   radio.getAudioInfo(&ai);
 
-  respondJSONObject("vol", ai.volume);
-  respondJSONObject("mute", ai.mute);
-  respondJSONObject("softmute", ai.softmute);
-  respondJSONObject("bassboost", ai.bassBoost, true);
+  sout.appendJSON("vol", ai.volume); sout.append(',');
+  sout.appendJSON("mute", ai.mute); sout.append(',');
+  sout.appendJSON("softmute", ai.softmute); sout.append(',');
+  sout.appendJSON("bassboost", ai.bassBoost);
 
-  _client.print("}");
-
+  sout.append('}');
+  _client.print(_writeBuffer);
 } // respondRadioData()
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
