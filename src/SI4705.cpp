@@ -174,16 +174,30 @@ void SI4705::term()
 
 // ----- Audio output control -----
 
-/// This function maps the newVolume value to the range 0..64 that is available in this chip.
+/// This function maps the newVolume value in the range 0..15 to the range 0..63 that is available in this chip.
 /// @param newVolume The new volume level of audio output.
-/// @return void
 void SI4705::setVolume(uint8_t newVolume)
 {
-  if (newVolume > 15) newVolume = 15;
-
-  RADIO::setVolume(newVolume);
-  _setProperty(PROP_RX_VOLUME, newVolume * 4);
+  setVolumeX(newVolume * 4);
 } // setVolume()
+
+
+/// This function sets the volume in the range 0..63.
+/// @param newVolume The new volume level of audio output.
+void SI4705::setVolumeX(uint8_t newVolume)
+{
+  if (newVolume > 63) newVolume = 63;
+  _setProperty(PROP_RX_VOLUME, newVolume);
+  _realVolume = newVolume;
+  RADIO::setVolume(newVolume / 4);
+} // setVolumeX()
+
+
+/// Retrieve the current output volume in the range 0..63.
+/// @return uint8_t actual volume.
+uint8_t SI4705::getVolumeX() {
+  return(_realVolume);
+} // getVolumeX()
 
 
 /// Control the mute mode of the radio chip

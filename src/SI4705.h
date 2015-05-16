@@ -39,12 +39,18 @@ class SI4705 : public RADIO {
 public:
   SI4705();
 
+  const uint8_t MAXVOLUMEX = 63; ///< max volume level for the SI4705 radio implementations.
+
   bool   init();  ///< Initialize the library and the chip.
   void   term();  ///< Terminate all radio functions in the chip.
 
-  // ----- Audion functions -----
+  // ----- Audio functions -----
 
   void    setVolume(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..15.
+
+  void    setVolumeX(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..63.
+  uint8_t getVolumeX();                  ///< Retrieve the current output volume in the range 0..63.
+
   void    setMute(bool switchOn);       ///< Control the mute mode of the radio chip.
   void    setSoftMute(bool switchOn);   ///< Control the softmute mode (mute on low signals) of the radio chip.
 
@@ -81,8 +87,11 @@ public:
 private:
   // ----- local variables
 
+  uint8_t _realVolume; ///< The real volume set to the chip.
+
   // store the current status values
   uint8_t _status;        ///< the status after sending a command
+
   uint8_t tuneStatus[8];
   uint8_t rsqStatus[1+7];
   uint8_t rdsStatusx[1+12];
