@@ -1,5 +1,5 @@
 ///
-/// \file  TestSI4705.ino
+/// \file  TestRDA5807M.ino
 /// \brief An Arduino sketch to operate a SI4705 chip based radio using the Radio library.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
@@ -15,16 +15,15 @@
 ///
 /// Wiring
 /// ------ 
-/// The SI4703 board/chip has to be connected by using the following connections:
-/// | Arduino UNO pin | Radio chip signal  | 
-/// | --------------- | -------------------| 
-/// | 3.3V            | VCC                | 
-/// | GND             | GND                | 
-/// | A5 or SCL       | SCLK               | 
-/// | A4 or SDA       | SDIO               | 
-/// |                 | RST (not used yet) | 
+/// The RDA5807M board/chip has to be connected by using the following connections:
+/// | Arduino UNO pin    | Radio chip signal  | 
+/// | -------------------| -------------------| 
+/// | 3.3V (red)         | VCC                | 
+/// | GND (black)        | GND                | 
+/// | A5 or SCL (yellow) | SCLK               | 
+/// | A4 or SDA (blue)   | SDIO               | 
 /// The locations of the pins on the UNO board are written on the PCB.
-/// The locations of the signals on the SI4705 side depend on the board you use.
+/// The locations of the signals on the RDA5807M side depend on the board you use.
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///

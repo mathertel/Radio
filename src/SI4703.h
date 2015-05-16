@@ -38,7 +38,7 @@ class SI4703 : public RADIO {
   // Control of the audio features
   
   // Control the volume output of the radio chip
-  void   setVolume(uint8_t newVolume); // set volume to 0..15
+  void    setVolume(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..15.
 
   // Control mono/stereo mode of the radio chip
   void   setMono(bool switchOn); // Switch to mono mode.

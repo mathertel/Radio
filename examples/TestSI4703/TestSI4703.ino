@@ -17,14 +17,13 @@
 /// Wiring
 /// ------ 
 /// The SI4703 board has to be connected by using the following connections:
-/// Arduino port | Si4703 signal
-/// ------------ | ---------------
-///     3.3V | VCC
-///      GND | GND
-///       A5 | SCLK
-///       A4 | SDIO
-///       D2 | RST
-///
+/// | Arduino UNO pin    | Radio chip signal  | 
+/// | -------------------| -------------------| 
+/// | 3.3V (red)         | VCC                | 
+/// | GND (black)        | GND                | 
+/// | A5 or SCL (yellow) | SCLK               | 
+/// | A4 or SDA (blue)   | SDIO               | 
+/// | D2 (white)         | RST                |
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
 /// CHangeLog:
@@ -53,11 +52,11 @@ void setup() {
   Serial.println("Radio...");
   delay(200);
 
-  // Initialize the Radio 
-  radio.init();
-
   // Enable information to the Serial port
   radio.debugEnable();
+
+  // Initialize the Radio 
+  radio.init();
 
   // Set all radio setting to the fixed values.
   radio.setBandFrequency(FIX_BAND, FIX_STATION);
@@ -84,4 +83,3 @@ void loop() {
 } // loop
 
 // End.
-
