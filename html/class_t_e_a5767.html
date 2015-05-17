@@ -129,7 +129,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac5d25307370f934e8dd1027c98d10994"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_t_e_a5767.html#ac5d25307370f934e8dd1027c98d10994">_saveRegisters</a> ()</td></tr>
 <tr class="separator:ac5d25307370f934e8dd1027c98d10994"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70cb0f40aee92ae18ca03bd61303075f"><td class="memItemLeft" align="right" valign="top">virtual uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a70cb0f40aee92ae18ca03bd61303075f">getVolume</a> ()</td></tr>
-<tr class="memdesc:a70cb0f40aee92ae18ca03bd61303075f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current output volume.  <a href="#a70cb0f40aee92ae18ca03bd61303075f">More...</a><br /></td></tr>
+<tr class="memdesc:a70cb0f40aee92ae18ca03bd61303075f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current output volume in the range 0..15.  <a href="#a70cb0f40aee92ae18ca03bd61303075f">More...</a><br /></td></tr>
 <tr class="separator:a70cb0f40aee92ae18ca03bd61303075f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60c513be9680016152add6a2d902b573"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a60c513be9680016152add6a2d902b573">getMute</a> ()</td></tr>
 <tr class="memdesc:a60c513be9680016152add6a2d902b573"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current mute mode setting.  <a href="#a60c513be9680016152add6a2d902b573">More...</a><br /></td></tr>
@@ -182,9 +182,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a837210ae5056091e263c0e11b8d7987a"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a837210ae5056091e263c0e11b8d7987a">MAXVOLUME</a> = 15</td></tr>
-<tr class="memdesc:a837210ae5056091e263c0e11b8d7987a"><td class="mdescLeft">&#160;</td><td class="mdescRight">max volume level for all radio implementations.  <a href="#a837210ae5056091e263c0e11b8d7987a">More...</a><br /></td></tr>
-<tr class="separator:a837210ae5056091e263c0e11b8d7987a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09486d2fca56da612b6a036e9f4d9d33"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_t_e_a5767.html#a09486d2fca56da612b6a036e9f4d9d33">MAXVOLUME</a> = 15</td></tr>
+<tr class="memdesc:a09486d2fca56da612b6a036e9f4d9d33"><td class="mdescLeft">&#160;</td><td class="mdescRight">max volume level for radio implementations.  <a href="#a09486d2fca56da612b6a036e9f4d9d33">More...</a><br /></td></tr>
+<tr class="separator:a09486d2fca56da612b6a036e9f4d9d33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -973,7 +973,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieve the current output volume. </p>
+<p>Retrieve the current output volume in the range 0..15. </p>
 
 </div>
 </div>
@@ -1278,7 +1278,7 @@ Private Attributes</h2></td></tr>
 <p>Control the softmute mode (mute on low signals) of the radio chip. </p>
 <p>The base implementation ony stores the value to the internal variable. </p>
 
-<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a34b07cedf3ade8c2d8b765ca208bed5c">RDA5807M</a>, <a class="el" href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">SI4703</a>, and <a class="el" href="class_s_i4705.html#a86aadd6e85fa039f8022cf863f2f9f00">SI4705</a>.</p>
+<p>Reimplemented in <a class="el" href="class_s_i4705.html#a86aadd6e85fa039f8022cf863f2f9f00">SI4705</a>, <a class="el" href="class_r_d_a5807_m.html#a34b07cedf3ade8c2d8b765ca208bed5c">RDA5807M</a>, and <a class="el" href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">SI4703</a>.</p>
 
 </div>
 </div>
@@ -1603,25 +1603,17 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a837210ae5056091e263c0e11b8d7987a"></a>
+<a class="anchor" id="a09486d2fca56da612b6a036e9f4d9d33"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const uint8_t RADIO::MAXVOLUME = 15</td>
+          <td class="memname">const uint8_t TEA5767::MAXVOLUME = 15</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inherited</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>max volume level for all radio implementations. </p>
+<p>max volume level for radio implementations. </p>
 
 </div>
 </div>
@@ -1676,7 +1668,7 @@ Private Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun May 3 2015 20:27:44 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 17 2015 14:04:23 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

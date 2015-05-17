@@ -91,7 +91,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a0a205807c94edffec17cb17b438587f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the volume output of the radio chip in the range 0..15.  <a href="#a0a205807c94edffec17cb17b438587f0">More...</a><br /></td></tr>
 <tr class="separator:a0a205807c94edffec17cb17b438587f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70cb0f40aee92ae18ca03bd61303075f"><td class="memItemLeft" align="right" valign="top">virtual uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#a70cb0f40aee92ae18ca03bd61303075f">getVolume</a> ()</td></tr>
-<tr class="memdesc:a70cb0f40aee92ae18ca03bd61303075f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current output volume.  <a href="#a70cb0f40aee92ae18ca03bd61303075f">More...</a><br /></td></tr>
+<tr class="memdesc:a70cb0f40aee92ae18ca03bd61303075f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the current output volume in the range 0..15.  <a href="#a70cb0f40aee92ae18ca03bd61303075f">More...</a><br /></td></tr>
 <tr class="separator:a70cb0f40aee92ae18ca03bd61303075f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2b57d02f8e17e823962180d45bbc757"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_a_d_i_o.html#ae2b57d02f8e17e823962180d45bbc757">setMute</a> (bool switchOn)</td></tr>
 <tr class="memdesc:ae2b57d02f8e17e823962180d45bbc757"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control the mute mode of the radio chip.  <a href="#ae2b57d02f8e17e823962180d45bbc757">More...</a><br /></td></tr>
@@ -610,7 +610,7 @@ Private Member Functions</h2></td></tr>
 
 <p>Retrieve the current tuned frequency. </p>
 
-<p>Reimplemented in <a class="el" href="class_s_i4705.html#a0b9bb76488ad5583d17564eb8dc818e1">SI4705</a>, <a class="el" href="class_s_i4703.html#a7cff351adf3a994d0516179d56f0ddc0">SI4703</a>, <a class="el" href="classnewchip.html#a399a14b1c82e49c455aeb1cc69bd65a6">newchip</a>, <a class="el" href="class_r_d_a5807_m.html#ae7a7721cb3405058f858d3c7202f4af4">RDA5807M</a>, and <a class="el" href="class_t_e_a5767.html#ac71272398455ca4018c2d6b8ea443028">TEA5767</a>.</p>
+<p>Reimplemented in <a class="el" href="class_s_i4705.html#a0b9bb76488ad5583d17564eb8dc818e1">SI4705</a>, <a class="el" href="class_s_i4703.html#a7cff351adf3a994d0516179d56f0ddc0">SI4703</a>, <a class="el" href="class_r_d_a5807_m.html#ae7a7721cb3405058f858d3c7202f4af4">RDA5807M</a>, <a class="el" href="classnewchip.html#a399a14b1c82e49c455aeb1cc69bd65a6">newchip</a>, and <a class="el" href="class_t_e_a5767.html#ac71272398455ca4018c2d6b8ea443028">TEA5767</a>.</p>
 
 </div>
 </div>
@@ -817,7 +817,7 @@ Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieve the current output volume. </p>
+<p>Retrieve the current output volume in the range 0..15. </p>
 
 </div>
 </div>
@@ -845,7 +845,7 @@ Private Member Functions</h2></td></tr>
 <p>initialize library and the chip. </p>
 <p>The <a class="el" href="class_r_a_d_i_o.html" title="Library to control radio chips in general. This library acts as a base library for the chip specific ...">RADIO</a> class doesn't implement a concrete chip so nothing has to be initialized. </p>
 
-<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a05f2d34aa69fccfbd5fe8f2225166125">RDA5807M</a>, <a class="el" href="class_s_i4705.html#a04853d95fc544d03fb98da98861eb9f3">SI4705</a>, <a class="el" href="classnewchip.html#ac9541334f40bfac0125ce5eb58476650">newchip</a>, <a class="el" href="class_s_i4703.html#a2a43f7d5022bca73ca12644411f4aaca">SI4703</a>, and <a class="el" href="class_t_e_a5767.html#acad7a8c78caf5fdd0a3b03b046fdb200">TEA5767</a>.</p>
+<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a05f2d34aa69fccfbd5fe8f2225166125">RDA5807M</a>, <a class="el" href="class_s_i4705.html#a04853d95fc544d03fb98da98861eb9f3">SI4705</a>, <a class="el" href="class_s_i4703.html#a2a43f7d5022bca73ca12644411f4aaca">SI4703</a>, <a class="el" href="classnewchip.html#ac9541334f40bfac0125ce5eb58476650">newchip</a>, and <a class="el" href="class_t_e_a5767.html#acad7a8c78caf5fdd0a3b03b046fdb200">TEA5767</a>.</p>
 
 </div>
 </div>
@@ -914,7 +914,7 @@ Private Member Functions</h2></td></tr>
 
 <p>Start a seek downwards from the current frequency. </p>
 
-<p>Reimplemented in <a class="el" href="class_s_i4705.html#acb9ee0aa00d3403d0fda3ea5927fabda">SI4705</a>, <a class="el" href="class_s_i4703.html#a056ee70fbc5cc59df632b7c23d8576f3">SI4703</a>, <a class="el" href="classnewchip.html#a927894c53d3991e37cfda2ca9764665f">newchip</a>, <a class="el" href="class_r_d_a5807_m.html#a387e93eb8e3343a0b52f9247f5fcfe95">RDA5807M</a>, and <a class="el" href="class_t_e_a5767.html#a9d91bf26798b0cb3b620298913ce288f">TEA5767</a>.</p>
+<p>Reimplemented in <a class="el" href="class_s_i4705.html#acb9ee0aa00d3403d0fda3ea5927fabda">SI4705</a>, <a class="el" href="class_s_i4703.html#a056ee70fbc5cc59df632b7c23d8576f3">SI4703</a>, <a class="el" href="class_r_d_a5807_m.html#a387e93eb8e3343a0b52f9247f5fcfe95">RDA5807M</a>, <a class="el" href="classnewchip.html#a927894c53d3991e37cfda2ca9764665f">newchip</a>, and <a class="el" href="class_t_e_a5767.html#a9d91bf26798b0cb3b620298913ce288f">TEA5767</a>.</p>
 
 </div>
 </div>
@@ -942,7 +942,7 @@ Private Member Functions</h2></td></tr>
 
 <p>Start a seek upwards from the current frequency. </p>
 
-<p>Reimplemented in <a class="el" href="class_s_i4705.html#a591c4452ab5e4bcb841cc96e25c069e2">SI4705</a>, <a class="el" href="class_s_i4703.html#a3c996ff7e8e1099641727a7c5591f35d">SI4703</a>, <a class="el" href="classnewchip.html#af54ed9c33beea4be5a2871848c3750dd">newchip</a>, <a class="el" href="class_r_d_a5807_m.html#a857ecaadc426f08838542e8af2a788d6">RDA5807M</a>, and <a class="el" href="class_t_e_a5767.html#a493b1f00530c5a0ba035ffaae3a9e51e">TEA5767</a>.</p>
+<p>Reimplemented in <a class="el" href="class_s_i4705.html#a591c4452ab5e4bcb841cc96e25c069e2">SI4705</a>, <a class="el" href="class_s_i4703.html#a3c996ff7e8e1099641727a7c5591f35d">SI4703</a>, <a class="el" href="class_r_d_a5807_m.html#a857ecaadc426f08838542e8af2a788d6">RDA5807M</a>, <a class="el" href="classnewchip.html#af54ed9c33beea4be5a2871848c3750dd">newchip</a>, and <a class="el" href="class_t_e_a5767.html#a493b1f00530c5a0ba035ffaae3a9e51e">TEA5767</a>.</p>
 
 </div>
 </div>
@@ -1070,7 +1070,7 @@ Private Member Functions</h2></td></tr>
 <p>Start using the new frequency for receiving. </p>
 <p>Start using the new frequency for receiving. The new frequency is stored for later retrieval. </p>
 
-<p>Reimplemented in <a class="el" href="class_s_i4705.html#acd90c102278c860efb1687e1e5ff4fd8">SI4705</a>, <a class="el" href="class_s_i4703.html#a1c9981a69502198a54636b5eafc9ee93">SI4703</a>, <a class="el" href="classnewchip.html#a4e93bc24e1cef8fcfcf75d6557e9e0a9">newchip</a>, <a class="el" href="class_r_d_a5807_m.html#a1939455786c2aeceffc248118697749b">RDA5807M</a>, and <a class="el" href="class_t_e_a5767.html#ad469334ecce5cfaa41bebfe138430ab1">TEA5767</a>.</p>
+<p>Reimplemented in <a class="el" href="class_s_i4705.html#acd90c102278c860efb1687e1e5ff4fd8">SI4705</a>, <a class="el" href="class_s_i4703.html#a1c9981a69502198a54636b5eafc9ee93">SI4703</a>, <a class="el" href="class_r_d_a5807_m.html#a1939455786c2aeceffc248118697749b">RDA5807M</a>, <a class="el" href="classnewchip.html#a4e93bc24e1cef8fcfcf75d6557e9e0a9">newchip</a>, and <a class="el" href="class_t_e_a5767.html#ad469334ecce5cfaa41bebfe138430ab1">TEA5767</a>.</p>
 
 </div>
 </div>
@@ -1128,7 +1128,7 @@ Private Member Functions</h2></td></tr>
 <p>Control the mute mode of the radio chip. </p>
 <p>The base implementation ony stores the value to the internal variable. </p>
 
-<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a22fd90f6d0460308247b18e493dfb165">RDA5807M</a>, <a class="el" href="classnewchip.html#a0da2a8471f7d2177d266f0be11ab7e25">newchip</a>, <a class="el" href="class_t_e_a5767.html#a61236481a2d122816e0a252a86e96627">TEA5767</a>, <a class="el" href="class_s_i4705.html#a798325925b4527302dd40c7ea231586f">SI4705</a>, and <a class="el" href="class_s_i4703.html#a096356c7a9b9d1cda6fb04336d81e8b4">SI4703</a>.</p>
+<p>Reimplemented in <a class="el" href="class_s_i4705.html#a798325925b4527302dd40c7ea231586f">SI4705</a>, <a class="el" href="class_r_d_a5807_m.html#a22fd90f6d0460308247b18e493dfb165">RDA5807M</a>, <a class="el" href="classnewchip.html#a0da2a8471f7d2177d266f0be11ab7e25">newchip</a>, <a class="el" href="class_t_e_a5767.html#a61236481a2d122816e0a252a86e96627">TEA5767</a>, and <a class="el" href="class_s_i4703.html#a096356c7a9b9d1cda6fb04336d81e8b4">SI4703</a>.</p>
 
 </div>
 </div>
@@ -1157,7 +1157,7 @@ Private Member Functions</h2></td></tr>
 <p>Control the softmute mode (mute on low signals) of the radio chip. </p>
 <p>The base implementation ony stores the value to the internal variable. </p>
 
-<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a34b07cedf3ade8c2d8b765ca208bed5c">RDA5807M</a>, <a class="el" href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">SI4703</a>, and <a class="el" href="class_s_i4705.html#a86aadd6e85fa039f8022cf863f2f9f00">SI4705</a>.</p>
+<p>Reimplemented in <a class="el" href="class_s_i4705.html#a86aadd6e85fa039f8022cf863f2f9f00">SI4705</a>, <a class="el" href="class_r_d_a5807_m.html#a34b07cedf3ade8c2d8b765ca208bed5c">RDA5807M</a>, and <a class="el" href="class_s_i4703.html#a2e14c12d6c9a8e32ee58d54cde3906d7">SI4703</a>.</p>
 
 </div>
 </div>
@@ -1185,7 +1185,7 @@ Private Member Functions</h2></td></tr>
 
 <p>Control the volume output of the radio chip in the range 0..15. </p>
 
-<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#afb185f77977a62512fc4ab237049fba7">RDA5807M</a>, <a class="el" href="class_s_i4705.html#a114664efdb970ea84ed692a5da02a511">SI4705</a>, <a class="el" href="classnewchip.html#a4e8f3dd43c96cae83aeb284fdae2c13b">newchip</a>, <a class="el" href="class_s_i4703.html#a0cef8ec52550dc160450362a7f2a3ca4">SI4703</a>, and <a class="el" href="class_t_e_a5767.html#a143fd58775412239dc1e76fc78160a47">TEA5767</a>.</p>
+<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#afb185f77977a62512fc4ab237049fba7">RDA5807M</a>, <a class="el" href="class_s_i4705.html#a114664efdb970ea84ed692a5da02a511">SI4705</a>, <a class="el" href="class_s_i4703.html#a0cef8ec52550dc160450362a7f2a3ca4">SI4703</a>, <a class="el" href="classnewchip.html#a4e8f3dd43c96cae83aeb284fdae2c13b">newchip</a>, and <a class="el" href="class_t_e_a5767.html#a143fd58775412239dc1e76fc78160a47">TEA5767</a>.</p>
 
 </div>
 </div>
@@ -1213,7 +1213,7 @@ Private Member Functions</h2></td></tr>
 <p>terminate all radio functions. </p>
 <p>switch the power off The <a class="el" href="class_r_a_d_i_o.html" title="Library to control radio chips in general. This library acts as a base library for the chip specific ...">RADIO</a> class doesn't implement a concrete chip so nothing has to be terminated. </p>
 
-<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a6b7a08e45408f089d3f0a7f2ce64010c">RDA5807M</a>, <a class="el" href="class_s_i4705.html#ac04457011af19a3fbd79780d82157e7b">SI4705</a>, <a class="el" href="classnewchip.html#ade3c83af8b4a8e637e0d04bd2da1e052">newchip</a>, <a class="el" href="class_s_i4703.html#abcbedad84835a0596b69502f7ca7bd75">SI4703</a>, and <a class="el" href="class_t_e_a5767.html#a965433514b087084821bea70ef188944">TEA5767</a>.</p>
+<p>Reimplemented in <a class="el" href="class_r_d_a5807_m.html#a6b7a08e45408f089d3f0a7f2ce64010c">RDA5807M</a>, <a class="el" href="class_s_i4705.html#ac04457011af19a3fbd79780d82157e7b">SI4705</a>, <a class="el" href="class_s_i4703.html#abcbedad84835a0596b69502f7ca7bd75">SI4703</a>, <a class="el" href="classnewchip.html#ade3c83af8b4a8e637e0d04bd2da1e052">newchip</a>, and <a class="el" href="class_t_e_a5767.html#a965433514b087084821bea70ef188944">TEA5767</a>.</p>
 
 </div>
 </div>
@@ -1503,7 +1503,7 @@ Private Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun May 3 2015 20:27:44 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 17 2015 14:04:23 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>
