@@ -13,8 +13,6 @@
 ///
 /// ChangeLog see RDSParser.h.
 
-
-
 #include "RDSParser.h"
 
 #define DEBUG_FUNC0(fn)          { Serial.print(fn); Serial.println("()"); }
@@ -159,8 +157,6 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     } else {
       mins += 30 * (off & 0x1F);
     }
-
-    Serial.print(" >>"); Serial.print(mins / 60); Serial.print(':'); Serial.println(mins % 60);
 
     if ((_sendTime) && (mins != _lastRDSMinutes)) {
       _lastRDSMinutes = mins;

@@ -29,7 +29,6 @@
 /// There is a special mute implementation.
 #define ELVRADIO
 
-
 // ----- Radio chip specific definitions including the registers
 
 // Commands and Parameter definitions
@@ -123,6 +122,7 @@
 
 /// Initialize the extra variables in SI4705
 SI4705::SI4705() {
+  _realVolume = 0;
 }
 
 /// Initialize the library and the chip.

@@ -30,6 +30,7 @@
 /// Library to control the TEA5767 radio chip.
 class TEA5767 : public RADIO {
   public:
+  const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
   TEA5767();
   
   bool   init();  // initialize library and the chip.

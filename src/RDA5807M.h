@@ -38,7 +38,9 @@
 /// Library to control the RDA5807M radio chip.
 class RDA5807M : public RADIO {
   public:
-  // ----- RDA5807M specific implementations -----
+    // ----- RDA5807M specific implementations -----
+    const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
+
   RDA5807M();
   
   bool   init();

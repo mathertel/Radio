@@ -106,8 +106,9 @@ OneButton menuButton(A10, true);
 /// Setup a seek button
 OneButton seekButton(A11, true);
 
-char rdsServiceName[10];
-char rdsText[64 + 2];
+char rdsServiceName[8 + 2]; ///< String with the actual RDS Service name. Some senders put rotating text in here too.
+char rdsText[64 + 2];       ///< String with the actual RDS text.
+char rdsTime[6];            ///< String with the actual time from RDS as hh:mm.
 
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right (one only) radio object definition.
@@ -670,10 +671,8 @@ void loopWebServer(unsigned long now) {
           } else if (webstate == PROCESS_POST) {
             // get data posted by a html form
 
-            // DEBUGVAR("uri", _httpURI);
             int len;
             len = _client.read((uint8_t *)_readBuffer, BUFSIZ);
-            // DEBUGVAR("len", len);
 
             if ((len > 0) && (len < sizeof(_readBuffer))) {
               _httpContentLen -= len;
@@ -777,7 +776,7 @@ void DisplayFrequency()
 /// and will be stored for the web interface.
 void DisplayServiceName(char *name)
 {
-  Serial.print("RDS:"); Serial.println(name);
+  DEBUGVAR("RDS", name);
   strncpy(rdsServiceName, name, sizeof(rdsServiceName));
 
   if (rot_state == STATE_FREQ) {
@@ -792,7 +791,7 @@ void DisplayServiceName(char *name)
 /// and will be stored for the web interface.
 void DisplayText(char *text)
 {
-  Serial.print("TEXT:"); Serial.println(text);
+  DEBUGVAR("RDS-text", text);
   strncpy(rdsText, text, sizeof(rdsText));
 } // DisplayText()
 
@@ -800,12 +799,13 @@ void DisplayText(char *text)
 /// This function will be called by the RDS module when a rds time message was received.
 /// The time will not displayed on the LCD but written to the serial port.
 void DisplayTime(uint8_t hour, uint8_t minute) {
-  Serial.print("RDS-Time:");
-  if (hour < 10) Serial.print('0');
-  Serial.print(hour);
-  Serial.print(':');
-  if (minute < 10) Serial.print('0');
-  Serial.println(minute);
+  rdsTime[0] = '0' + (hour / 10);
+  rdsTime[1] = '0' + (hour % 10);
+  rdsTime[2] = ':';
+  rdsTime[3] = '0' + (minute / 10);
+  rdsTime[4] = '0' + (minute % 10);
+  rdsTime[5] = NUL;
+  DEBUGVAR("RDS-time", rdsTime);
 } // DisplayTime()
 
 
@@ -833,7 +833,7 @@ void DisplayMono(uint8_t v)
 /// Display the current soft mute switch.
 void DisplaySoftMute(uint8_t v)
 {
-  Serial.print("SMUTE: "); Serial.println(v);
+  DEBUGFUNC1("DisplaySoftMute", v);
   lcd.setCursor(0, 1);
   lcd.print("SMUTE: "); lcd.print(v);
 } // DisplaySoftMute()
@@ -1087,7 +1087,6 @@ void loopSerial(unsigned long now) {
 void runRadioSerialCommand(char cmd, int16_t value)
 {
   if (cmd == '?') {
-    Serial.println();
     Serial.println("? Help");
     Serial.println("fnnnnn: direct frequency input (n: freq*100)");
     Serial.println("vnn: direct volume input (n: 0...15)");
@@ -1102,7 +1101,7 @@ void runRadioSerialCommand(char cmd, int16_t value)
     Serial.println("b bass boost");
     Serial.println("m mute/unmute");
     Serial.println("u soft mute/unmute");
-  }
+  } // runRadioSerialCommand()
 
   // ----- control the volume and audio output -----
 
@@ -1151,22 +1150,14 @@ void runRadioSerialCommand(char cmd, int16_t value)
   } else if (cmd == 'i') {
     char s[12];
     radio.formatFrequency(s, sizeof(s));
-    Serial.print("Station:"); Serial.println(s);
+    DEBUGVAR("Station", s);
     Serial.print("Radio:"); radio.debugRadioInfo();
     Serial.print("Audio:"); radio.debugAudioInfo();
 
     RADIO_INFO ri;
     radio.getRadioInfo(&ri);
-
-
-    //     Serial.print("  RSSI: ");
-    //     Serial.print(info.rssi);
-    //
-    //     for (uint8_t i = 0; i < info.rssi - 15; i+=2) { Serial.write('*'); } // Empfangspegel ab 15. Zeichen
-    //     Serial.println();
-    delay(3000);
-
   } // info
+
   //  else if (cmd == 'n') { radio.debugScan(); }
   else if (cmd == 'x') { radio.debugStatus(); }
 
@@ -1187,7 +1178,6 @@ void loopButtons(unsigned long now) {
   // check for the rotary encoder
   newPos = encoder.getPosition();
   if (newPos != encoderLastPos) {
-    Serial.println("B1");
     if (rot_state == STATE_FREQ) {
       RADIO_FREQ f = radio.getMinFrequency() + (newPos *  radio.getFrequencyStep());
       radio.setFrequency(f);

@@ -7,7 +7,7 @@
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
-/// This library enables the use of the Radio Chip SI4703.
+/// This library can be used as a starting point to implement a new radio chip for the radio library.
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
@@ -30,7 +30,8 @@
 /// Template library control a new radio chip.
 class newchip : public RADIO {
   public:
-  newchip();
+    const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
+    newchip();
   
   bool   init();  // initialize library and the chip.
   void   term();  // terminate all radio functions.

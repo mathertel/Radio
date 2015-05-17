@@ -30,6 +30,8 @@
 /// Library to control the SI4703 radio chip.
 class SI4703 : public RADIO {
   public:
+    const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
+
   SI4703();
   
   bool   init();  // initialize library and the chip.
