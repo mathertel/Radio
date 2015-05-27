@@ -251,9 +251,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a9c4665742c6b6eb1f0bb9dde41f7cba3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a9c4665742c6b6eb1f0bb9dde41f7cba3">ISR</a> (PCINT2_vect)</td></tr>
 <tr class="separator:a9c4665742c6b6eb1f0bb9dde41f7cba3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
-<tr class="memdesc:a4fc01d736fe50cf5b977f755b675f11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">--&mdash; Main functions <a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="--— Main functions setup() and loop() --— ">setup()</a> and <a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> --&mdash;  <a href="#a4fc01d736fe50cf5b977f755b675f11d">More...</a><br /></td></tr>
+<tr class="memdesc:a4fc01d736fe50cf5b977f755b675f11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">--&mdash; Main functions <a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="--— Main functions setup() and loop() --— ">setup()</a> and <a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Constantly look for the things, that have to be done. ">loop()</a> --&mdash;  <a href="#a4fc01d736fe50cf5b977f755b675f11d">More...</a><br /></td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
+<tr class="memdesc:afe461d27b9c48d5921c00d521181f12f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constantly look for the things, that have to be done.  <a href="#afe461d27b9c48d5921c00d521181f12f">More...</a><br /></td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
@@ -1089,6 +1090,13 @@ It can be used with various chips after adjusting the radio object definition.<b
       </table>
 </div><div class="memdoc">
 
+<p>Constantly look for the things, that have to be done. </p>
+<p>Look for incomming webserver requests and answer them...</p>
+<p>Check for changed signals on the buttons and rotary encoder.</p>
+<p>Check for serial input commands and trigger command execution.</p>
+<p>Check for new radio data.</p>
+<p>Check for new LCD data to be displayed. </p>
+
 </div>
 </div>
 <a class="anchor" id="abf096d3578f1ccc1d96023e72ed5a34e"></a>
@@ -1479,7 +1487,7 @@ It can be used with various chips after adjusting the radio object definition.<b
       </table>
 </div><div class="memdoc">
 
-<p>--&mdash; Main functions <a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="--— Main functions setup() and loop() --— ">setup()</a> and <a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> --&mdash; </p>
+<p>--&mdash; Main functions <a class="el" href="_web_radio_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="--— Main functions setup() and loop() --— ">setup()</a> and <a class="el" href="_web_radio_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Constantly look for the things, that have to be done. ">loop()</a> --&mdash; </p>
 
 </div>
 </div>
@@ -1934,7 +1942,7 @@ It can be used with various chips after adjusting the radio object definition.<b
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun May 17 2015 14:04:23 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed May 27 2015 20:42:59 for Arduino Radio Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>
