@@ -1,3 +1,4 @@
+///
 /// \file TEA5767.cpp
 /// \brief Implementation for the radio library to control the TEA5767 radio chip.
 ///
@@ -17,9 +18,7 @@
 /// http://www.electronicsblog.net
 /// https://github.com/andykarpov/TEA5767/blob/master/TEA5767.cpp
 ///
-/// History:
-/// --------
-/// * 05.08.2014 created.
+/// ChangeLog see TEA5767.h:
 
 #include <Arduino.h>
 #include <Wire.h>     // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
@@ -79,7 +78,7 @@ TEA5767::TEA5767() {
 }
 
 // initialize all internals.
-bool TEA5767::TEA5767::init() {
+bool TEA5767::init() {
   bool result = false; // no chip found yet.
   DEBUG_FUNC0("init");
 
@@ -88,11 +87,11 @@ bool TEA5767::TEA5767::init() {
   registers[2] = 0xB0;
   registers[REG_4] = REG_4_XTAL | REG_4_SMUTE;
 
-  #ifdef IN_EUROPE
+#ifdef IN_EUROPE
   registers[REG_5] = 0; // 50 ms Europe setup
-  #else
+#else
   registers[REG_5] = REG_5_DTC; // 75 ms Europe setup
-  #endif
+#endif
   Wire.begin();
 
 
@@ -109,44 +108,46 @@ void TEA5767::term()
 
 // ----- Volume control -----
 
+/// setVolume is a non-existing function in TEA5767. It will always me MAXVOLUME.
 void TEA5767::setVolume(uint8_t newVolume)
 {
   DEBUG_FUNC0("setVolume");
+  RADIO::setVolume(MAXVOLUME);
 } // setVolume()
 
 
+/// setBassBoost is a non-existing function in TEA5767. It will never be acivated.
 void TEA5767::setBassBoost(bool switchOn)
 {
   DEBUG_FUNC0("setBassBoost");
+  RADIO::setBassBoost(false);
 } // setBassBoost()
 
 
-// Mono / Stereo
+/// force mono receiving mode.
 void TEA5767::setMono(bool switchOn)
 {
   DEBUG_FUNC0("setMono");
   RADIO::setMono(switchOn);
-  
+
   if (switchOn) {
     registers[REG_3] |= REG_3_MS;
-  }
-  else {
+  } else {
     registers[REG_3] &= ~REG_3_MS;
   } // if
   _saveRegisters();
 } // setMono
 
 
-// Switch mute mode.
+/// Force mute mode.
 void TEA5767::setMute(bool switchOn)
 {
   DEBUG_FUNC0("setMute");
   RADIO::setMute(switchOn);
-  
+
   if (switchOn) {
     registers[REG_1] |= REG_1_MUTE;
-  }
-  else {
+  } else {
     registers[REG_1] &= ~REG_1_MUTE;
   } // if
   _saveRegisters();
@@ -155,7 +156,7 @@ void TEA5767::setMute(bool switchOn)
 
 // ----- Band and frequency control methods -----
 
-// tune to new band.
+/// Tune to new a band.
 void TEA5767::setBand(RADIO_BAND newBand) {
   if (newBand == RADIO_BAND_FM) {
 
@@ -187,7 +188,7 @@ void TEA5767::setBand(RADIO_BAND newBand) {
 */
 RADIO_FREQ TEA5767::getFrequency() {
   _readRegisters();
-  
+
   unsigned long frequencyW = ((status[REG_1] & REG_1_PLL) << 8) | status[REG_2];
   frequencyW = ((frequencyW * QUARTZ / 4) - FILTER) / 10000;
 
@@ -206,7 +207,7 @@ void TEA5767::setFrequency(RADIO_FREQ newF) {
 
   unsigned int frequencyB = 4 * (newF * 10000L + FILTER) / QUARTZ;
   Serial.print('*'); Serial.println(frequencyB);
-  
+
   registers[0] = frequencyB >> 8;
   registers[1] = frequencyB & 0XFF;
   _saveRegisters();
@@ -214,27 +215,27 @@ void TEA5767::setFrequency(RADIO_FREQ newF) {
 } // setFrequency()
 
 
-// start seek mode upwards
+/// Start seek mode upwards.
 void TEA5767::seekUp(bool toNextSender) {
   DEBUG_FUNC0("seekUp");
   _seek(true);
 } // seekUp()
 
 
-// start seek mode downwards
+/// Start seek mode downwards.
 void TEA5767::seekDown(bool toNextSender) {
   _seek(false);
 } // seekDown()
 
 
 
-// Load all status registers from to the chip
+/// Load all status registers from to the chip
 void TEA5767::_readRegisters()
 {
   Wire.requestFrom(TEA5767_ADR, 5); // We want to read all the 5 registers.
 
   if (Wire.available()) {
-    for (uint8_t n = 0 ; n < 5 ; n++) {
+    for (uint8_t n = 0; n < 5; n++) {
       status[n] = Wire.read();
     } // for
   } // if
@@ -261,7 +262,7 @@ void TEA5767::_saveRegisters()
 
 void TEA5767::getRadioInfo(RADIO_INFO *info) {
   RADIO::getRadioInfo(info);
-  
+
   _readRegisters();
   if (status[STAT_3] & STAT_3_STEREO) info->stereo = true;
   info->rssi = (status[STAT_4] & STAT_4_ADC) >> 4;

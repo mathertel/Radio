@@ -11,9 +11,10 @@
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
-/// History:
+/// ChangeLog see TEA5767.h:
 /// --------
 /// * 05.08.2014 created.
+/// * 27.05.2015 working-
 
 
 #ifndef TEA5767_h
@@ -38,8 +39,8 @@ class TEA5767 : public RADIO {
   
   // Control of the audio features
   
-  // Control the volume output of the radio chip
-  void   setVolume(uint8_t newVolume); // set volume to 0..15
+  /// setVolume is a non-existing function in TEA5767. It will always me MAXVOLUME.
+  void   setVolume(uint8_t newVolume);
 
   // Control the bass boost function of the radio chip
   void   setBassBoost(bool switchOn);
