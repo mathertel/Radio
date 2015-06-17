@@ -61,26 +61,26 @@
 // #define DEBUG_STR(txt) {}
 
 /// Used for Debugging text information.
-#define DEBUG_STR(txt)           if (_debugEnabled) { Serial.println(txt); }
+#define DEBUG_STR(txt)           if (_debugEnabled) { Serial.print('>'); Serial.println(txt); }
 
 /// Used for Debugging function entries without parameters.
-#define DEBUG_VAL(label, val)    if (_debugEnabled) { Serial.print(label);  Serial.print(':');  Serial.println(val); }
-#define DEBUG_VALX(label, val)    if (_debugEnabled) { Serial.print(label);  Serial.print(':');  Serial.println(val, HEX); }
+#define DEBUG_VAL(label, val)    if (_debugEnabled) { Serial.print('>'); Serial.print(label);  Serial.print(':');  Serial.println(val); }
+#define DEBUG_VALX(label, val)    if (_debugEnabled) { Serial.print('>'); Serial.print(label);  Serial.print(':');  Serial.println(val, HEX); }
 
 /// Used for Debugging function entries without parameters.
-#define DEBUG_FUNC0(fn)          if (_debugEnabled) { Serial.print(fn); Serial.println("()"); }
+#define DEBUG_FUNC0(fn)          if (_debugEnabled) { Serial.print('>'); Serial.print(fn); Serial.println("()"); }
 
 /// Used for Debugging function entries with 1 parameter.
-#define DEBUG_FUNC1(fn, p1)      if (_debugEnabled) { Serial.print(fn); Serial.print('('); Serial.print(p1); Serial.println(')'); }
+#define DEBUG_FUNC1(fn, p1)      if (_debugEnabled) { Serial.print('>'); Serial.print(fn); Serial.print('('); Serial.print(p1); Serial.println(')'); }
 
 /// Used for Debugging function entries with 1 parameters as hex Value.
-#define DEBUG_FUNC1X(fn, p1) if (_debugEnabled) { Serial.print(fn); Serial.print("(0x"); Serial.print(p1, HEX); Serial.println(')'); }
+#define DEBUG_FUNC1X(fn, p1) if (_debugEnabled) { Serial.print('>'); Serial.print(fn); Serial.print("(0x"); Serial.print(p1, HEX); Serial.println(')'); }
 
 /// Used for Debugging function entries with 2 parameters.
-#define DEBUG_FUNC2(fn, p1, p2)  if (_debugEnabled) { Serial.print(fn); Serial.print('('); Serial.print(p1); Serial.print(", "); Serial.print(p2); Serial.println(')'); }
+#define DEBUG_FUNC2(fn, p1, p2)  if (_debugEnabled) { Serial.print('>'); Serial.print(fn); Serial.print('('); Serial.print(p1); Serial.print(", "); Serial.print(p2); Serial.println(')'); }
 
 /// Used for Debugging function entries with 2 parameters and Hex Value.
-#define DEBUG_FUNC2X(fn, p1, p2) if (_debugEnabled) { Serial.print(fn); Serial.print("(0x"); Serial.print(p1, HEX); Serial.print(", 0x"); Serial.print(p2, HEX); Serial.println(')'); }
+#define DEBUG_FUNC2X(fn, p1, p2) if (_debugEnabled) { Serial.print('>'); Serial.print(fn); Serial.print("(0x"); Serial.print(p1, HEX); Serial.print(", 0x"); Serial.print(p2, HEX); Serial.println(')'); }
 
 
 // ----- Callback function types -----

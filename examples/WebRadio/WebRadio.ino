@@ -139,8 +139,10 @@ enum RADIO_STATE {
   STATE_PARSEINT,     ///< waiting for digits for the parameter.
   STATE_EXEC,         ///< executing the command.
 
-  STATE_FREQ,
+  STATE_RDS,     ///< display RDS information
   STATE_VOL,
+  STATE_PRESET,
+  STATE_FREQ,
   STATE_MONO,
   STATE_SMUTE
 
@@ -151,11 +153,9 @@ RADIO_STATE rot_state;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#define DEBUGTEXT(txt)  { Serial.print('>'); Serial.println(txt); }
-#define DEBUGFUNC0(fn)  { Serial.print('>'); Serial.print(fn); Serial.println("()"); }
-#define DEBUGFUNC1(fn, v)  { Serial.print('>'); Serial.print(fn); Serial.print('('); Serial.print(v); Serial.println(')');}
-#define DEBUGVAR(l, v)  { Serial.print('>'); Serial.print(l); Serial.print(": "); Serial.println(v); }
-#define DEBUGIP(l, n)   { Serial.print('>'); Serial.print(l); Ethernet.n().printTo(Serial); Serial.println(); }
+boolean _debugEnabled = true; ///< enable / disable local debug output and reuse the radio macros.
+
+#define DEBUGIP(l, n)   if (_debugEnabled) { Serial.print('>'); Serial.print(l); Ethernet.n().printTo(Serial); Serial.println(); }
 
 /*
 Analyzed the Sources from
@@ -380,7 +380,7 @@ char *_ctCopyWord(char *text, char *word, int len)
 // Response no and send not found html
 void respond404NotFound()
 {
-  // DEBUGFUNC0("respond404NotFound");
+  DEBUG_FUNC0("respond404NotFound");
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
   sout.append(HTTPERR_404);
   sout.append(HTTP_GENERAL);
@@ -392,7 +392,7 @@ void respond404NotFound()
 // Response no and send not found html
 void respondEmptyFile()
 {
-  // DEBUGFUNC0("respondEmptyFile");
+  DEBUG_FUNC0("respondEmptyFile");
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
   sout.append(HTTP_200_CT); sout.append("text/html"); sout.append(CRLF);
   sout.append(HTTP_GENERAL);
@@ -488,7 +488,7 @@ void readRequestLine()
 
     if (c < 0) {
       // no more data available
-      // DEBUGTEXT("No more data.");
+      // DEBUG_STR("No more data.");
       break;
 
     } else if (c == CR) {
@@ -689,7 +689,7 @@ void loopWebServer(unsigned long now) {
 
               // simple parsing of the JSON request.
               // assume only one command like {"vol":6}
-              // DEBUGTEXT(_readBuffer);
+              // DEBUG_STR(_readBuffer);
               p = strchr(_readBuffer, '{');
               if (p) p = strchr(p, '"');
               if (p) p += 1;
@@ -724,7 +724,7 @@ void loopWebServer(unsigned long now) {
               f.write((uint8_t *)_readBuffer, len);
               _httpContentLen -= len;
             } // if
-            // DEBUGTEXT(_httpContentLen);
+            // DEBUG_STR(_httpContentLen);
 
             if (_httpContentLen == 0) {
               f.close();
@@ -741,7 +741,7 @@ void loopWebServer(unsigned long now) {
         } // if
 
         if (webstate == PROCESS_STOP) {
-          // DEBUGTEXT("PROCESS_STOP");
+          // DEBUG_STR("PROCESS_STOP");
           _client.stop();
           webstate = WEBSERVER_IDLE;
         } // if
@@ -767,7 +767,7 @@ void DisplayFrequency()
   radio.formatFrequency(s, sizeof(s));
   lcd.setCursor(0, 0);
   lcd.print(s);
-  DEBUGVAR("FREQ", s);
+  DEBUG_VAL("FREQ", s);
 } // DisplayFrequency()
 
 
@@ -776,10 +776,10 @@ void DisplayFrequency()
 /// and will be stored for the web interface.
 void DisplayServiceName(char *name)
 {
-  DEBUGVAR("RDS", name);
+  DEBUG_VAL("RDS", name);
   strncpy(rdsServiceName, name, sizeof(rdsServiceName));
 
-  if (rot_state == STATE_FREQ) {
+  if (rot_state == STATE_RDS) {
     lcd.setCursor(0, 1);
     lcd.print(name);
   }
@@ -791,7 +791,7 @@ void DisplayServiceName(char *name)
 /// and will be stored for the web interface.
 void DisplayText(char *text)
 {
-  DEBUGVAR("RDS-text", text);
+  DEBUG_VAL("RDS-text", text);
   strncpy(rdsText, text, sizeof(rdsText));
 } // DisplayText()
 
@@ -805,7 +805,7 @@ void DisplayTime(uint8_t hour, uint8_t minute) {
   rdsTime[3] = '0' + (minute / 10);
   rdsTime[4] = '0' + (minute % 10);
   rdsTime[5] = NUL;
-  DEBUGVAR("RDS-time", rdsTime);
+  DEBUG_VAL("RDS-time", rdsTime);
 } // DisplayTime()
 
 
@@ -814,7 +814,7 @@ void DisplayTime(uint8_t hour, uint8_t minute) {
 /// The new volume is displayed on the LCD 2. Line.
 void DisplayVolume(uint8_t v)
 {
-  DEBUGFUNC1("DisplayVolume", v);
+  DEBUG_FUNC1("DisplayVolume", v);
   lcd.setCursor(0, 1);
   lcd.print("VOL: ");  lcd.print(v);
   lcd.print("     ");
@@ -824,7 +824,7 @@ void DisplayVolume(uint8_t v)
 /// Display the current mono switch.
 void DisplayMono(uint8_t v)
 {
-  DEBUGFUNC1("DisplayMono", v);
+  DEBUG_FUNC1("DisplayMono", v);
   lcd.setCursor(0, 1);
   lcd.print("MONO: "); lcd.print(v);
 } // DisplayMono()
@@ -833,7 +833,7 @@ void DisplayMono(uint8_t v)
 /// Display the current soft mute switch.
 void DisplaySoftMute(uint8_t v)
 {
-  DEBUGFUNC1("DisplaySoftMute", v);
+  DEBUG_FUNC1("DisplaySoftMute", v);
   lcd.setCursor(0, 1);
   lcd.print("SMUTE: "); lcd.print(v);
 } // DisplaySoftMute()
@@ -845,7 +845,7 @@ void DisplaySoftMute(uint8_t v)
 /// Format al data as in JSON Format.\n
 void respondRadioData()
 {
-  // DEBUGFUNC0("respondRadioData");
+  DEBUG_FUNC0("respondRadioData");
   char s[12];
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
 
@@ -982,7 +982,6 @@ void setupRadio() {
   PCMSK2 |= (1 << PCINT16) | (1 << PCINT17);
 
   encoderLastPos = (radio.getFrequency() - radio.getMinFrequency()) / radio.getFrequencyStep();
-  Serial.println(encoderLastPos);
   encoder.setPosition(encoderLastPos);
 
   // Setup the buttons
@@ -993,7 +992,7 @@ void setupRadio() {
   seekButton.attachClick(doSeekClick);
 
   state = STATE_PARSECOMMAND;
-  rot_state = STATE_NONE;
+  rot_state = STATE_NONE; // the loop function will enter RDS mode immediately.
 
   // setup the information chain for RDS data.
   *rdsServiceName = NUL;
@@ -1150,7 +1149,7 @@ void runRadioSerialCommand(char cmd, int16_t value)
   } else if (cmd == 'i') {
     char s[12];
     radio.formatFrequency(s, sizeof(s));
-    DEBUGVAR("Station", s);
+    DEBUG_VAL("Station", s);
     Serial.print("Radio:"); radio.debugRadioInfo();
     Serial.print("Audio:"); radio.debugAudioInfo();
 
@@ -1178,6 +1177,11 @@ void loopButtons(unsigned long now) {
   // check for the rotary encoder
   newPos = encoder.getPosition();
   if (newPos != encoderLastPos) {
+    if (rot_state == STATE_RDS) {
+      // modify volume instead
+      rot_state = STATE_VOL;
+    } // if
+
     if (rot_state == STATE_FREQ) {
       RADIO_FREQ f = radio.getMinFrequency() + (newPos *  radio.getFrequencyStep());
       radio.setFrequency(f);
@@ -1206,11 +1210,12 @@ void loopButtons(unsigned long now) {
     } // if
     encoderLastTime = now;
 
-  } else if (rot_state != STATE_FREQ)  {
+  } else if (rot_state != STATE_RDS)  {
     if (now > encoderLastTime + ENCODER_FALLBACK) {
       // fall into FREQ + RDS mode
-      rot_state = STATE_FREQ;
-      encoderLastPos = (radio.getFrequency() - radio.getMinFrequency()) / radio.getFrequencyStep();
+      rot_state = STATE_RDS;
+      // set rotary encoder to volume.
+      encoderLastPos = radio.getVolume();
       encoder.setPosition(encoderLastPos);
       encoderLastTime = now;
     } // if
@@ -1224,10 +1229,10 @@ void loopButtons(unsigned long now) {
 
 void setup() {
   Serial.begin(57600);
-  // DEBUGTEXT(F("Initializing LCD..."));
+  // DEBUG_STR(F("Initializing LCD..."));
   setupLCD();
 
-  // DEBUGTEXT(F("Initializing Radio..."));
+  // DEBUG_STR(F("Initializing Radio..."));
   lcd.print("Radio...");
   setupRadio();
 
@@ -1246,35 +1251,35 @@ void setup() {
 
   int result = Ethernet.begin(mac);  // Ethernet.begin(mac, ip); if there is no DHCP
 
-  DEBUGVAR(F("Ethernet Result"), result);
-  DEBUGTEXT(F("Configuration:"));
-  DEBUGIP(F(" localIP: "), localIP);
-  DEBUGIP(F(" subnetMask: "), subnetMask);
-  DEBUGIP(F(" dnsServerIP: "), dnsServerIP);
-  DEBUGIP(F(" gatewayIP: "), gatewayIP);
+  DEBUG_VAL(F("Ethernet Result"), result);
+  DEBUG_STR(F("Configuration:"));
+
+  Serial.print(F("> localIP:"));  Ethernet.localIP().printTo(Serial); Serial.println();
+  Serial.print(F("> subnetMask:"));  Ethernet.subnetMask().printTo(Serial); Serial.println();
+  Serial.print(F("> dnsServerIP:"));  Ethernet.dnsServerIP().printTo(Serial); Serial.println();
+  Serial.print(F("> gatewayIP:"));  Ethernet.gatewayIP().printTo(Serial); Serial.println();
 
   if (result) {
     // Let's start the server
-    DEBUGTEXT(F("Starting the server..."));
+    DEBUG_STR(F("Starting the server..."));
     server.begin();
     webstate = WEBSERVER_IDLE;
   }
-  DEBUGVAR(F("Free RAM"), FreeRam());
+  DEBUG_VAL(F("Free RAM"), FreeRam());
 
   lcd.clear();
 } // setup()
 
 
-// constantly look for the things, that have to be done.
+/// Constantly look for the things, that have to be done.
 void loop()
 {
   unsigned long now = millis();
-
-  loopWebServer(now);
-  loopButtons(now);
-  loopSerial(now);
-  loopRadio(now);
-  loopLCD(now);
+  loopWebServer(now);  /// Look for incomming webserver requests and answer them...
+  loopButtons(now);    /// Check for changed signals on the buttons and rotary encoder.
+  loopSerial(now);     /// Check for serial input commands and trigger command execution.
+  loopRadio(now);      /// Check for new radio data.
+  loopLCD(now);        /// Check for new LCD data to be displayed.
 } // loop()
 
 
