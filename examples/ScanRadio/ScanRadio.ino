@@ -22,7 +22,8 @@
 /// History:
 /// --------
 /// * 17.05.2015 created.
-/// * 27.05.2015 first version is working (beta).
+/// * 27.05.2015 first version is working (beta with SI4705).
+/// * 04.07.2015 2 scan algorithms working with good results with SI4705.
 
 #include <Wire.h>
 
@@ -63,6 +64,8 @@ uint16_t g_block1;
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
+// use a function inbetween the radio chip and the RDS parser
+// to catch the block1 value (used for sender identification)
 void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
   g_block1 = block1;
   rds.processData(block1, block2, block3, block4);
@@ -90,6 +93,13 @@ void DisplayServiceName(char *name)
 /// \param value An optional parameter for the command.
 void runSerialCommand(char cmd, int16_t value)
 {
+  unsigned long startSeek; // after 300 msec must be tuned. after 500 msec must have RDS.
+  RADIO_FREQ fSave, fLast;
+  RADIO_FREQ f = radio.getMinFrequency();
+  RADIO_FREQ fMax = radio.getMaxFrequency();
+  char sFreq[12];
+  RADIO_INFO ri;
+
   if (cmd == '?') {
     Serial.println();
     Serial.println("? Help");
@@ -131,74 +141,87 @@ void runSerialCommand(char cmd, int16_t value)
   // ----- control the frequency -----
 
   else if (cmd == '1') {
-    // start Scan
-    RADIO_FREQ f = radio.getMinFrequency();
-    RADIO_FREQ fMax = radio.getMaxFrequency();
-    char sFreq[12];
-    RADIO_INFO ri;
+    Serial.println("Scanning all available frequencies... (1)");
+    fSave = radio.getFrequency();
 
+    // start Simple Scan: all channels
     while (f <= fMax) {
-      // check f
       radio.setFrequency(f);
-      delay(200);
+      delay(50);
 
       radio.getRadioInfo(&ri);
-      if (ri.rssi > 55) {
-        radio.checkRDS();
+      if (ri.tuned) {
         radio.formatFrequency(sFreq, sizeof(sFreq));
         Serial.print(sFreq);
         Serial.print(' ');
 
-        Serial.print(ri.rssi);
-        if (ri.stereo) Serial.print('*');
-        Serial.print(' ');
-
-        radio.checkRDS();
-        if (g_block1) {
-          Serial.print('[');  Serial.print(g_block1, HEX); Serial.print(']');
-        } // if
+        Serial.print(ri.rssi); Serial.print(' ');
+        Serial.print(ri.snr); Serial.print(' ');
+        Serial.print(ri.stereo ? 'S' : '-');
+        Serial.print(ri.rds ? 'R' : '-');
         Serial.println();
       } // if
 
       // tune up by 1 step
       f += radio.getFrequencyStep();
     } // while
+    radio.setFrequency(fSave);
+    Serial.println();
 
   } else if (cmd == '2') {
-    // start Scan
-    RADIO_FREQ f = radio.getMinFrequency();
-    RADIO_FREQ fMax = radio.getMaxFrequency();
-    char sFreq[12];
-    RADIO_INFO ri;
+    Serial.println("Seeking all frequencies... (2)");
+    fSave = radio.getFrequency();
 
+    // start Scan
     radio.setFrequency(f);
-    delay(200);
 
     while (f <= fMax) {
       radio.seekUp(true);
-      delay(200);
-      f = radio.getFrequency();
+      delay(100); // 
+      startSeek = millis();
 
-      radio.getRadioInfo(&ri);
-      if (ri.rssi > 55) {
+      // wait for seek complete
+      do {
+        radio.getRadioInfo(&ri);
+      } while ((!ri.tuned) && (startSeek + 300 > millis()));
+
+      // check frequency
+      f = radio.getFrequency();
+      if (f < fLast) {
+        break;
+      }
+      fLast = f;
+
+      if ((ri.tuned) && (ri.rssi > 42) && (ri.snr > 12)) {
         radio.checkRDS();
+
+        // print frequency.
         radio.formatFrequency(sFreq, sizeof(sFreq));
         Serial.print(sFreq);
         Serial.print(' ');
 
-        Serial.print(ri.rssi);
-        if (ri.stereo) Serial.print('*');
-        Serial.print(' ');
+        do {
+          radio.checkRDS();
+          // Serial.print(g_block1); Serial.print(' ');
+        } while ((!g_block1) && (startSeek + 600 > millis()));
 
-        radio.checkRDS();
+        // fetch final status for printing
+        radio.getRadioInfo(&ri);
+        Serial.print(ri.rssi); Serial.print(' ');
+        Serial.print(ri.snr); Serial.print(' ');
+        Serial.print(ri.stereo ? 'S' : '-');
+        Serial.print(ri.rds ? 'R' : '-');
+
         if (g_block1) {
+          Serial.print(' ');
           Serial.print('[');  Serial.print(g_block1, HEX); Serial.print(']');
         } // if
         Serial.println();
       } // if
-
-      // tune up by 1 step
     } // while
+    radio.setFrequency(fSave);
+    Serial.println();
+
 
   } else if (cmd == 'f') { radio.setFrequency(value); }
 
