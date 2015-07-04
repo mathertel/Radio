@@ -256,6 +256,7 @@ void RADIO::debugRadioInfo() {
   Serial.print(info.tuned  ? " TUNED"  : " -----");
   Serial.print(info.stereo ? " STEREO" : "  MONO ");
   Serial.print("  RSSI: "); Serial.print(info.rssi);
+  Serial.print("  SNR: "); Serial.print(info.snr);
   Serial.println();
 } // debugRadioInfo()
 

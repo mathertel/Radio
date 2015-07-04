@@ -93,6 +93,25 @@ private:
   uint8_t rdsStatusx[1 + 12];
   uint8_t agcStatus[1 + 2];
 
+  /// structure used to read status information from the SI4705 radio chip.
+  union {
+    // use structured access 
+    struct {
+      uint8_t  status;
+      uint8_t  resp1;
+      uint8_t  resp2;
+      uint8_t  rdsFifoUsed;
+      uint8_t  blockAH; uint8_t  blockAL;
+      uint8_t  blockBH; uint8_t  blockBL;
+      uint8_t  blockCH; uint8_t  blockCL;
+      uint8_t  blockDH; uint8_t  blockDL;
+      uint8_t  blockErrors;
+    };
+    // use the the byte while receiving and sending.
+    uint8_t buffer[1 + 7];
+  } tuneStatus2; // union RDSSTATUS
+
+
   /// structure used to read RDS information from the SI4705 radio chip.
   union {
     // use structured access 

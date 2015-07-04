@@ -47,6 +47,9 @@
 #define	CMD_SET_PROPERTY	0x12	//	Sets the value of a property.
 #define	CMD_GET_PROPERTY	0x13	//	Retrieves a property’s value.
 #define	CMD_GET_INT_STATUS	0x14	//	Reads interrupt status bits.
+#define	CMD_GET_INT_STATUS_CTS	0x80	//	CTS flag in status
+
+
 #define	CMD_PATCH_ARGS*	    0x15	//	Reserved command used for patch file downloads.
 #define	CMD_PATCH_DATA*	    0x16	//	Reserved command used for patch file downloads.
 #define	CMD_FM_TUNE_FREQ	0x20	//	Selects the FM tuning frequency.
@@ -91,11 +94,6 @@
 #define FM_SOFT_MUTE_SNR_THRESHOLD   0x1303
 #define FM_SOFT_MUTE_RELEASE_RATE    0x1304
 #define FM_SOFT_MUTE_ATTACK_RATE     0x1305
-
-//  si47xx_set_property(FM_SOFT_MUTE_RATE, 64);
-//  si47xx_set_property(FM_SOFT_MUTE_MAX_ATTENUATION, 16);
-//  si47xx_set_property(FM_SOFT_MUTE_SNR_THRESHOLD, 4);
-
 
 #define PROP_FM_SEEK_FREQ_SPACING   0x1402
 #define FM_SEEK_TUNE_SNR_THRESHOLD  0x1403 
@@ -152,6 +150,10 @@ bool SI4705::init() {
   // Set mute bits in the fm receiver
   setMute(true);
   setSoftMute(true);
+
+  // adjust sensibility for scanning
+  _setProperty(FM_SEEK_TUNE_SNR_THRESHOLD, 12);
+  _setProperty(FM_SEEK_TUNE_RSSI_TRESHOLD, 42);
 
   _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN); //  | PROP_GPO_IEN_RDSIEN ????
 
@@ -264,12 +266,12 @@ void SI4705::setMono(bool switchOn)
   if (switchOn) {
     // disable automatic stereo feature
     _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 127);
-    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD,   127);
+    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 127);
 
   } else {
     // Automatic stereo feature on.
     _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 0x0031); // default = 49
-    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD,   0x001E); // default = 30
+    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 0x001E); // default = 30
   } // if
 } // setMono
 
@@ -315,31 +317,49 @@ RADIO_FREQ SI4705::getFrequency() {
 /// @param newF The new frequency to be received.
 /// @return void
 void SI4705::setFrequency(RADIO_FREQ newF) {
+  uint8_t status;
+
   RADIO::setFrequency(newF);
   _sendCommand(5, CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)& 0xff, 0);
 
   // reset the RDSParser
   clearRDS();
+
+  // loop until status ok.
+  do {
+    status = _readStatus();
+  } while (!(status & CMD_GET_INT_STATUS_CTS));
 } // setFrequency()
 
 
 /// Start seek mode upwards.
 void SI4705::seekUp(bool toNextSender) {
-  if (! toNextSender) {
+  uint8_t status;
+
+  if (!toNextSender) {
     RADIO_FREQ newF = getFrequency() + _freqSteps;
     setFrequency(newF);
 
   } else {
+    _setProperty(FM_SEEK_TUNE_SNR_THRESHOLD, 12);
+    _setProperty(FM_SEEK_TUNE_RSSI_TRESHOLD, 42);
     // start tuning
     _sendCommand(2, CMD_FM_SEEK_START, 0x0C);
+
     // reset the RDSParser
     clearRDS();
+
+    // loop until status ok.
+    do {
+      status = _readStatus();
+    } while (!(status & CMD_GET_INT_STATUS_CTS));
   } // if
 } // seekUp()
 
 
 /// Start seek mode downwards.
 void SI4705::seekDown(bool toNextSender) {
+  uint8_t status;
   if (!toNextSender) {
     RADIO_FREQ newF = getFrequency() - _freqSteps;
     setFrequency(newF);
@@ -347,8 +367,14 @@ void SI4705::seekDown(bool toNextSender) {
   } else {
     // start tuning
     _sendCommand(2, CMD_FM_SEEK_START, 0x04);
+
     // reset the RDSParser
     clearRDS();
+
+    // loop until status ok.
+    do {
+      status = _readStatus();
+    } while (!(status & CMD_GET_INT_STATUS_CTS));
   } // if
 } // seekDown()
 
@@ -393,11 +419,12 @@ void SI4705::getRadioInfo(RADIO_INFO *info) {
   _readStatusData(CMD_FM_TUNE_STATUS, 0x01, tuneStatus, sizeof(tuneStatus));
 
   info->active = true;
-  info->rssi = tuneStatus[4];
   if (tuneStatus[1] & 0x01) info->tuned = true;
 
   _readStatusData(CMD_FM_RSQ_STATUS, 0x01, rsqStatus, sizeof(rsqStatus));
   if (rsqStatus[3] & 0x80) info->stereo = true;
+  info->rssi = rsqStatus[4];
+  info->snr = rsqStatus[5];
 
   _readStatusData(CMD_FM_RDS_STATUS, 0x05, rdsStatus.buffer, sizeof(rdsStatus));
   if (rdsStatus.resp2 & 0x01) info->rds = true;
@@ -447,6 +474,7 @@ void SI4705::debugStatus()
   Serial.print(tuneStatus[1], HEX); Serial.print(' ');
 
   Serial.print("TUNE:"); Serial.print((tuneStatus[2] << 8) + tuneStatus[3]); Serial.print(' ');
+  // RSSI and SNR when tune is complete (not the actual one ?)
   Serial.print("RSSI:"); Serial.print(tuneStatus[4]); Serial.print(' ');
   Serial.print("SNR:");  Serial.print(tuneStatus[5]); Serial.print(' ');
   Serial.print("MULT:"); Serial.print(tuneStatus[6]); Serial.print(' ');
@@ -459,6 +487,9 @@ void SI4705::debugStatus()
   Serial.print(rsqStatus[1], HEX); Serial.print(' ');
   Serial.print(rsqStatus[2], HEX); Serial.print(' '); if (rsqStatus[2] & 0x08) Serial.print("SMUTE ");
   Serial.print(rsqStatus[3], HEX); Serial.print(' '); if (rsqStatus[3] & 0x80) Serial.print("STEREO ");
+  // The current RSSI and SNR.
+  Serial.print("RSSI:"); Serial.print(rsqStatus[4]); Serial.print(' ');
+  Serial.print("SNR:");  Serial.print(rsqStatus[5]); Serial.print(' ');
   Serial.print(rsqStatus[7], HEX); Serial.print(' ');
   Serial.println();
 
@@ -526,7 +557,7 @@ void SI4705::_setProperty(uint16_t prop, uint16_t value) {
   Wire.write(value & 0x00FF);
 
   Wire.endTransmission();
-  
+
   Wire.requestFrom(SI4705_ADR, 1); // We want to read the status byte.
   _status = Wire.read();
 } // _setProperty()

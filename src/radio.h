@@ -116,6 +116,7 @@ typedef uint16_t RADIO_FREQ;
 typedef struct RADIO_INFO {
   bool active;   ///< receiving is active.
   uint8_t rssi;  ///< Radio Station Strength Information.
+  uint8_t snr;   ///< Signal Noise Ratio.
   bool rds;      ///< RDS information is available.
   bool tuned;    ///< A stable frequency is tuned.
   bool mono;     ///< Mono mode is on.
