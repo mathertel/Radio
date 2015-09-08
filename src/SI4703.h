@@ -19,7 +19,7 @@
 #ifndef SI4703_h
 #define SI4703_h
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 
 #include <radio.h>

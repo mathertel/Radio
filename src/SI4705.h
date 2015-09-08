@@ -24,7 +24,7 @@
 #ifndef SI4705_h
 #define SI4705_h
 
-#include <arduino.h>
+#include <Arduino.h>
 
 // The wire library is used for the communication with the radio chip.
 #include <Wire.h>

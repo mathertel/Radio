@@ -52,7 +52,7 @@
 #ifndef __RADIO_h__
 #define __RADIO_h__
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 
 // The DEBUG_xxx Macros enable Information to the Serial port.

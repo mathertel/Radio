@@ -20,7 +20,7 @@
 #ifndef TEA5767_h
 #define TEA5767_h
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 
 #include <radio.h>

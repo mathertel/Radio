@@ -22,7 +22,7 @@
 #ifndef __RDSPARSER_H__
 #define __RDSPARSER_H__
 
-#include <arduino.h>
+#include <Arduino.h>
 
 /// callback function for passing a ServicenName 
 extern "C" {

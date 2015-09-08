@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <Wire.h>     // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
 
-#include <RADIO.h>    // Include the common radio library interface
+#include <radio.h>    // Include the common radio library interface
 #include <newchip.h>
 
 // ----- Definitions for the Wire communication

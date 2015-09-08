@@ -19,7 +19,7 @@
 #ifndef newchip_h
 #define newchip_h
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 
 #include <radio.h>

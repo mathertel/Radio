@@ -28,7 +28,7 @@
 #ifndef RDA5807M_h
 #define RDA5807M_h
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 
 #include <radio.h>

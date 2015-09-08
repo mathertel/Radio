@@ -15,10 +15,10 @@
 /// * 05.08.2014 created.
 
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 
-#include <RADIO.h>
+#include <radio.h>
 #include <RDA5807M.h>
 
 // ----- Register Definitions -----
