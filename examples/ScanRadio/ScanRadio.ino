@@ -27,7 +27,7 @@
 
 #include <Wire.h>
 
-#include <RADIO.h>
+#include <radio.h>
 #include <RDA5807M.h>
 #include <SI4703.h>
 #include <SI4705.h>

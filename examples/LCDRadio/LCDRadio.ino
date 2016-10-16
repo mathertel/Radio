@@ -19,12 +19,12 @@
 /// 
 /// Arduino port | SI4703 signal | RDA5807M signal
 /// :----------: | :-----------: | :-------------:
-///          GND | GND           | GND   
-///         3.3V | VCC           | -
-///           5V | -             | VCC
-///           A5 | SCLK          | SCLK
-///           A4 | SDIO          | SDIO
-///           D2 | RST           | -
+/// GND (black)  | GND           | GND   
+/// 3.3V (red)   | VCC           | VCC
+/// 5V (red)     | -             | -
+/// A5 (yellow)  | SCLK          | SCLK
+/// A4 (blue)    | SDIO          | SDIO
+/// D2           | RST           | -
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
@@ -37,7 +37,7 @@
 
 #include <Wire.h>
 
-#include <RADIO.h>
+#include <radio.h>
 #include <RDA5807M.h>
 #include <SI4703.h>
 #include <TEA5767.h>
@@ -81,8 +81,8 @@ int    i_sidx=5;        // Start at Station with index=5
 int    i_smax=14;       // Max Index of Stations
 
 /// Setup a RoraryEncoder for pins A2 and A3:
-// RotaryEncoder encoder(A2, A3);
-RotaryEncoder encoder(A9, A8);
+RotaryEncoder encoder(A2, A3);
+// RotaryEncoder encoder(A9, A8);
 
 int encoderLastPos;
 unsigned long encoderLastTime;

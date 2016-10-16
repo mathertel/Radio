@@ -19,12 +19,12 @@
 /// 
 /// Arduino port | SI4703 signal | RDA5807M signal
 /// :----------: | :-----------: | :-------------:
-///          GND | GND           | GND   
-///         3.3V | VCC           | -
-///           5V | -             | VCC
-///           A5 | SCLK          | SCLK
-///           A4 | SDIO          | SDIO
-///           D2 | RST           | -
+/// GND (black)  | GND           | GND   
+/// 3.3V (red)   | VCC           | VCC
+/// 5V (red)     | -             | -
+/// A5 (yellow)  | SCLK          | SCLK
+/// A4 (blue)    | SDIO          | SDIO
+/// D2           | RST           | -
 ///
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
@@ -36,7 +36,7 @@
 
 #include <Wire.h>
 
-#include <RADIO.h>
+#include <radio.h>
 #include <RDA5807M.h>
 #include <SI4703.h>
 #include <SI4705.h>
@@ -70,15 +70,15 @@ RADIO_FREQ preset[] = {
   10500 // * FFH
 };
 
-int    i_sidx=5;        ///< Start at Station with index=5
+int    i_sidx = 5;        ///< Start at Station with index=5
 
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
 // RADIO radio;       ///< Create an instance of a non functional radio.
-// RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
+RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
 // SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
-SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
+//SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
 
 
@@ -89,7 +89,7 @@ RDSParser rds;
 /// State definition for this radio implementation.
 enum RADIO_STATE {
   STATE_PARSECOMMAND, ///< waiting for a new command character.
-  
+
   STATE_PARSEINT,     ///< waiting for digits for the parameter.
   STATE_EXEC          ///< executing the command.
 };
@@ -148,13 +148,12 @@ void runSerialCommand(char cmd, int16_t value)
   }
 
   // ----- control the volume and audio output -----
-  
+
   else if (cmd == '+') {
     // increase volume
     int v = radio.getVolume();
     if (v < 15) radio.setVolume(++v);
-  }
-  else if (cmd == '-') {
+  } else if (cmd == '-') {
     // decrease volume
     int v = radio.getVolume();
     if (v > 0) radio.setVolume(--v);
@@ -162,37 +161,32 @@ void runSerialCommand(char cmd, int16_t value)
 
   else if (cmd == 'u') {
     // toggle mute mode
-    radio.setMute(! radio.getMute());
+    radio.setMute(!radio.getMute());
   }
-  
+
   // toggle stereo mode
-  else if (cmd == 's') { radio.setMono(! radio.getMono()); }
+  else if (cmd == 's') { radio.setMono(!radio.getMono()); }
 
   // toggle bass boost
-  else if (cmd == 'b') { radio.setBassBoost(! radio.getBassBoost()); }
+  else if (cmd == 'b') { radio.setBassBoost(!radio.getBassBoost()); }
 
   // ----- control the frequency -----
-  
+
   else if (cmd == '>') {
     // next preset
-    if (i_sidx < (sizeof(preset) / sizeof(RADIO_FREQ))-1) {
+    if (i_sidx < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
       i_sidx++; radio.setFrequency(preset[i_sidx]);
     } // if
-  }
-  else if (cmd == '<') {
+  } else if (cmd == '<') {
     // previous preset
     if (i_sidx > 0) {
       i_sidx--;
       radio.setFrequency(preset[i_sidx]);
     } // if
 
-  }
-  else if (cmd == 'f') { radio.setFrequency(value); }
+  } else if (cmd == 'f') { radio.setFrequency(value); }
 
-  else if (cmd == '.') { radio.seekUp(false); }
-  else if (cmd == ':') { radio.seekUp(true); }
-  else if (cmd == ',') { radio.seekDown(false); }
-  else if (cmd == ';') { radio.seekDown(true); }
+  else if (cmd == '.') { radio.seekUp(false); } else if (cmd == ':') { radio.seekUp(true); } else if (cmd == ',') { radio.seekDown(false); } else if (cmd == ';') { radio.seekDown(true); }
 
 
   // not in help:
@@ -200,8 +194,7 @@ void runSerialCommand(char cmd, int16_t value)
     if (value == 0) radio.term();
     if (value == 1) radio.init();
 
-  }
-  else if (cmd == 'i') {
+  } else if (cmd == 'i') {
     char s[12];
     radio.formatFrequency(s, sizeof(s));
     Serial.print("Station:"); Serial.println(s);
@@ -210,7 +203,7 @@ void runSerialCommand(char cmd, int16_t value)
 
   } // info
 
-  else if (cmd == 'x') { 
+  else if (cmd == 'x') {
     radio.debugStatus(); // print chip specific data.
   }
 } // runSerialCommand()
@@ -239,13 +232,13 @@ void setup() {
   radio.setVolume(8);
 
   Serial.write('>');
-  
+
   state = STATE_PARSECOMMAND;
-  
+
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
   rds.attachServicenNameCallback(DisplayServiceName);
-  
+
   runSerialCommand('?', 0);
 } // Setup
 
@@ -256,13 +249,13 @@ void loop() {
   unsigned long now = millis();
   static unsigned long nextFreqTime = 0;
   static unsigned long nextRadioInfoTime = 0;
-  
+
   // some internal static values for parsing the input
   static char command;
   static int16_t value;
   static RADIO_FREQ lastf = 0;
   RADIO_FREQ f = 0;
-  
+
   char c;
   if (Serial.available() > 0) {
     // read the next char from input.
@@ -272,20 +265,17 @@ void loop() {
       // ignore unprintable chars
       Serial.read();
 
-    }
-    else if (state == STATE_PARSECOMMAND) {
+    } else if (state == STATE_PARSECOMMAND) {
       // read a command.
       command = Serial.read();
       state = STATE_PARSEINT;
 
-    }
-    else if (state == STATE_PARSEINT) {
+    } else if (state == STATE_PARSEINT) {
       if ((c >= '0') && (c <= '9')) {
         // build up the value.
         c = Serial.read();
         value = (value * 10) + (c - '0');
-      }
-      else {
+      } else {
         // not a value -> execute
         runSerialCommand(command, value);
         command = ' ';
@@ -313,4 +303,3 @@ void loop() {
 } // loop
 
 // End.
-

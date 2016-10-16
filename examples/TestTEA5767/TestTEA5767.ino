@@ -16,19 +16,20 @@
 ///
 /// Wiring
 /// ------ 
-/// Arduino port | Si4703 signal
+/// Arduino port | TEA5767 signal
 /// ------------ | ---------------
-///     3.3V | VCC
-///      GND | GND
-///       A5 | SCLK
-///       A4 | SDIO
-///       D2 | RST
+///         3.3V | VCC
+///          GND | GND
+///           A5 | SCLK
+///           A4 | SDIO
+///           D2 | RST
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
 /// History:
 /// --------
 /// * 15.09.2014 created.
+/// * 15.11.2015 wiring corrected.
 
 #include <Arduino.h>
 #include <Wire.h>

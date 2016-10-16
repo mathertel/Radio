@@ -47,7 +47,7 @@
 #include <SD.h>
 
 // Include all the possible radio chips.
-// #include <RADIO.h>
+// #include <radio.h>
 // #include <RDA5807M.h>
 // #include <SI4703.h>
 #include <SI4705.h>
@@ -891,8 +891,13 @@ void respondRadioData()
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
+/// retrieve RDS data from the radio chip and forward to the RDS decoder library
 void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
+  static uint16_t b1;
+
+  if (b1 != block1)
+    Serial.println(block1);
+  b1 = block1;
   rds.processData(block1, block2, block3, block4);
 }
 
@@ -996,7 +1001,8 @@ void setupRadio() {
 
   // setup the information chain for RDS data.
   *rdsServiceName = NUL;
-  radio.attachReceiveRDS(RDS_process);
+  /// retrieve RDS data from the radio chip and forward to the RDS decoder library
+  radio.attachReceiveRDS(RDS_process); // or (rds.processData)
 
   rds.attachServicenNameCallback(DisplayServiceName);
   rds.attachTextCallback(DisplayText);

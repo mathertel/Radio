@@ -77,6 +77,28 @@ class StringBuffer {
     } // append()
 
 
+    void append_without_itoa(int num)
+    {
+      char buf[1 + 3 * sizeof(int)];
+      int  n = 3 * sizeof(int);
+
+      buf[n--] = NUL; // terminating the result string
+
+      // allow negative numbers
+      if (num < 0) {
+        append('-');
+        num = - num;
+      } // if
+
+      do {
+        buf[n--] = '0' + (num % 10);
+        num = num / 10;
+      } while (num);
+      append(&buf[n+1]);
+    } // append()
+
+
+
     /// Append a number.
     void append(uint32_t num)
     {
