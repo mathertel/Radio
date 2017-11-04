@@ -150,6 +150,8 @@ void RDA5807M::setVolume(uint8_t newVolume)
 void RDA5807M::setBassBoost(bool switchOn)
 {
   RADIO::setBassBoost(switchOn);
+
+  registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_SEEK);
   uint16_t regCtrl = registers[RADIO_REG_CTRL];
   if (switchOn)
   regCtrl |= RADIO_REG_CTRL_BASS;
@@ -181,6 +183,7 @@ void RDA5807M::setMute(bool switchOn)
 {
   RADIO::setMute(switchOn);
 
+  registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_SEEK);
   if (switchOn) {
     // now don't unmute
     registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_UNMUTE);
