@@ -34,15 +34,21 @@
 
 // int STATUS_LED = 13;
 #define resetPin 2
-// SDA/A4 on Arduino
-#define SDIO A4
+
+
+#ifdef ESP8266
+#define SDIO 4	// 4 on ESP8266
+#else
+#define SDIO A4	// SDA/A4 on Arduino
+#endif
+
 // int SCLK = A5; //SCL/A5 on Arduino
 
 // Register Definitions -----
 
 // Define the register names
 #define DEVICEID 0x00
-#define CHIPID  0x01
+#define SICHIPID  0x01
 #define POWERCFG  0x02
 #define CHANNEL  0x03
 #define SYSCONFIG1  0x04
