@@ -271,7 +271,7 @@ void RDA5807M::seekUp(bool toNextSender) {
   registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_SEEK); // clear seekmode
   if (! toNextSender) {
     // stop scanning right now
-    registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_SEEK);
+    //registers[RADIO_REG_CTRL] &= (~RADIO_REG_CTRL_SEEK);
     _saveRegister(RADIO_REG_CTRL);
   } // if
 } // seekUp()
