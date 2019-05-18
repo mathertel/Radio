@@ -32,11 +32,15 @@ class SI4703 : public RADIO {
   public:
     const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
 
-  SI4703();
+  SI4703(uint8_t resetPin = 2, uint8_t sdaPin = SDA);
   
   bool   init();  // initialize library and the chip.
   void   term();  // terminate all radio functions.
   
+  // SI4703 specific features
+
+  void setResetPin(uint8_t pin);
+
   // Control of the audio features
   
   // Control the volume output of the radio chip
@@ -81,7 +85,7 @@ class SI4703 : public RADIO {
   void  _readRegisters();  // read all status & data registers
   void  _saveRegisters();  // Save writable registers back to the chip
 
-  private:
+private:
   // ----- local variables
 
   // store the current values of the 16 chip internal 16-bit registers
@@ -94,6 +98,9 @@ class SI4703 : public RADIO {
   
   void _seek(bool seekUp = true);
   void _waitEnd();
+
+  uint8_t _resetPin;
+  uint8_t _sdaPin;
 };
 
 #endif

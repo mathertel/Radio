@@ -33,10 +33,6 @@
 #define IN_EUROPE
 
 // int STATUS_LED = 13;
-#define resetPin 2
-// SDA/A4 on Arduino
-#define SDIO A4
-// int SCLK = A5; //SCL/A5 on Arduino
 
 // Register Definitions -----
 
@@ -109,7 +105,9 @@
 // ----- implement
 
 // initialize the extra variables in SI4703
-SI4703::SI4703() {
+SI4703::SI4703(uint8_t resetPin, uint8_t sdaPin) {
+  _resetPin = resetPin;
+  _sdaPin = sdaPin;
 }
 
 // initialize all internals.
@@ -121,13 +119,13 @@ bool SI4703::init() {
   //The breakout board has SEN pulled high, but also has SDIO pulled high. Therefore, after a normal power up
   //The Si4703 will be in an unknown state. RST must be controlled
 
-  pinMode(resetPin, OUTPUT);
-  pinMode(SDIO, OUTPUT); //SDIO is connected to A4 for I2C
-  digitalWrite(SDIO, LOW); //A low SDIO indicates a 2-wire interface
-  digitalWrite(resetPin, LOW); //Put Si4703 into reset
+  pinMode(_resetPin, OUTPUT);
+  pinMode(_sdaPin, OUTPUT); // SDIO is connected to SDA for I2C
+  digitalWrite(_sdaPin, LOW); //A low SDA during reset indicates a 2-wire interface
+  digitalWrite(_resetPin, LOW); //Put Si4703 into reset
   delay(1); //Some delays while we allow pins to settle
 
-  digitalWrite(resetPin, HIGH); //Bring Si4703 out of reset with SDIO set to low and SEN pulled high with on-board resistor
+  digitalWrite(_resetPin, HIGH); //Bring Si4703 out of reset with SDIO set to low and SEN pulled high with on-board resistor
   delay(1); //Allow Si4703 to come out of reset
 
   Wire.begin(); //Now that the unit is reset and I2C inteface mode, we need to begin I2C
@@ -167,13 +165,6 @@ bool SI4703::init() {
   _saveRegisters(); //Update
 
   delay(110); //Max powerup time, from datasheet page 13
-
-
-
-  // ???
-  //       currentChannel = 893;
-  //       //currentChannel = 1023;
-  //       gotoChannel(currentChannel);
 
   return(result);
 } // init()
