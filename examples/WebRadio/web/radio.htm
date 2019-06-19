@@ -1,176 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <link rel="shortcut icon" href="/radio.ico" type="image/x-icon" />
+  <link rel="icon" href="/radio.ico" type="image/x-icon" />
+  <link rel="manifest" href="/manifest.jsn">
   <title>Radio</title>
-  <!-- http://www.responsivegridsystem.com/calculator/ -->
   <script type='text/javascript' src='jcl.js'></script>
+  <!-- <script type='text/javascript' src="nls-de.js"></script> -->
+  <link href="iotstyle.css" rel="stylesheet" />
 
   <style>
-    html {
-      font-family: Tahoma,Helvetica,Arial;
-      font-size: 100%;
-    }
-
-    body {
-      padding: 0;
-      margin: 0;
-    }
-
-    h1 {
-      margin-top: 0.2em;
-      margin-bottom: 0.2em;
-    }
-
     #servicename {
-      font-size: 1.2em;
+      font-size: 1.2rem;
     }
-
+    
     #rdstext {
-      font-size: 1.2em;
+      font-size: 1.2rem;
       word-wrap: normal;
     }
-
-    label, input, button, textarea, img.INPUTFUNC {
-      display: inline-block;
-      height: 2.4rem;
-      font-size: 1rem;
-      line-height: 1rem;
-      border-radius: 0.25rem;
-      vertical-align: baseline;
-      border: 0.1rem solid gray;
-    }
-
-      button.activ {
-        background-color: #acc1e4 !important;
-        border-color: #203050 !important;
-      }
-
-    td {
-      text-align: center;
-    }
-
+    
     .HSlider {
       display: inline-block;
     }
-
-      .HSlider .minus, .HSlider .plus {
-        position: relative;
-        display: inline-block;
-        margin-right: 0.1em;
-        height: 1em;
-        width: 1em;
-        border: 0.2em solid gray;
-        border-radius: 0.4em;
-      }
-
-        .HSlider .minus div, .HSlider .plus div {
-          font-weight: bold;
-          width: 1em;
-          height: 1em;
-          top: -0.08em;
-          position: absolute;
-        }
-
-        .HSlider .minus svg, .HSlider .plus svg {
-          width: 1em;
-          height: 1em;
-          position: absolute;
-        }
-
-      .HSlider .slider {
-        height: 1em;
-        width: 16.4em;
-        padding: 0.2em;
-        position: relative;
-        display: inline-block;
-      }
-
-      .HSlider .ruler {
-        height: 0.4em;
-        top: 0.3em;
-        border: 0.2em solid gray;
-        border-radius: 0.5em;
-        position: absolute;
-        background-color: silver;
-      }
-
-      .HSlider .knob {
-        width: 0.6em;
-        height: 1em;
-        top: 0;
-        border: 0.2em solid black;
-        border-radius: 0.4em;
-        position: absolute;
-        background-color: silver;
-      }
-
+    
+    .HSlider .slider {
+      display: inline-block;
+      width: 16.4em;
+      position: relative;
+      margin: 0 0.4em;
+    }
+    
+    .HSlider .ruler {
+      position: relative;
+      height: 0.6em;
+      border: 0.2em solid gray;
+      border-radius: 0.5em;
+      background-color: silver;
+    }
+    
+    .HSlider .knob {
+      width: 0.6em;
+      height: 1.6em;
+      top: -0.5em;
+      border: 0.2em solid black;
+      border-radius: 0.4em;
+      position: absolute;
+      background-color: silver;
+    }
+    
     [draggable=true] {
       -khtml-user-drag: element;
     }
-
     /* Grid Design  */
-    .container {
-      margin-right: auto;
-      margin-left: auto;
+    
+    .col.label,
+    .col.nolabel {
+      min-width: 8em;
     }
-
-    .flex-row {
-      display: flex;
-      flex-flow: row wrap;
-      padding: 0px;
-      border-left: 0.2em solid white;
-      border-top: 0.2em solid white;
-    }
-
-      .flex-row > .area {
-        border-right: 0.2em solid white;
-        border-bottom: 0.2em solid white;
-      }
-
-    .area {
-      padding: 0.2em;
-      flex-grow: 0;
-      background-color: silver;
-    }
-
-      .area.stretch {
-        flex-grow: 1;
-      }
-
-      .area.label, .area.nolabel {
-        width: 8em;
-      }
-
-    @media (max-width: 720px) {
-      html {
-        font-size: 80%;
-      }
-
-      .area.label {
-        width: 100%;
-      }
-
-      .area.nolabel {
-        display: none;
-      }
-    }
-
+    
     svg.icon {
-      width: 4em;
-      height: 4em;
+      width: 4rem;
+      height: 4rem;
     }
-
-      svg.icon .object {
-        fill: #304878;
-        fill-opacity: 1;
-      }
-
-      svg.icon .connect {
-        fill: green;
-        fill-opacity: 1;
-      }
+    
+    svg.icon .object {
+      fill: #304878;
+      fill-opacity: 1;
+    }
+    
+    svg.icon .connect {
+      fill: green;
+      fill-opacity: 1;
+    }
   </style>
 
   <script type='text/javascript'>
@@ -180,111 +84,113 @@
     // DataOutput.js
     jcl.DataOutputBehavior = {
 
-      // --- Attributes
-      nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+        // --- Attributes
+        nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
 
-      datatype: "", /// <summary>The datatype of the input element.</summary>
-      prec: "", /// <summary>Precision for numeric types.</summary>
+        datatype: "", /// <summary>The datatype of the input element.</summary>
+        prec: "", /// <summary>Precision for numeric types.</summary>
 
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+        eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
 
-      init: function () {
-        /// <summary>Initialze the JavaScript control.</summary>
-        if (this.eventname) {
-          OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
-        } // if
-
-        this.setDatatype(this.datatype);
-      }, // init
-
-
-      // --- OpenAjax event handler ---
-      handleEvent: function (eventName, eventData) {
-        this.setData(eventData);
-      }, // handleEvent
-
-
-      setData: function (val) {
-        /// <summary>Display a new value.</summary>
-        var s = this._toString(val);
-        if (this.innerText != s)
-          this.innerText = s;
-      }, // setData
-
-
-      setDatatype: function (newType) {
-        /// <summary>If a datatype is given and if the nls functionality is present
-        /// use the nls functionality to support the special datatype conversion functions.</summary>
-        if (typeof (jcl.nls) != "undefined") {
-          if ((newType) && (jcl.nls[newType])) {
-            this.datatype = newType;
-          } else {
-            this.datatype = "string";
+        init: function() {
+          /// <summary>Initialze the JavaScript control.</summary>
+          if (this.eventname) {
+            OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
           } // if
-          this._toString = jcl.nls[this.datatype].toString;
-        } // if
-      }, // setDatatype
 
-      _toString: function (v) { return (v); }
+          this.setDatatype(this.datatype);
+        }, // init
 
-    } // jcl.DataOutputBehavior
+
+        // --- OpenAjax event handler ---
+        handleEvent: function(eventName, eventData) {
+          this.setData(eventData);
+        }, // handleEvent
+
+
+        setData: function(val) {
+          /// <summary>Display a new value.</summary>
+          var s = this._toString(val);
+          if (this.innerText != s)
+            this.innerText = s;
+        }, // setData
+
+
+        setDatatype: function(newType) {
+          /// <summary>If a datatype is given and if the nls functionality is present
+          /// use the nls functionality to support the special datatype conversion functions.</summary>
+          if (typeof(jcl.nls) != "undefined") {
+            if ((newType) && (jcl.nls[newType])) {
+              this.datatype = newType;
+            } else {
+              this.datatype = "string";
+            } // if
+            this._toString = jcl.nls[this.datatype].toString;
+          } // if
+        }, // setDatatype
+
+        _toString: function(v) {
+          return (v);
+        }
+
+      } // jcl.DataOutputBehavior
 
 
     // DataPreset.js
     jcl.DataPresetBehavior = {
 
-      // --- Attributes
-      nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+        // --- Attributes
+        nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
 
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+        eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
 
-      presetvalue: "", ///
+        presetvalue: "", ///
 
-      init: function () {
-        /// <summary>Initialze the JavaScript control.</summary>
-        if (this.eventname)
-          OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
-      }, // init
+        init: function() {
+          /// <summary>Initialze the JavaScript control.</summary>
+          if (this.eventname)
+            OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
+        }, // init
 
-      onclick: function (evt) {
-        /// <summary>Handle the event when the mouse button is pressed.</summary>
-        if ((this.eventname != null) && (this.eventname != "")) {
-          OpenAjax.hub.publish(jcl.BuildFullEventname(this), this.presetvalue);
-        } // if
-      }, // onclick
+        onclick: function(evt) {
+          /// <summary>Handle the event when the mouse button is pressed.</summary>
+          if ((this.eventname != null) && (this.eventname != "")) {
+            OpenAjax.hub.publish(jcl.BuildFullEventname(this), this.presetvalue);
+          } // if
+        }, // onclick
 
-      // --- OpenAjax event handler ---
-      handleEvent: function (eventName, eventData) {
-        /// <summary>if the current value is the preset value of this button mark it as active.</summary>
-        if (eventData == this.presetvalue) {
-          this.classList.add("activ");
-        } else {
-          this.classList.remove("activ");
-        } // if
-      } // handleEvent
+        // --- OpenAjax event handler ---
+        handleEvent: function(eventName, eventData) {
+            /// <summary>if the current value is the preset value of this button mark it as active.</summary>
+            if (eventData == this.presetvalue) {
+              this.classList.add("activ");
+            } else {
+              this.classList.remove("activ");
+            } // if
+          } // handleEvent
 
-    } // jcl.DataPresetBehavior
+      } // jcl.DataPresetBehavior
 
 
     // Command.js
     jcl.CommandBehavior = {
 
-      // --- Attributes
-      nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+        // --- Attributes
+        nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
 
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+        eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
 
-      init: function () {
-        /// <summary>Initialze the JavaScript control.</summary>
-      }, // init
+        init: function() {
+          /// <summary>Initialze the JavaScript control.</summary>
+        }, // init
 
-      onclick: function (evt) {
-        /// <summary>Handle the event when the mouse button is pressed.</summary>
-        if ((this.eventname != null) && (this.eventname != "")) {
-          OpenAjax.hub.publish(jcl.BuildFullEventname(this), 1);
-        } // if
-      } // onclick
-    } // jcl.CommandBehavior
+        onclick: function(evt) {
+            /// <summary>Handle the event when the mouse button is pressed.</summary>
+            if ((this.eventname != null) && (this.eventname != "")) {
+              OpenAjax.hub.publish(jcl.BuildFullEventname(this), 1);
+            } // if
+          } // onclick
+      } // jcl.CommandBehavior
 
 
     // DataToggleBehavior.js
@@ -292,48 +198,48 @@
     // 1 ist active.
     jcl.DataToggleBehavior = {
 
-      // --- Attributes
-      nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
+        // --- Attributes
+        nosubmit: false, /// <summary>Enable the ENTER Key on input elements without submitting a html-form.</summary>
 
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+        eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
 
-      init: function () {
-        /// <summary>Initialze the JavaScript control.</summary>
-        if (this.eventname) {
-          OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
-        } // if
-        this._value = 0;
-      }, // init
-
-      // --- OpenAjax event handler ---
-      handleEvent: function (eventName, eventData) {
-        this.setData(eventData);
-      }, // handleEvent
-
-
-      onclick: function (evt) {
-        /// <summary>Handle the event when the mouse button is pressed.</summary>
-        evt = evt || window.event;
-        var t = evt.target || evt.srcElement;
-
-        if ((this.eventname != null) && (this.eventname != "")) {
-          OpenAjax.hub.publish(this.eventname, 1 - this._value);
-        } // if
-      },
-
-      setData: function (val) {
-        /// <summary>Display the new value.</summary>
-        if (this._value != val) {
-          if (val == 1) {
-            this.classList.add("activ");
-          } else {
-            this.classList.remove("activ");
+        init: function() {
+          /// <summary>Initialze the JavaScript control.</summary>
+          if (this.eventname) {
+            OpenAjax.hub.subscribe(jcl.BuildFullEventname(this), this.handleEvent, this);
           } // if
-          this._value = val;
-        } // if
-      } // setData
+          this._value = 0;
+        }, // init
 
-    } // jcl.DataToggleBehavior
+        // --- OpenAjax event handler ---
+        handleEvent: function(eventName, eventData) {
+          this.setData(eventData);
+        }, // handleEvent
+
+
+        onclick: function(evt) {
+          /// <summary>Handle the event when the mouse button is pressed.</summary>
+          evt = evt || window.event;
+          var t = evt.target || evt.srcElement;
+
+          if ((this.eventname != null) && (this.eventname != "")) {
+            OpenAjax.hub.publish(this.eventname, 1 - this._value);
+          } // if
+        },
+
+        setData: function(val) {
+            /// <summary>Display the new value.</summary>
+            if (this._value != val) {
+              if (val == 1) {
+                this.classList.add("activ");
+              } else {
+                this.classList.remove("activ");
+              } // if
+              this._value = val;
+            } // if
+          } // setData
+
+      } // jcl.DataToggleBehavior
 
 
     // HSlider.js
@@ -347,97 +253,172 @@
     // 06.01.2008 documentation and simplifications
 
     jcl.HSliderBehavior = {
-      /// <summary>This control implements is a horizontal moveable rectangle that acts as a slider.
-      /// It can be attached to an OpenAjax event and acts as a subscriber and publisher.</summary>
-      /// <example>A page that uses this control ist available at:<br />
-      /// <a href="http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx">
-      /// http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx</a></example>
+        /// <summary>This control implements is a horizontal moveable rectangle that acts as a slider.
+        /// It can be attached to an OpenAjax event and acts as a subscriber and publisher.</summary>
+        /// <example>A page that uses this control ist available at:<br />
+        /// <a href="http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx">
+        /// http://www.mathertel.de/AJAXEngine/S03_AJAXControls/ConnectionsTestPage.aspx</a></example>
 
-      _knob: null, /// <summary>Reference to the movable knob obj.</summary>
-      _lastValue: -1, /// <summary>last published value to avoid doublicate events.</summary>
-      _x: 0, /// <summary>Offset between mouse and the knob.</summary>
-      _maxright: 0, /// <summary>rightmost position of the knob.</summary>
-      _xOffset: 0, /// <summary>x-offset of the region the knob is allowed to be moved.</summary>
+        _knob: null, /// <summary>Reference to the movable knob obj.</summary>
+        _lastValue: -1, /// <summary>last published value to avoid doublicate events.</summary>
+        _x: 0, /// <summary>Offset between mouse and the knob.</summary>
+        _maxright: 0, /// <summary>rightmost position of the knob.</summary>
+        _xOffset: 0, /// <summary>x-offset of the region the knob is allowed to be moved.</summary>
 
-      minvalue: 0, /// <summary>The value that is reached on the leftmost position of the knob.</summary>
-      maxvalue: 100, /// <summary>The value that is reached on the rightmost position of the knob.</summary>
-      unit: 1, /// <summary>The unit of the oublished values. All values can be divided by this value without any reminder
-      /// if the value is determined by using the HSlider.</summary>
+        minvalue: 0, /// <summary>The value that is reached on the leftmost position of the knob.</summary>
+        maxvalue: 100, /// <summary>The value that is reached on the rightmost position of the knob.</summary>
+        unit: 1, /// <summary>The unit of the oublished values. All values can be divided by this value without any reminder
+        /// if the value is determined by using the HSlider.</summary>
 
-      eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
+        eventname: "", /// <summary>The local or complete event name that is used for publishing OpenAjax events.</summary>
 
-      init: function () {
-        var p;
-        /// <summary>Initialze the JavaScript control.</summary>
-        this._removeTextNodes(this);
+        init: function() {
+          var p;
+          /// <summary>Initialze the JavaScript control.</summary>
+          this._removeTextNodes(this);
 
-        this.eventname = jcl.BuildFullEventname(this);
+          this.eventname = jcl.BuildFullEventname(this);
 
-        if (this.eventname) {
-          OpenAjax.hub.subscribe(this.eventname, this._handleEvent, this);
-        } // if
-
-        // find the moveable knob
-        this._knob = jcl.getElementsByClassName(this, "knob")[0];
-        p = this._knob.parentNode;
-
-        this._maxright = p.offsetWidth - this._knob.offsetWidth;
-
-        this.minvalue = parseInt(this.minvalue);
-        this.maxvalue = parseInt(this.maxvalue);
-        this.unit = parseInt(this.unit);
-        this._lastValue = this.minvalue;
-      }, // init
-
-
-      // --- events
-
-      onmousedown: function (evt) {
-        /// <summary>Handle the event when the mouse button is pressed.</summary>
-        evt = evt || window.event;
-        var t = evt.target || evt.srcElement;
-        var left = this._lastValue;
-
-        // if not clicked on a defined element use one element up.
-        if (!t.className) t = t.parentElement;
-
-        if (jcl.hasClassName(t, "knob")) {
-          this.MoveStart(evt);
-
-        } else if (jcl.hasClassName(t, "minus")) {
-          left = parseInt(left) - this.unit;
-          if (left < this.minvalue) left = this.minvalue;
-
-        } else if (jcl.hasClassName(t, "plus")) {
-          left = parseInt(left) + this.unit;
-          if (left > this.maxvalue) left = this.maxvalue;
-        } // if
-
-        if (left != this._lastValue) {
-          if ((this.eventname != null) && (this.eventname != "")) {
-            OpenAjax.hub.publish(this.eventname, left);
+          if (this.eventname) {
+            OpenAjax.hub.subscribe(this.eventname, this._handleEvent, this);
           } // if
+
+          // find the moveable knob
+          this._knob = this.getElementsByClassName("knob")[0];
+          p = this._knob.parentNode;
+
+          this._maxright = p.offsetWidth - this._knob.offsetWidth;
+
+          this.minvalue = parseInt(this.minvalue);
+          this.maxvalue = parseInt(this.maxvalue);
+          this.unit = parseInt(this.unit);
+          this._lastValue = this.minvalue;
+        }, // init
+
+
+        // --- events
+
+        onmousedown: function(evt) {
+          /// <summary>Handle the event when the mouse button is pressed.</summary>
+          var t = window.event.srcElement;
+          var left = this._lastValue;
+
+          // check clicked element or the parents fur functionality.
+          while (t) {
+            if (t == this) {
+              // don't analyze further that the hst object
+              break;
+
+            } else if (t.classList.contains("minus")) {
+              left = parseInt(left) - this.unit;
+              if (left < this.minvalue) left = this.minvalue;
+
+            } else if (t.classList.contains("plus")) {
+              left = parseInt(left) + this.unit;
+              if (left > this.maxvalue) left = this.maxvalue;
+
+            } else if (t.classList.contains("knob")) {
+              this.MoveStart(evt);
+            } // if
+            t = t.parentElement;
+          } // while
+
+          if (left != this._lastValue) {
+            if ((this.eventname != null) && (this.eventname != "")) {
+              OpenAjax.hub.publish(this.eventname, left);
+            } // if
+            this._lastValue = left;
+          } // if
+        }, // onmousedown
+
+
+        ontouchstart: function(evt) {
+          /// <summary>Handle the event when a touch operation starts.</summary>
+          var t = evt.targetTouches[0].target;
+          if (t.className == "knob") {
+            this.TouchStart(evt);
+          } // if
+        }, // ontouchstart:
+
+
+        ontouchmove: function(evt) {
+          /// <summary>Handle the event when a touch point moves.</summary>
+          var mo = jcl.currentMoving;
+          if (mo != null) {
+            evt.preventDefault();
+
+            var left = evt.targetTouches[0].pageX - this._x - this._xOffset;
+            left = Math.min(this._maxright, Math.max(0, left));
+            this._knob.style.left = left + "px";
+
+            left = Math.round(left * (this.maxvalue - this.minvalue) / this._maxright + this.minvalue);
+            left = Math.round(left / parseInt(this.unit)) * parseInt(this.unit);
+
+            if (left != this._lastValue) {
+              if ((this.eventname != null) && (this.eventname != "")) {
+                OpenAjax.hub.publish(this.eventname, left);
+              } // if
+            } // if
+          } // if
+
           this._lastValue = left;
-        } // if
-      }, // onmousedown
+        }, // ontouchmove:
 
 
-      ontouchstart: function (evt) {
-        /// <summary>Handle the event when a touch operation starts.</summary>
-        var t = evt.targetTouches[0].target;
-        if (t.className == "knob") {
-          this.TouchStart(evt);
-        } // if
-      }, // ontouchstart:
+        _onmousemove: function(evt) {
+          /// <summary>Handle the mouse button move event. This handler will be attached to the document level.</summary>
+          evt = evt || window.event;
+          jcl.currentMoving.MoveIt(evt);
+        }, // onmousemove
 
 
-      ontouchmove: function (evt) {
-        /// <summary>Handle the event when a touch point moves.</summary>
-        var mo = jcl.currentMoving;
-        if (mo != null) {
-          evt.preventDefault();
+        _onmouseup: function(evt) {
+          /// <summary>Handle the mouse button up event. This handler will be attached to the document level.</summary>
+          evt = evt || window.event;
+          jcl.currentMoving.MoveEnd(evt);
+        }, // onmouseup
 
-          var left = evt.targetTouches[0].pageX - this._x - this._xOffset;
+
+        // --- methods
+
+        MoveStart: function(evt) {
+          /// <summary>Start sliding the knob.</summary>
+          this._xOffset = 0;
+          var obj = this._knob.offsetParent;
+          while (obj != null) {
+            this._xOffset += obj.offsetLeft;
+            obj = obj.offsetParent;
+          } // while
+
+          // calculate mousepointer-knob delta
+          this._x = evt.clientX - (this._knob.offsetLeft + this._xOffset);
+
+          jcl.currentMoving = this; // make it globally evailable when mouse is leaving this object.
+          jcl.AttachEvent(document, "onmousemove", this._onmousemove);
+          jcl.AttachEvent(document, "onmouseup", this._onmouseup);
+          // cancel selecting anything
+          evt.cancelBubble = true;
+          evt.returnValue = false;
+        }, // MoveStart
+
+
+        TouchStart: function(evt) {
+          this._xOffset = 0;
+          var obj = this._knob.offsetParent;
+          while (obj != null) {
+            this._xOffset += obj.offsetLeft;
+            obj = obj.offsetParent;
+          } // while
+
+          // calculate mousepointer-knob delta
+          this._x = evt.targetTouches[0].pageX - (this._knob.offsetLeft + this._xOffset);
+          jcl.currentMoving = this;
+        }, // TouchStart
+
+
+        MoveIt: function(evt) {
+          /// <summary>Move the knob element and eventually publish a new event.</summary>
+          var left = evt.clientX - this._x - this._xOffset;
           left = Math.min(this._maxright, Math.max(0, left));
           this._knob.style.left = left + "px";
 
@@ -448,124 +429,53 @@
             if ((this.eventname != null) && (this.eventname != "")) {
               OpenAjax.hub.publish(this.eventname, left);
             } // if
-          } // if
-        } // if
 
-        this._lastValue = left;
-      }, // ontouchmove:
-
-
-      _onmousemove: function (evt) {
-        /// <summary>Handle the mouse button move event. This handler will be attached to the document level.</summary>
-        evt = evt || window.event;
-        jcl.currentMoving.MoveIt(evt);
-      }, // onmousemove
-
-
-      _onmouseup: function (evt) {
-        /// <summary>Handle the mouse button up event. This handler will be attached to the document level.</summary>
-        evt = evt || window.event;
-        jcl.currentMoving.MoveEnd(evt);
-      }, // onmouseup
-
-
-      // --- methods
-
-      MoveStart: function (evt) {
-        /// <summary>Start sliding the knob.</summary>
-        this._xOffset = 0;
-        var obj = this._knob.offsetParent;
-        while (obj != null) {
-          this._xOffset += obj.offsetLeft;
-          obj = obj.offsetParent;
-        } // while
-
-        // calculate mousepointer-knob delta
-        this._x = evt.clientX - (this._knob.offsetLeft + this._xOffset);
-
-        jcl.currentMoving = this; // make it globally evailable when mouse is leaving this object.
-        jcl.AttachEvent(document, "onmousemove", this._onmousemove);
-        jcl.AttachEvent(document, "onmouseup", this._onmouseup);
-        // cancel selecting anything
-        evt.cancelBubble = true;
-        evt.returnValue = false;
-      }, // MoveStart
-
-
-      TouchStart: function (evt) {
-        this._xOffset = 0;
-        var obj = this._knob.offsetParent;
-        while (obj != null) {
-          this._xOffset += obj.offsetLeft;
-          obj = obj.offsetParent;
-        } // while
-
-        // calculate mousepointer-knob delta
-        this._x = evt.targetTouches[0].pageX - (this._knob.offsetLeft + this._xOffset);
-        jcl.currentMoving = this;
-      }, // TouchStart
-
-
-      MoveIt: function (evt) {
-        /// <summary>Move the knob element and eventually publish a new event.</summary>
-        var left = evt.clientX - this._x - this._xOffset;
-        left = Math.min(this._maxright, Math.max(0, left));
-        this._knob.style.left = left + "px";
-
-        left = Math.round(left * (this.maxvalue - this.minvalue) / this._maxright + this.minvalue);
-        left = Math.round(left / parseInt(this.unit)) * parseInt(this.unit);
-
-        if (left != this._lastValue) {
-          if ((this.eventname != null) && (this.eventname != "")) {
-            OpenAjax.hub.publish(this.eventname, left);
           } // if
 
-        } // if
-
-        this._lastValue = left;
-        // cancel selecting anything
-        evt.cancelBubble = true;
-        evt.returnValue = false;
-      }, // MoveIt
+          this._lastValue = left;
+          // cancel selecting anything
+          evt.cancelBubble = true;
+          evt.returnValue = false;
+        }, // MoveIt
 
 
-      MoveEnd: function () {
-        /// <summary>Handle the end of a moving gesture.</summary>
-        if (this._knob != null) {
-          jcl.DetachEvent(document, "onmousemove", this._onmousemove);
-          jcl.DetachEvent(document, "onmouseup", this._onmouseup);
-          jcl.currentMoving = null;
-        } // if
-      }, // MoveEnd
+        MoveEnd: function() {
+          /// <summary>Handle the end of a moving gesture.</summary>
+          if (this._knob != null) {
+            jcl.DetachEvent(document, "onmousemove", this._onmousemove);
+            jcl.DetachEvent(document, "onmouseup", this._onmouseup);
+            jcl.currentMoving = null;
+          } // if
+        }, // MoveEnd
 
 
-      // --- OpenAjax event handler ---
+        // --- OpenAjax event handler ---
 
-      _handleEvent: function (eventName, eventData) {
-        /// <summary>Handle OpenAjax events.</summary>
-        var knob = this._knob;
-        if ((knob != null) && (this._lastValue != eventData)) {
-          this._lastValue = eventData;
-          eventData = eventData - this.minvalue;
-          eventData = Math.round(eventData * this._maxright / (this.maxvalue - this.minvalue));
-          eventData = Math.min(this._maxright, Math.max(0, eventData));
-          knob.style.left = eventData + "px";
-        } // if
-      }, // _handleEvent
+        _handleEvent: function(eventName, eventData) {
+          /// <summary>Handle OpenAjax events.</summary>
+          var knob = this._knob;
+          if ((knob != null) && (this._lastValue != eventData)) {
+            this._lastValue = eventData;
+            eventData = eventData - this.minvalue;
+            eventData = Math.round(eventData * this._maxright / (this.maxvalue - this.minvalue));
+            eventData = Math.min(this._maxright, Math.max(0, eventData));
+            knob.style.left = eventData + "px";
+          } // if
+        }, // _handleEvent
 
 
-      _removeTextNodes: function (n) {
-        /// <summary>remove all textnodes from the control to avoid unwanted spaces.</summary>
-        var obj = n.firstChild;
-        while (obj != null) {
-          var nextObj = obj.nextSibling;
-          if (obj.nodeType == 3)
-            obj.parentNode.removeChild(obj);
-          obj = nextObj;
-        } // while
-      } // _removeTextNodes
+        _removeTextNodes: function(n) {
+            /// <summary>remove all textnodes from the control to avoid unwanted spaces.</summary>
+            var obj = n.firstChild;
+            while (obj != null) {
+              var nextObj = obj.nextSibling;
+              if (obj.nodeType == 3)
+                obj.parentNode.removeChild(obj);
+              obj = nextObj;
+            } // while
+          } // _removeTextNodes
 
-    } // jcl.HSliderBehavior
+      } // jcl.HSliderBehavior
 
 
     /// ----- ajax functions -----
@@ -610,7 +520,7 @@
     // ----- jcl functions -----
 
     // elem.classList.contains("aClass");
-    jcl.hasClassName = function (elem, className) {
+    jcl.hasClassName = function(elem, className) {
       var cn = elem.className;
       if ((cn != null) && (cn != ""))
         return (cn.match("\\b" + className + "\\b") != null);
@@ -630,7 +540,7 @@
             OpenAjax.hub.publish('radio.' + n, data[n]);
           }
         } // for
-      } catch (e) { }
+      } catch (e) {}
       timer = window.setTimeout(upd, 1200);
 
     } // upd()
@@ -640,8 +550,8 @@
 <body style="background-color:#F0F0F0">
   <div class="container">
 
-    <div class="flex-row">
-      <div class="area">
+    <div class="row">
+      <div class="col">
         <svg class="icon" viewBox="0 0 48 48">
           <path class="object"
                 d="M 6.47,12.3 C 5.02,12.87 4,14.33 4,16 l 0,24 c 0,2.21 1.79,4 4,4 l 32,0 c 2.21,0 4,-1.79 4,-4 l 0,-24 c 0,-2.21 -1.79,-4 -4,-4 L 16.61,12 33.14,5.33 31.76,2 Z M 14,40 c -3.31,0 -6,-2.69 -6,-6 0,-3.31 2.69,-6 6,-6 3.31,0 6,2.69 6,6 0,3.31 -2.69,6 -6,6 z M 40,24 8,24 8,16 40,16 Z" />
@@ -650,23 +560,25 @@
         M 33,7 A 8,8, 0,0,1, 41,15 2,2, 0,0,1, 37,15 4,4, 0,0,0, 33,11 2,2, 0,0,1, 33,7 Z M 31,15 a 2,2,0,1,1,4,0 2,2,0,1,1,-4,0 z" />
         </svg>
       </div>
-      <div class="area stretch"><h1>Radio</h1></div>
+      <div class="col stretch">
+        <h1>Radio</h1>
+      </div>
     </div>
 
-    <div class="flex-row">
-      <div class="area stretch" style="text-align:center;height:3em">
+    <div class="row">
+      <div class="col stretch" style="text-align:center;height:2em">
         <span id="servicename" eventname="radio.servicename">#RDS</span>
       </div>
     </div>
 
-    <div class="flex-row">
-      <div class="area stretch" style="text-align:center;height:6em">
+    <div class="row">
+      <div class="col stretch" style="text-align:center;height:4em">
         <span id="rdstext" eventname="radio.rdstext">#RDSTEXT</span>
       </div>
     </div>
 
-    <div class="flex-row">
-      <div class="area stretch">
+    <div class="row">
+      <div class="col stretch">
         <button id="station1" eventname="radio.freq" presetvalue="8930">hr3</button>
         <button id="station2" eventname="radio.freq" presetvalue="10020">planet</button>
         <button id="station3" eventname="radio.freq" presetvalue="10110">SWR3</button>
@@ -675,58 +587,71 @@
       </div>
     </div>
 
-    <div class="flex-row">
-      <div class="area label">Frequency</div>
-      <div class="area" style="text-align:right">
+    <div class="row">
+      <div class="col label">Frequency</div>
+      <div class="col" style="text-align:right">
         <span id="freq" class="PropOutput" style="text-align: right" eventname="radio.freq">9840</span>
       </div>
-      <div class="area stretch">MHz</div>
+      <div class="col stretch">MHz</div>
     </div>
 
 
-    <div class="flex-row">
-      <div class="area nolabel"></div>
-      <div class="area stretch">
-        <div id="ctlSD" eventname="radio.seekdown" style="height:1em;width:1.6em;border:0.2em solid gray;border-radius: 0.4em;position:relative;display:inline-block">
-          <div style="font-weight:bold;width:1.6em;top:-0.08em;position:absolute">&lt;&lt;</div>
-        </div>
-
+    <div class="row">
+      <div class="col nolabel"></div>
+      <div class="col stretch">
+        <button id="ctlSD" eventname="radio.seekdown">
+          <svg style="width:1em;height: 1em;vertical-align:baseline" viewBox="0 0 48 48"><path class="object" d="M 44,44 24,24 44,4 Z M 24,44 4,24 24,4 Z"></path></svg>
+        </button>
         <div class="HSlider" id="ctlF" eventname="radio.freq" minvalue="8750" maxvalue="10800" unit="10">
-          <div class="minus"><svg viewBox="0 0 16 16" width="32" height="32"><path d="M 13,2 3,8 13,14 Z"></path></svg></div>
+          <button class="minus">
+            <svg style="width:1em;height: 1em;vertical-align:baseline" viewBox="0 0 48 48"><path class="object" d="M 38,44 10,24 38,4 Z"></path></svg>
+          </button>
+
           <div class="slider">
-            <div class="ruler" style="width:16em;"></div>
+            <div class="ruler"></div>
             <div class="knob"></div>
           </div>
-          <div class="plus"><svg viewBox="0 0 16 16" width="32" height="32"><path d="M 3,2 13,8 3,14 Z"></path></svg></div>
+
+          <button class="plus">
+            <svg style="width:1em;height: 1em;vertical-align:baseline" viewBox="0 0 48 48"><path class="object" d="M 10,4 38,24 10,44 Z"></path></svg>
+          </button>
         </div>
 
-        <div id="ctlSU" eventname="radio.seekup" style="height:1em;width:1.6em;border:0.2em solid gray;border-radius: 0.4em;position:relative;display:inline-block">
-          <svg style="width:1em;height: 1em;position:absolute" viewBox="0 0 16 16" width="32" height="32"><path d="M 3,2 13,8 3,14 Z"></path></svg>
-        </div>
+
+        <button id="ctlSU" eventname="radio.seekup">
+          <svg style="width:1em;height: 1em;vertical-align:baseline" viewBox="0 0 48 48"><path class="object" d="M 4,4 24,24 4,44 Z M 24,4 44,24 24,44 Z"></path></svg>
+        </button>
+
+
       </div>
     </div>
 
-    <div class="flex-row">
-      <div class="area label">Volume</div>
-      <div class="area stretch">
+    <div class="row">
+      <div class="col label">Volume</div>
+      <div class="col stretch">
+        <div style="display:inline-block;width:2.8em"></div>
+
         <div class="HSlider" id="ctlV" eventname="radio.vol" minvalue="0" maxvalue="15" unit="1">
-          <div class="minus"><div>&lt;</div></div>
+          <button class="minus">
+            <svg style="width:1em;height: 1em;vertical-align:baseline" viewBox="0 0 48 48"><path class="object" d="M 38,44 10,24 38,4 Z"></path></svg>
+          </button>
           <div class="slider">
-            <div class="ruler" style="width:16em;"></div>
+            <div class="ruler"></div>
             <div class="knob"></div>
           </div>
-          <div class="plus"><div>&gt;</div></div>
+          <button class="plus">
+            <svg style="width:1em;height: 1em;vertical-align:baseline" viewBox="0 0 48 48"><path class="object" d="M 10,4 38,24 10,44 Z"></path></svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="flex-row">
-      <div class="area stretch">
+    <div class="row">
+      <div class="col stretch">
         <button id="ctlM" eventname="radio.mute">Mute</button>
         <button id="ctlSM" eventname="radio.softmute">SoftMute</button>
         <button id="ctlMono" eventname="radio.mono">Mono</button>
-        <button id="ctlBB" eventname="radio.bassboost">BassBoost</button>
-        &nbsp;
+        <button id="ctlBB" eventname="radio.bassboost">BassBoost</button> &nbsp;
         <button onclick="upd()">update</button>
         <button onclick="alert(JSON.stringify(radioValues))">?</button>
       </div>
@@ -741,7 +666,7 @@
     // attach some behaviors to html elements
     jcl.LoadBehaviour("freq", jcl.DataOutputBehavior);
     // patch the data formatting function.
-    freq._toString = function (v) {
+    freq._toString = function(v) {
       v = String(v);
       var l = v.length - 2;
       return (v.substr(0, l) + "." + v.substr(l));
@@ -780,61 +705,62 @@
   </script>
 
 
-  <div id="oa_log" style="display:block;border: solid 1px blue; font-size:11px; height: 14em; width:400px; padding:1px;overflow: hidden">
+  <div id="oa_log" style="display:none;border: solid 1px blue; font-size:11px; height: 14em; width:400px; padding:1px;overflow: hidden">
     <h3 style="margin: 0px">OpenAjax hub event log:</h3>
   </div>
 
   <script type="text/javascript">
     obj = document.getElementById("oa_log");
-    obj.dumpevent = function (eventName, eventData) {
-      this.Dump(eventName + ":" + this._objToText(eventData));
-    } // dumpevent
+    obj.dumpevent = function(eventName, eventData) {
+        this.Dump(eventName + ":" + this._objToText(eventData));
+      } // dumpevent
 
-    obj.Dump = function (txt) {
-      var p = window.document.createElement("div");
-      this.appendChild(p);
-      p.innerText = txt;
+    obj.Dump = function(txt) {
+        var p = window.document.createElement("div");
+        this.appendChild(p);
+        p.innerText = txt;
 
-      if (this.childNodes.length > 12)
-        this.removeChild(this.childNodes[1]);
-    } // GetValue
+        if (this.childNodes.length > 12)
+          this.removeChild(this.childNodes[1]);
+      } // GetValue
 
 
     // get some pretty printable object notation in one line
-    obj._objToText = function (obj) {
-      var s = "";
+    obj._objToText = function(obj) {
+        var s = "";
 
-      if (obj == null) {
-        s = "(null)";
-      } else if (obj.constructor == String) {
-        s = "\"" + obj + "\"";
-      } else if (typeof (obj) == "function") {
-        s += " [function]" + obj;
+        if (obj == null) {
+          s = "(null)";
+        } else if (obj.constructor == String) {
+          s = "\"" + obj + "\"";
+        } else if (typeof(obj) == "function") {
+          s += " [function]" + obj;
 
-      } else if (obj.constructor == Array) {
-        s += "[";
-        for (n = 0; n < obj[p].length; n++) {
-          if (n > 0) s += ", ";
-          s += obj[n];
+        } else if (obj.constructor == Array) {
+          s += "[";
+          for (n = 0; n < obj[p].length; n++) {
+            if (n > 0) s += ", ";
+            s += obj[n];
+          }
+          s += "]";
+
+        } else if (obj.constructor == Object) {
+          s += "{";
+          for (n in obj) {
+            s += n + ": " + obj[n] + ", ";
+          }
+          s += "}";
+
+        } else {
+          s = obj.toString();
         }
-        s += "]";
-
-      } else if (obj.constructor == Object) {
-        s += "{";
-        for (n in obj) {
-          s += n + ": " + obj[n] + ", ";
-        }
-        s += "}";
-
-      } else {
-        s = obj.toString();
-      }
-      return (s);
-    } // _objToText
+        return (s);
+      } // _objToText
 
     OpenAjax.hub.subscribe("**", "dumpevent", obj);
     OpenAjax.hub.registerLibrary("OpenAjaxEventLog", "http://www.mathertel.de/OpenAjax/OpenAjaxEventLog");
   </script>
 
 </body>
+
 </html>

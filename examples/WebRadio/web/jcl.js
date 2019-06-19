@@ -36,6 +36,7 @@
 // 02.01.2009 adding new nls support
 // 05.12.2009 fixed getCookie
 // 01.10.2010 IE9 compatibility avoiding browser detection.
+// 02.11.2016 radio version.
 
 // initialization sequence: init(), initstate(), afterinit()
 
@@ -48,80 +49,82 @@ if (typeof(window.OpenAjax) == "undefined") {
 
 if (typeof(OpenAjax.hub) == "undefined") {
 
-// a hub implementation
-OpenAjax.hub = {
-  implementer: "http://www.mathertel.de/OpenAjax",
-  implVersion: "0.4",
-  specVersion: "0.5",
-  implExtraData: {},
+  // a hub implementation
+  OpenAjax.hub = {
+    implementer: "http://www.mathertel.de/OpenAjax",
+    implVersion: "0.4",
+    specVersion: "0.5",
+    implExtraData: {},
 
-  // ----- library management -----
+    // ----- library management -----
 
-  // the list of libraries that have registered
-  libraries: {},
+    // the list of libraries that have registered
+    libraries: {},
 
-  // Registers an Ajax library with the OpenAjax Hub. 
-  registerLibrary: function (p, u, v, e) {
-    var entry = { prefix: p, namespaceURI: u, version: v, extraData:e };
-    this.libraries[p] = entry;
-    this.publish("org.openajax.hub.registerLibrary", entry);
-  },
+    // Registers an Ajax library with the OpenAjax Hub. 
+    registerLibrary: function(p, u, v, e) {
+      var entry = { prefix: p, namespaceURI: u, version: v, extraData: e };
+      this.libraries[p] = entry;
+      this.publish("org.openajax.hub.registerLibrary", entry);
+    },
 
-  // Unregisters an Ajax library with the OpenAjax Hub.
-  unregisterLibrary: function (p) {
-    var entry = this.libraries[p];
-    this.publish("org.openajax.hub.unregisterLibrary", entry);
-    if (entry)
-      this.libraries[p] = null;
-  },
+    // Unregisters an Ajax library with the OpenAjax Hub.
+    unregisterLibrary: function(p) {
+      var entry = this.libraries[p];
+      this.publish("org.openajax.hub.unregisterLibrary", entry);
+      if (entry)
+        this.libraries[p] = null;
+    },
 
-  // ----- event management -----
+    // ----- event management -----
 
-  _regs: {},
-  _regsId: 0,
+    _regs: {},
+    _regsId: 0,
 
-  /// name, callback, scope, data, filter
-  subscribe: function (n, c, s, d, f) {
-    var h = this._regsId;
+    /// name, callback, scope, data, filter
+    subscribe: function(n, c, s, d, f) {
+      var h = this._regsId;
 
-    s = s || window;
+      s = s || window;
 
-    // treating upper/lowercase equal is not clearly defined, but true with domain names.
-    var rn = n.toLocaleLowerCase();
+      // treating upper/lowercase equal is not clearly defined, but true with domain names.
+      var rn = n.toLocaleLowerCase();
 
-    // build a regexp pattern that will match the event names
-    rn = rn.replace(/\*\*$/, "\S{0,}").replace(/\./g, "\\.").replace(/\*/g, "[^.]*");
+      // build a regexp pattern that will match the event names
+      rn = rn.replace(/\*\*$/, "\S{0,}").replace(/\./g, "\\.").replace(/\*/g, "[^.]*");
 
-    var entry = {id:h, n:rn, c:c, s:s, d:d, f:f};
-    this._regs[h] = entry;
+      var entry = { id: h, n: rn, c: c, s: s, d: d, f: f };
+      this._regs[h] = entry;
 
-    this._regsId++;
-    return(h);
-  }, // subscribe
-
-
-  unsubscribe: function (h) {
-    this._regs[h] = null;
-  }, // unsubscribe
+      this._regsId++;
+      return (h);
+    }, // subscribe
 
 
-  publish: function (n, data) {
-    if ((n) && (n.length > 0)) {
-      n = n.toLocaleLowerCase();
-      for (var h in this._regs) {
-        var r = this._regs[h];
-        if (r && (n.match(r.n))) {
-          var ff = r.f; if (typeof(ff) == "string") ff = r.s[ff];
-          var fc = r.c; if (typeof(fc) == "string") fc = r.s[fc];
-          if ((!ff) || (ff.call(r.s, n, data, r.d)))
-            fc.call(r.s, n, data, r.d);
+    unsubscribe: function(h) {
+      this._regs[h] = null;
+    }, // unsubscribe
+
+
+    publish: function(n, data) {
+        if ((n) && (n.length > 0)) {
+          n = n.toLocaleLowerCase();
+          for (var h in this._regs) {
+            var r = this._regs[h];
+            if (r && (n.match(r.n))) {
+              var ff = r.f;
+              if (typeof(ff) == "string") ff = r.s[ff];
+              var fc = r.c;
+              if (typeof(fc) == "string") fc = r.s[fc];
+              if ((!ff) || (ff.call(r.s, n, data, r.d)))
+                fc.call(r.s, n, data, r.d);
+            } // if
+          } // for
         } // if
-      } // for
-    } // if
-  } // publish
+      } // publish
 
-}; // OpenAjax.hub
-OpenAjax.hub.registerLibrary("aoa", "http://www.mathertel.de/OpenAjax", "0.4", {});
+  }; // OpenAjax.hub
+  OpenAjax.hub.registerLibrary("aoa", "http://www.mathertel.de/OpenAjax", "0.4", {});
 
 } // if (! hub)
 
@@ -129,7 +132,7 @@ OpenAjax.hub.registerLibrary("jcl", "http://www.mathertel.de/Behavior", "1.2", {
 
 // -- Javascript Control Library (behaviors) --
 
-if (typeof (window.jcl) == "undefined") {
+if (typeof(window.jcl) == "undefined") {
   // setup the jcl root object.
   window.jcl = {};
 } // if
@@ -141,7 +144,7 @@ jcl.isIE = (window.navigator.userAgent.indexOf("MSIE") > 0);
 jcl.List = [];
 
 // attach events, methods and default-values to a html object (using the english spelling)
-jcl.LoadBehaviour = function (obj, behaviour) {
+jcl.LoadBehaviour = function(obj, behaviour) {
   if ((obj) && (obj.constructor == String))
     obj = document.getElementById(obj);
 
@@ -162,11 +165,11 @@ jcl.LoadBehaviour = function (obj, behaviour) {
         if (obj[obj.attributes[n].name] == null)
           obj[obj.attributes[n].name] = obj.attributes[n].value;
     } // if
-    
+
     for (var p in behaviour) {
       if (p.substr(0, 2) == "on") {
         jcl.AttachEvent(obj, p, behaviour[p].bind(obj));
-        
+
       } else if ((behaviour[p] == null) || (behaviour[p].constructor != Function)) {
         // set default-value
         if (obj[p] == null)
@@ -177,7 +180,7 @@ jcl.LoadBehaviour = function (obj, behaviour) {
         obj[p] = behaviour[p];
       } // if
     } // for
-    
+
     obj._attachedBehaviour = behaviour;
   } // if
   if (obj)
@@ -186,39 +189,39 @@ jcl.LoadBehaviour = function (obj, behaviour) {
 
 
 /// Find the parent node of a given object that has the behavior attached.
-jcl.FindBehaviourElement = function (obj, behaviourDef) {
+jcl.FindBehaviourElement = function(obj, behaviourDef) {
   while ((obj) && (obj._attachedBehaviour != behaviourDef))
     obj = obj.parentNode;
-  return(obj);
+  return (obj);
 }; // FindBehaviourElement
 
 
 /// Find the child elements with a given className contained by obj.
-jcl.getElementsByClassName = function (obj, cName) {
+jcl.getElementsByClassName = function(obj, cName) {
   var ret = new Array();
   var allNodes = obj.getElementsByTagName("*");
   for (var n = 0; n < allNodes.length; n++) {
     if (allNodes[n].className == cName)
       ret.push(allNodes[n]);
   }
-  return(ret);
+  return (ret);
 }; // getElementsByClassName
 
 
 /// Find the child elements with a given name contained by obj.
-jcl.getElementsByName = function (obj, cName) {
+jcl.getElementsByName = function(obj, cName) {
   var ret = new Array();
   var allNodes = obj.getElementsByTagName("*");
   for (var n = 0; n < allNodes.length; n++) {
     if (allNodes[n].name == cName)
       ret.push(allNodes[n]);
   }
-  return(ret);
+  return (ret);
 }; // getElementsByName
 
 
 // cross browser compatible helper to register for events
-jcl.AttachEvent = function (obj, eventname, handler) {
+jcl.AttachEvent = function(obj, eventname, handler) {
   if (obj.addEventListener) { // IE9 compatible
     obj.addEventListener(eventname.substr(2), handler, false);
   } else {
@@ -228,7 +231,7 @@ jcl.AttachEvent = function (obj, eventname, handler) {
 
 
 // cross browser compatible helper to register for events
-jcl.DetachEvent = function (obj, eventname, handler) {
+jcl.DetachEvent = function(obj, eventname, handler) {
   if (obj.removeEventListener) { // IE9 compatible
     obj.removeEventListener(eventname.substr(2), handler, false);
   } else {
@@ -239,24 +242,24 @@ jcl.DetachEvent = function (obj, eventname, handler) {
 
 /// Create a duplicate of a given JavaScript Object.
 /// References are not duplicated !
-jcl.CloneObject = function (srcObject) {
+jcl.CloneObject = function(srcObject) {
   var tarObject = new Object();
   for (var p in srcObject)
     tarObject[p] = srcObject[p];
-  return(tarObject);
+  return (tarObject);
 }; // CloneObject
 
 
 // calculate the absolute position of an html element
 jcl.absolutePosition = function(obj) {
   var pos = null;
-  
+
   if (obj) {
     pos = new Object();
     pos.top = obj.offsetTop;
     pos.left = obj.offsetLeft;
     pos.width = obj.offsetWidth;
-    pos.height= obj.offsetHeight;
+    pos.height = obj.offsetHeight;
 
     obj = obj.offsetParent;
     while (obj) {
@@ -265,27 +268,27 @@ jcl.absolutePosition = function(obj) {
       obj = obj.offsetParent;
     } // while
   }
-  return(pos);
+  return (pos);
 }; // _absolutePosition
 
 
 /// When an object publishes or subscribes events it is possible to define the complete eventname
 /// by a local eventname and a eventnamespace of a surrounding object.
-jcl.BuildFullEventname = function (obj) {
+jcl.BuildFullEventname = function(obj) {
   var en = null;
-  
+
   // find the local event name on the object itself.
-  if (! obj) {
-    return(null);
-  } else if ((obj.eventname) && (obj.eventname.length >0)) {
+  if (!obj) {
+    return (null);
+  } else if ((obj.eventname) && (obj.eventname.length > 0)) {
     en = obj.eventname;
   } else if ((obj.attributes["eventname"]) && (obj.attributes["eventname"].value.length > 0)) {
     en = obj.attributes["eventname"].value;
   } // if
-  
+
   // search the event namespace if not present in the local eventname.
   if ((en) && (en.indexOf('.') < 0)) {
-    while ((obj) && (! obj.eventnamespace) && ((obj.attributes) && (! obj.attributes["eventnamespace"])))
+    while ((obj) && (!obj.eventnamespace) && ((obj.attributes) && (!obj.attributes["eventnamespace"])))
       obj = obj.parentNode;
     if (obj == document) {
       en = "jcl." + en; // default namespace, if none is specified.
@@ -295,24 +298,24 @@ jcl.BuildFullEventname = function (obj) {
       en = obj.attributes["eventnamespace"].value + "." + en;
     } // if
   } // if
-  return(en);
+  return (en);
 }; // BuildFullEventname
 
 
 /// Return the local part of a full qualified eventname.
-jcl.LocalEventName = function (evn) {
+jcl.LocalEventName = function(evn) {
   var idx;
   if (evn) {
     idx = evn.lastIndexOf('.');
     if (idx >= 0)
-      evn = evn.substr(idx+1);
+      evn = evn.substr(idx + 1);
   } // if
-  return(evn);
+  return (evn);
 }; // LocalEventName
 
 
 /// Return the eventnamesapce of a full qualified eventname.
-jcl.EventNameSpace = function (evn) {
+jcl.EventNameSpace = function(evn) {
   var idx;
   if (evn) {
     idx = evn.lastIndexOf('.');
@@ -321,20 +324,20 @@ jcl.EventNameSpace = function (evn) {
     else
       evn = null;
   } // if
-  return(evn);
+  return (evn);
 }; // EventNameSpace
 
 
 // find a relative link to the controls folder containing jcl.js
-jcl.GetControlsPath = function () {
+jcl.GetControlsPath = function() {
   var path = "../controls/";
   var s;
   for (var n in document.scripts) {
     s = String(document.scripts[n].src);
-    if ((s) && (s.length >= 6) && (s.substr(s.length -6).toLowerCase() == "jcl.js"))
-      path = s.substr(0,s.length -6);
+    if ((s) && (s.length >= 6) && (s.substr(s.length - 6).toLowerCase() == "jcl.js"))
+      path = s.substr(0, s.length - 6);
   } // for
-  return(path);
+  return (path);
 }; // GetControlsPath
 
 
@@ -349,7 +352,7 @@ jcl.onload = function(evt) {
     if ((obj) && (obj.init))
       obj.init();
   } // for
-  
+
   for (c in jcl.List) {
     obj = jcl.List[c];
     if ((obj) && (obj.initstate))
@@ -379,7 +382,7 @@ jcl.onunload = function(evt) {
 // allow non-submitting input elements
 jcl.onkeypress = function(evt) {
   evt = evt || window.event;
-  
+
   if (evt.keyCode == 13) {
     var obj = document.activeElement;
 
@@ -397,7 +400,7 @@ jcl.onkeypress = function(evt) {
 
 // --- cookie helper methods ---
 // from http: //www.elated.com/articles/javascript-and-cookies/
-jcl.getCookie = function (aName) {
+jcl.getCookie = function(aName) {
   var results = document.cookie.match('(^;) ?' + aName + '=([^;]*)(;$)');
   if (results)
     return (unescape(results[2]));
@@ -406,50 +409,50 @@ jcl.getCookie = function (aName) {
 }; // _getCookie
 
 
-jcl.setCookie = function (aName, value, path, expire) {
+jcl.setCookie = function(aName, value, path, expire) {
   if ((path == null) || (path == "")) {
     // use the current folder from the url for the cookie to avoid conflicts
     path = String(window.location.href).split('/');
-    path = '/' + path.slice(3, path.length-1).join('/');
+    path = '/' + path.slice(3, path.length - 1).join('/');
   } // if
 
   if (expire) {
- 	var today = new Date();
- 	expire = parseInt(expire, 10) * 1000 * 60 * 60 * 24;
-	expire = new Date(today.getTime() + expire);
+    var today = new Date();
+    expire = parseInt(expire, 10) * 1000 * 60 * 60 * 24;
+    expire = new Date(today.getTime() + expire);
   } else {
     expire = null;
-  }// if
+  } // if
 
-  window.document.cookie = aName + "=" + escape(value)
-    + ((path) ? ';path=' + path : "")
-    + ((expire) ? ";expires=" + expire.toGMTString() : "");
+  window.document.cookie = aName + "=" + escape(value) +
+    ((path) ? ';path=' + path : "") +
+    ((expire) ? ";expires=" + expire.toGMTString() : "");
 }; // setCookie
 
 
-// ----- classname modifications -----
+/// Call a function before next repaint. The function is triggered only once.
+/// See http://www.w3.org/TR/animation-timing/
+function throttle(func) {
+  var isStarted = false;
 
-jcl.addClassName = function(elem, className) {
-  if (elem.nodeType != 3) {
-    jcl.removeClassName (elem, className);
-    if (className)
-      elem.className = (elem.className + " " + className);
-  } // if
-}; // addClassName
+  if (typeof func != 'function')
+    throw new Error("throttle: not a function");
+
+  return function() {
+    var context = this;
+
+    if (!isStarted) {
+      isStarted = true;
+      window.requestAnimationFrame(function() {
+        func.call(context);
+        isStarted = false;
+      });
+    } // if
+  }; // function()
+} // throttle
 
 
-jcl.removeClassName = function(elem, className) {
-  if (elem.nodeType != 3) {
-    var cn = " " + elem.className + " ";
-    if (className)
-      cn = cn.replace(" " + className + " ", "");
-    cn = cn.replace(/^\s+|\s+$/g, "");
-    elem.className = cn;
-  } // if
-}; // removeClassName
-
-
-jcl.init = function () {
+jcl.init = function() {
   jcl.AttachEvent(window, "onload", jcl.onload);
   jcl.AttachEvent(window, "onunload", jcl.onunload);
   jcl.AttachEvent(document, "onkeypress", jcl.onkeypress);
@@ -463,14 +466,14 @@ document.jcl_isinit = true;
 jcl.init();
 
 // ----- make FF more IE compatible -----
-if (! jcl.isIE) {
+if (!jcl.isIE) {
 
   // ----- HTML objects -----
 
-  HTMLElement.prototype.__defineGetter__("innerText", function () { return(this.textContent); });
-  HTMLElement.prototype.__defineSetter__("innerText", function (txt) { this.textContent = txt; });
+  HTMLElement.prototype.__defineGetter__("innerText", function() { return (this.textContent); });
+  HTMLElement.prototype.__defineSetter__("innerText", function(txt) { this.textContent = txt; });
 
-  HTMLElement.prototype.__defineGetter__("XMLDocument", function () { 
+  HTMLElement.prototype.__defineGetter__("XMLDocument", function() {
     return ((new DOMParser()).parseFromString(this.innerHTML, "text/xml"));
   });
 
@@ -478,18 +481,18 @@ if (! jcl.isIE) {
   // ----- Event objects -----
 
   // enable using evt.cancelBubble=true in Mozilla/Firefox
-  Event.prototype.__defineSetter__("cancelBubble", function (b) {
+  Event.prototype.__defineSetter__("cancelBubble", function(b) {
     if (b) this.stopPropagation();
   });
 
   // enable using evt.returnValue=false in Mozilla/Firefox
-  Event.prototype.__defineSetter__("returnValue", function (b) {
+  Event.prototype.__defineSetter__("returnValue", function(b) {
     if (!b) this.preventDefault();
   });
 
 
   // ----- XML objects -----
-  
+
   // select the first node that matches the XPath expression
   // xPath: the XPath expression to use
   if (!XMLDocument.selectSingleNode) {
@@ -511,16 +514,16 @@ if (! jcl.isIE) {
       var doc = this;
       if (doc.nodeType != 9)
         doc = doc.ownerDocument;
-      if (doc.nsResolver == null) doc.nsResolver = function(prefix) { return(null); };
+      if (doc.nsResolver == null) doc.nsResolver = function(prefix) { return (null); };
       var node = doc.evaluate(xPath, this, doc.nsResolver, XPathResult.ANY_UNORDERED_NODE_TYPE, null);
       if (node) node = node.singleNodeValue;
-      return(node);
+      return (node);
     }; // selectSingleNode
   } // if
 
 
-  Node.prototype.__defineGetter__("text", function () {
-    return(this.textContent);
+  Node.prototype.__defineGetter__("text", function() {
+    return (this.textContent);
   }); // text
 
 }
@@ -530,10 +533,11 @@ if (! jcl.isIE) {
 // see http://digital-web.com/articles/scope_in_javascript/
 
 Function.prototype.bind = function(obj) {
-  var method = this, temp = function() {
-    return method.apply(obj, arguments);
-  }
-  return(temp);
-} // Function.prototype.bind
+  var method = this,
+    temp = function() {
+      return method.apply(obj, arguments);
+    };
+  return (temp);
+}; // Function.prototype.bind
 
 // ----- End -----

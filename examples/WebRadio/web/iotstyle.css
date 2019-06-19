@@ -1,0 +1,113 @@
+html,
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+}
+
+body,
+div,
+td,
+th,
+button {
+  color: black;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+svg.icon {
+  width: 4em;
+  height: 4em;
+}
+
+svg.icon .object {
+  fill: #304878;
+  fill-opacity: 1;
+}
+
+svg.icon .connect {
+  fill: green;
+  fill-opacity: 1;
+}
+
+p,
+h1,
+h2,
+h3 {
+  margin: 0 0 0.5em 0;
+}
+
+h1,
+h2 {
+  font-family: Comic Sans MS, Verdana, Helvetica, Arial;
+  color: black;
+}
+
+h1 {
+  font-size: 2.2em;
+}
+
+h2 {
+  font-size: 1.6em;
+}
+
+h3 {
+  font-size: 1em;
+  font-weight: bold;
+}
+
+
+/* Grid Design */
+
+.container {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+
+/* row with 0.5rem gutter */
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: -0.5rem 0 0.5rem -0.5rem;
+}
+
+.col {
+  flex: 0 0 2rem;
+  margin: 0.5rem 0 0 0.5rem;
+}
+
+.col.stretch {
+  flex-grow: 1;
+}
+
+button {
+  font-size: 1em;
+  border: 0.2em solid gray;
+  border-radius: 0.5em;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+button.activ {
+  background-color: #acc1e4 !important;
+  border-color: #203050 !important;
+}
+
+label,
+input,
+button,
+textarea,
+img.INPUTFUNC {
+  display: inline-block;
+  height: 2.4rem;
+  font-size: 1rem;
+  line-height: 1rem;
+  border-radius: 0.2rem;
+  vertical-align: baseline;
+  border: 0.1rem solid gray;
+}

@@ -1,6 +1,6 @@
-/// \file WebRadio.ino 
+/// \file WebRadio.ino
 /// \brief Radio implementation using a web frontend served by the Arduino.
-/// 
+///
 /// \author Matthias Hertel, http://www.mathertel.de
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
@@ -20,7 +20,7 @@
 /// A Rotary encoder press function on pin A10.
 /// A button for scanning upwards on pin A11.
 
-/// ChangeLog: 
+/// ChangeLog:
 /// ----------
 /// * 06.11.2014 created.
 /// * 22.11.2014 working.
@@ -29,6 +29,7 @@
 /// * 17.04.2015 Return JSON format.
 /// * 01.05.2015 faster WebServer responses by using a buffer.
 /// * 16.05.2015 Using StringBuffer to collect output at several places for reducing net packages.
+/// * 21.10.2017 Ethernet reset wait time
 
 // There are several tasks that have to be done when the radio is running.
 // Therefore all these tasks are handled this way:
@@ -100,7 +101,7 @@ RotaryEncoder encoder(A9, A8);
 int           encoderLastPos;  ///< last received encoder position
 unsigned long encoderLastTime; ///< last time the encoder or encoder state was changed
 
-/// Setup a Menu Button 
+/// Setup a Menu Button
 OneButton menuButton(A10, true);
 
 /// Setup a seek button
@@ -158,29 +159,29 @@ boolean _debugEnabled = true; ///< enable / disable local debug output and reuse
 #define DEBUGIP(l, n)   if (_debugEnabled) { Serial.print('>'); Serial.print(l); Ethernet.n().printTo(Serial); Serial.println(); }
 
 /*
-Analyzed the Sources from
-* Arduino Example WebServer
-* http://www.ladyada.net/learn/arduino/ethfiles.html
-* http://github.com/adafruit/SDWebBrowse
-and built a webServer
+  Analyzed the Sources from
+  Arduino Example WebServer
+  http://www.ladyada.net/learn/arduino/ethfiles.html
+  http://github.com/adafruit/SDWebBrowse
+  and built a webServer
 
-http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
-http://www.w3.org/Protocols/rfc2616/rfc2616.html
-http://www.jmarshall.com/easy/http/
-
-
-You can reach the web server on you local network with:
-http://WIZnetEFFEED
-http://WIZnetEFFEED/$list
+  http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
+  http://www.w3.org/Protocols/rfc2616/rfc2616.html
+  http://www.jmarshall.com/easy/http/
 
 
-* This sketch uses the microSD card slot on the Arduino Ethernet shield
-* to serve up files over a very minimal browsing interface
-*
-* Some code is from Bill Greiman's SdFatLib examples, some is from the
-* Arduino Ethernet WebServer example and the rest is from Limor Fried
-* (Adafruit) so its probably under GPL
-*
+  You can reach the web server on you local network with:
+  http://WIZnetEFFEED
+  http://WIZnetEFFEED/$list
+
+
+  This sketch uses the microSD card slot on the Arduino Ethernet shield
+  to serve up files over a very minimal browsing interface
+
+  Some code is from Bill Greiman's SdFatLib examples, some is from the
+  Arduino Ethernet WebServer example and the rest is from Limor Fried
+  (Adafruit) so its probably under GPL
+
 */
 
 #define NUL '\0'
@@ -211,18 +212,19 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; // Name will be WIZnetEFFEE
 
 // CompactList for file Extension -> content-type and cache-control
 char *CONTENTTYPES =
-"htm text/html 1\n"
-"css text/css 1\n"
-"js  application/x-javascript 1\n"
-"txt text/txt 0\n"
-"png image/png C\n"
-"gif image/gif C\n"
-"jpg image/jpeg 1\n"
-"ico image/x-icon 1"
-// ".3gp video/mpeg\n"
-// ".pdf application/pdf\n"
-// ".xml application/xml\n"
-;
+  "htm text/html 1\n"
+  "css text/css 1\n"
+  "js  application/x-javascript 1\n"
+  "txt text/txt 0\n"
+  "png image/png C\n"
+  "jpg image/jpeg 1\n"
+  "ico image/x-icon 1\n"
+  "jsn application/json C"
+  //"gif image/gif C\n"
+  // ".3gp video/mpeg\n"
+  // ".pdf application/pdf\n"
+  // ".xml application/xml\n"
+  ;
 
 // The server instance listening at port 80.
 EthernetServer server(80);
@@ -428,8 +430,8 @@ void respondFileList()
   while (true) {
     File entry = dir.openNextFile();
 
-    if (!entry) break; // no more files 
-      
+    if (!entry) break; // no more files
+
     sout.append(entry.name());
     sout.append("\t");
 
@@ -516,6 +518,7 @@ void readRequestLine()
 /// Responds the content of a file from the SD disk given by fName.
 void respondFileContent(char *fName)
 {
+  DEBUG_FUNC0("respondFileContent");
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
 
   char *p;
@@ -704,13 +707,15 @@ void loopWebServer(unsigned long now) {
               if (p) {
                 p += 1;
                 runRadioJSONCommand(name, atoi(p));
-              } // if              
+              } // if
 
             } // if
 
           } else if (webstate == PROCESS_PUT) {
             // upload a file
             int len;
+            DEBUG_VAL("Upload...", _httpURI);
+
             len = _client.read((uint8_t *)_readBuffer, 32);
             if (len > 0) {
               _readBuffer[len] = NUL; _readBuffer[32] = NUL;
@@ -718,10 +723,12 @@ void loopWebServer(unsigned long now) {
               if (!f) {
                 f = SD.open(_httpURI, O_CREAT | O_WRITE | O_TRUNC);
                 if (!f) {
+                  DEBUG_STR("no OPEN");
                   webstate = PROCESS_ERR;
                 } // if
               }  // if
               f.write((uint8_t *)_readBuffer, len);
+              DEBUG_VAL("len", len);
               _httpContentLen -= len;
             } // if
             // DEBUG_STR(_httpContentLen);
@@ -845,7 +852,7 @@ void DisplaySoftMute(uint8_t v)
 /// Format al data as in JSON Format.\n
 void respondRadioData()
 {
-  DEBUG_FUNC0("respondRadioData");
+  // DEBUG_FUNC0("respondRadioData");
   char s[12];
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
 
@@ -860,7 +867,7 @@ void respondRadioData()
   // JSON Data
   sout.clear();
   sout.append('{');
-  
+
   // return frequency
   sout.appendJSON("freq", (int)(radio.getFrequency())); sout.append(',');
   sout.appendJSON("band", (int)(radio.getBand()));  sout.append(',');
@@ -872,7 +879,7 @@ void respondRadioData()
   sout.appendJSON("stereo", ri.stereo); sout.append(',');
   // respondJSONObject("rds", ri.rds); sout.append(',');      // has rds signal
 
-  // return rds information 
+  // return rds information
   sout.appendJSON("servicename", rdsServiceName); sout.append(',');
   sout.appendJSON("rdstext", rdsText); sout.append(',');
 
@@ -973,7 +980,7 @@ void setupRadio() {
   radio.setMono(false);
   radio.setMute(false);
   // radio.debugRegisters();
-  radio.setVolume(6);
+  radio.setVolume(8);
 
   // Setup rotary encoder
 
@@ -1116,10 +1123,14 @@ void runRadioSerialCommand(char cmd, int16_t value)
   }
 
   // toggle stereo mode
-  else if (cmd == 's') { radio.setMono(!radio.getMono()); }
+  else if (cmd == 's') {
+    radio.setMono(!radio.getMono());
+  }
 
   // toggle bass boost
-  else if (cmd == 'b') { radio.setBassBoost(!radio.getBassBoost()); }
+  else if (cmd == 'b') {
+    radio.setBassBoost(!radio.getBassBoost());
+  }
 
   // ----- control the frequency -----
 
@@ -1144,7 +1155,15 @@ void runRadioSerialCommand(char cmd, int16_t value)
     delay(4000);
   }
 
-  else if (cmd == '.') { radio.seekUp(false); } else if (cmd == ':') { radio.seekUp(true); } else if (cmd == ',') { radio.seekDown(false); } else if (cmd == ';') { radio.seekDown(true); }
+  else if (cmd == '.') {
+    radio.seekUp(false);
+  } else if (cmd == ':') {
+    radio.seekUp(true);
+  } else if (cmd == ',') {
+    radio.seekDown(false);
+  } else if (cmd == ';') {
+    radio.seekDown(true);
+  }
 
 
   // not in help:
@@ -1164,7 +1183,9 @@ void runRadioSerialCommand(char cmd, int16_t value)
   } // info
 
   //  else if (cmd == 'n') { radio.debugScan(); }
-  else if (cmd == 'x') { radio.debugStatus(); }
+  else if (cmd == 'x') {
+    radio.debugStatus();
+  }
 
 
 } // runRadioSerialCommand()
@@ -1231,10 +1252,32 @@ void loopButtons(unsigned long now) {
 } // loopButtons
 
 
+void dumpCard() {
+  DEBUG_FUNC0("dumpCard");
+
+  // Recursive list of all directories
+  File dir = SD.open("/");
+  while (true) {
+    File entry = dir.openNextFile();
+
+    if (!entry) break; // no more files
+
+    Serial.print(entry.name());
+    Serial.print(" - ");
+    Serial.println(entry.size());
+    entry.close();
+  } // while ()
+  dir.close();
+} // dumpCard()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ;
+
 /// ----- Main functions setup() and loop() -----
 
 void setup() {
+  delay(250);  // give the Ethernet some time to reset properly
+
+  // setup all components
   Serial.begin(57600);
+
   // DEBUG_STR(F("Initializing LCD..."));
   setupLCD();
 
@@ -1246,7 +1289,10 @@ void setup() {
   // see if the card is present and can be initialized:
   lcd.clear();
   lcd.print("Card...");
+
   SD.begin(4);
+  if (_debugEnabled)
+    dumpCard();
 
   // Initialize web server.
   webstate = WEBSERVER_OFF;
