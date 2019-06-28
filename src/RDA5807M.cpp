@@ -228,7 +228,6 @@ RADIO_FREQ RDA5807M::getFrequency() {
   // check register A
   Wire.requestFrom (I2C_SEQ, 2);
   registers[RADIO_REG_RA] = _read16();
-  Wire.endTransmission();
 
   uint16_t ch = registers[RADIO_REG_RA] & RADIO_REG_RA_NR;
   
@@ -299,8 +298,7 @@ void RDA5807M::_readRegisters()
   for (int i = 0; i < 6; i++) {
     registers[0xA+i] = _read16();
   }
-  Wire.endTransmission();
-}
+} // _readRegisters()
 
 
 // Save writable registers back to the chip
@@ -363,7 +361,6 @@ void RDA5807M::checkRDS()
     // check register A
     Wire.requestFrom (I2C_SEQ, 2);
     registers[RADIO_REG_RA] = _read16();
-    Wire.endTransmission();
 
     if (registers[RADIO_REG_RA] & RADIO_REG_RA_RDSBLOCK) {
       DEBUG_STR("BLOCK_E found.");
@@ -391,7 +388,6 @@ void RDA5807M::checkRDS()
       newData = _read16();
       if (newData != registers[RADIO_REG_RDSD]) { registers[RADIO_REG_RDSD] = newData; result = true; }
 
-      Wire.endTransmission();
       // _printHex(registers[RADIO_REG_RDSA]); _printHex(registers[RADIO_REG_RDSB]);
       // _printHex(registers[RADIO_REG_RDSC]); _printHex(registers[RADIO_REG_RDSD]);
       // Serial.println();
@@ -484,7 +480,6 @@ void RDA5807M::debugStatus()
   for (int n = 0; n < 16; n++) {
     _printHex4(_read16());
   }
-  Wire.endTransmission();
   Serial.println();
   
   // clear text information in Registers
