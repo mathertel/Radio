@@ -1,0 +1,33 @@
+# This will run on Travis' 'new' container-based infrastructure
+sudo: false 
+
+# Blacklist
+branches:
+  only:
+    - master
+
+# Install dependencies
+addons:
+  apt:
+    packages:
+      - doxygen
+
+# Build your code e.g. by calling make
+script:
+  - doxygen Doxyfile
+  - cp README.md html/README.md 
+  - "echo 'title: Radio' > html/_config.yml"
+  - "echo 'description: An Arduino library to control radio chips like SI4703, SI4703, RDA5807M, TEA5768.' >> html/_config.yml"
+  - "echo 'show_downloads: true' >> html/_config.yml"
+  - "echo 'google_analytics:' >> html/_config.yml"
+  - "echo 'theme: jekyll-theme-architect' >> html/_config.yml"
+
+# Generate and deploy documentation
+deploy:
+  provider: pages
+  skip_cleanup: true
+  keep_history: true
+  local_dir: html
+  github_token: $GH_REPO_TOKEN
+  on:
+    branch: master
