@@ -19,3 +19,6 @@
 *.exe
 *.out
 *.app
+
+# DoxyGen files
+html/
