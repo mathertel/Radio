@@ -59,6 +59,14 @@ attachReceiveRDS	KEYWORD2
 
 formatFrequency	KEYWORD2
 
+setMode	KEYWORD2
+beginRDS	KEYWORD2
+setRDSstation	KEYWORD2
+setRDSbuffer	KEYWORD2
+
+getASQ
+getTuneStatus
+
 #######################################
 # Instances (KEYWORD2)
 #######################################
@@ -67,3 +75,6 @@ formatFrequency	KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################
+
+RX	LITERAL1
+TX	LITERAL1

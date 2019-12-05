@@ -28,6 +28,20 @@
 // Include the radio library that is extended by the SI4721 library.
 #include <radio.h>
 
+// A structure for storing ASQ Status and Audio Input Metrics
+typedef struct ASQ_STATUS {
+  uint8_t asq;
+  uint8_t audioInLevel;
+};
+
+// A structure for storing TX Tuning Status
+typedef struct TX_STATUS {
+  uint16_t frequency;
+  uint8_t dBuV;
+  uint8_t antennaCap;
+  uint8_t noiseLevel;
+};
+
 // ----- library definition -----
 
 /// Library to control the SI4721 radio chip.
@@ -75,11 +89,29 @@ public:
 
   void  debugScan();               // Scan all frequencies and report a status
   void  debugStatus();             // Report Info about actual Station
+  
+  // ----- transmit functions
+  
+  void setMode(bool transmit = false);
+  void beginRDS(uint16_t programID = 0xBEEF);
+  void setRDSstation(char *s);
+  void setRDSbuffer(char *s);  
+  
+  ASQ_STATUS getASQ();
+  TX_STATUS getTuneStatus();
+  
+  // ----- regional compatibility
+  
+  void setDeemphasis(uint8_t uS); // set the deemphasis (50 for Europe, 75 for USA)
 
 private:
   // ----- local variables
 
   uint8_t _realVolume; ///< The real volume set to the chip.
+  
+  bool _transmitMode = false; ///< Remember which mode we're in 
+  
+  uint8_t _fmDeemphasis = 50; ///< RX Deemphasis and TX Preemphasis in uS
 
   // store the current status values
   uint8_t _status;        ///< the status after sending a command
