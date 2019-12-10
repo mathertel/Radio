@@ -20,6 +20,8 @@
 #ifndef SI4721_h
 #define SI4721_h
 
+#define SI4721_ADR 0x63  ///< The I2C address of SI4721 is 0x61 or 0x63
+
 #include <Arduino.h>
 
 // The wire library is used for the communication with the radio chip.
@@ -52,7 +54,7 @@ public:
 
   SI4721();
 
-  bool   init();  ///< Initialize the library and the chip.
+  bool   init(TwoWire &wirePort = Wire, uint8_t deviceAddress = SI4721_ADR);  ///< Initialize the library and the chip.
   void   term();  ///< Terminate all radio functions in the chip.
 
   // ----- Audio functions -----
@@ -92,10 +94,12 @@ public:
   
   // ----- transmit functions
   
-  void setMode(bool transmit = false);
+  void setModeReceive();
+  void setModeTransmit();
   void beginRDS(uint16_t programID = 0xBEEF);
   void setRDSstation(char *s);
   void setRDSbuffer(char *s);  
+  void setTXpower(uint8_t pwr);
   
   ASQ_STATUS getASQ();
   TX_STATUS getTuneStatus();
@@ -175,6 +179,10 @@ private:
 
   void _seek(bool seekUp = true);
   void _waitEnd();
+  
+  TwoWire *_i2cPort;
+  uint8_t _i2caddr;
+  
 };
 
 #endif

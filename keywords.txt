@@ -59,8 +59,9 @@ attachReceiveRDS	KEYWORD2
 
 formatFrequency	KEYWORD2
 
-setMode	KEYWORD2
-beginRDS	KEYWORD2
+setModeReceive	KEYWORD2
+setModeTransmit	KEYWORD2
+beginRDS		KEYWORD2
 setRDSstation	KEYWORD2
 setRDSbuffer	KEYWORD2
 
@@ -75,6 +76,3 @@ getTuneStatus
 #######################################
 # Constants (LITERAL1)
 #######################################
-
-RX	LITERAL1
-TX	LITERAL1

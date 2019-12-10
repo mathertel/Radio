@@ -22,10 +22,6 @@
 #include <radio.h>    // Include the common radio library interface
 #include <SI4721.h>
 
-// ----- Definitions for the Wire communication
-
-#define SI4721_ADR 0x63  ///< The I2C address of SI4721 is 0x61 or 0x63
-
 /// Uncomment this definition when not using the ELV radio board.
 /// There is a special mute implementation.
 #define ELVRADIO
@@ -166,10 +162,6 @@
 #define PROP_TX_PREEMPHASIS_50 		0x01
 #define PROP_TX_PREEMPHASIS_75		0x00
 
-// Mode Keywords (for convenience)
-#define RX false 
-#define TX true
-
 /// Initialize the extra variables in SI4721
 SI4721::SI4721() {
   _realVolume = 0;
@@ -178,12 +170,14 @@ SI4721::SI4721() {
 /// Initialize the library and the chip.
 /// Set all internal variables to the standard values.
 /// @return bool The return value is true when a SI4721 chip was found.
-bool SI4721::init() {
+bool SI4721::init(TwoWire &wirePort, uint8_t deviceAddress) {
   bool result = false; // no chip found yet.
   DEBUG_FUNC0("init");
 
   // Now that the unit is reset and I2C interface mode, we need to begin I2C
-  Wire.begin();
+  _i2cPort = &wirePort;
+  _i2cPort->begin();
+  _i2caddr = deviceAddress;
 
   // powering up is done by specifying the band etc. so it's implemented in setBand
   setBand(RADIO_BAND_FM);
@@ -195,13 +189,6 @@ bool SI4721::init() {
   // enable GPO1 output for mute function
   _sendCommand(2, CMD_GPIO_CTL, CMD_GPIO_CTL_GPO1OEN);
 #endif
-
-  // set volume to 0 and mute so no noise gets out here.
-  _setProperty(PROP_RX_VOLUME, 0);
-
-  // Set mute bits in the fm receiver
-  setMute(true);
-  setSoftMute(true);
 
   // adjust sensibility for scanning
   _setProperty(FM_SEEK_TUNE_SNR_THRESHOLD, 12);
@@ -287,10 +274,9 @@ void SI4721::setMute(bool switchOn) {
 /// This number is also used as the pre-emphasis in transmit mode
 /// @param uS The new deemphasis value in µS
 /// @return void
-void setDeemphasis(uint8_t uS) {
-	
+void SI4721::setDeemphasis(uint8_t uS) 
+{
 	_fmDeemphasis = uS;
-	
 }
 
 /// Control the softmute mode of the radio chip
@@ -392,7 +378,12 @@ void SI4721::setFrequency(RADIO_FREQ newF) {
   uint8_t status;
 
   RADIO::setFrequency(newF);
-  _sendCommand(5, _transmitMode ? CMD_TX_TUNE_FREQ : CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)& 0xff, 0);
+
+  if(_transmitMode){
+	 _sendCommand(4, CMD_TX_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF) & 0xff);
+	}else{
+	 _sendCommand(5, CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)& 0xff, 0);
+	}
 
   // reset the RDSParser
   clearRDS();
@@ -456,12 +447,12 @@ uint8_t SI4721::_readStatus()
 {
   uint8_t value;
 
-  Wire.beginTransmission(SI4721_ADR);
-  Wire.write(CMD_GET_INT_STATUS);
-  Wire.endTransmission();
+  _i2cPort->beginTransmission(_i2caddr);
+  _i2cPort->write(CMD_GET_INT_STATUS);
+  _i2cPort->endTransmission();
 
-  Wire.requestFrom(SI4721_ADR, 1); // We want to read 1 byte only.
-  value = Wire.read();
+  _i2cPort->requestFrom(_i2caddr, 1); // We want to read 1 byte only.
+  value = _i2cPort->read();
 
   return(value);
 } // _readStatus()
@@ -470,16 +461,16 @@ uint8_t SI4721::_readStatus()
 /// Load status information from to the chip.
 void SI4721::_readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len)
 {
-  Wire.beginTransmission(SI4721_ADR);
-  Wire.write(cmd);
-  Wire.write(param);
+  _i2cPort->beginTransmission(_i2caddr);
+  _i2cPort->write(cmd);
+  _i2cPort->write(param);
 
-  Wire.endTransmission();
-  Wire.requestFrom(SI4721_ADR, (int)len); //We want to read some bytes.
+  _i2cPort->endTransmission();
+  _i2cPort->requestFrom(_i2caddr, (int)len); //We want to read some bytes.
 
   for (uint8_t n = 0; n < len; n++) {
     //Read in these bytes   
-    values[n] = Wire.read();
+    values[n] = _i2cPort->read();
   } // for
 } // _readStatusData()
 
@@ -534,36 +525,68 @@ void SI4721::checkRDS()
 
 // ----- Transmitter functions -----
 
-/// Change device mode between transmit and receive
-void SI4721::setMode(bool transmit) {
+/// Change device mode to transmit by powering down and \n
+/// then back up into the correct mode. Store the current mode in a local \n
+/// variable for setFrequency() to reference.
+/// @return void
+void SI4721::setModeTransmit() {
 	
 	// Power down the device
 	_sendCommand(1, CMD_POWER_DOWN);
 	
-	// Power up in selected mode
-	if(transmit){
-		_sendCommand(3, CMD_POWER_UP, 0x12, 0x50);
-		_setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
-		_setProperty(PROP_TX_PREEMPHASIS, _fmDeemphasis == 75 ? PROP_TX_PREEMPHASIS_75 : PROP_TX_PREEMPHASIS_50);  // uses the RX deemphasis as the TX preemphasis
-		_setProperty(PROP_TX_ACOMP_GAIN, 10);  // sets max gain
-		_setProperty(PROP_TX_ACOMP_ENABLE, 0x0); // turns on limiter and AGC	
-	}else{
-		_sendCommand(3, CMD_POWER_UP, 0x10, 0x05); 
-		_setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
-		_setProperty(PROP_FM_DEEMPHASIS, _fmDeemphasis == 75 ? PROP_FM_DEEMPHASIS_75 : PROP_FM_DEEMPHASIS_50);  // set the RX deemphasis  
-		_setProperty(PROP_FM_ANTENNA_INPUT, 1);  // sets antenna input
-	}
+	// Give the device some time to power down before restart
+	delay(500);
 	
-	_transmitMode = transmit;
+	// Power up in transmit mode
+	_sendCommand(3, CMD_POWER_UP, 0x12, 0x50);
+	// delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
+	delay(500);
+	_setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
+	_setProperty(PROP_TX_PREEMPHASIS, _fmDeemphasis == 75 ? PROP_TX_PREEMPHASIS_75 : PROP_TX_PREEMPHASIS_50);  // uses the RX deemphasis as the TX preemphasis
+	_setProperty(PROP_TX_ACOMP_GAIN, 10);  // sets max gain
+	_setProperty(PROP_TX_ACOMP_ENABLE, 0x0); // turns on limiter and AGC	
+	
+	_transmitMode = true;
 	
 }
 
-/// Set the output power of the device in dBµV (valid range is 88 to 115) 
+/// Change device mode to receive by powering down and \n
+/// then back up into the correct mode. Store the current mode in a local \n
+/// variable for setFrequency() to reference.
+/// @return void
+void SI4721::setModeReceive() {
+	
+	// Power down the device
+	_sendCommand(1, CMD_POWER_DOWN);
+	
+	// Give the device some time to power down before restart
+	delay(500);
+	
+	// Power up in receive mode
+	_sendCommand(3, CMD_POWER_UP, 0x10, 0x05); 
+	// delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
+	delay(500);
+	_setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
+	_setProperty(PROP_FM_DEEMPHASIS, _fmDeemphasis == 75 ? PROP_FM_DEEMPHASIS_75 : PROP_FM_DEEMPHASIS_50);  // set the RX deemphasis  
+	_setProperty(PROP_FM_ANTENNA_INPUT, 1);  // sets antenna input
+	
+	_transmitMode = false;
+	
+}
+
+/// Set the output power of the device.
+/// @param pwr Output power of the device in dBµV (valid range is 88 to 115)
+/// @return void
 void SI4721::setTXpower(uint8_t pwr) {
   _sendCommand(5, CMD_TX_TUNE_POWER, 0, 0, pwr, 0); 
 }
 
-/// Begin Broadcasting RDS and optionally set Program ID
+/// Begin Broadcasting RDS and optionally set Program ID. \n
+/// The Program ID should be a unique 4 character hexadecimal \n
+/// code that identifies your station. By default, the Radio library \n 
+/// will use 0xBEEF as your Program ID.
+/// @param programID Optional 4 character hexadecimal ID
+/// @return void
 void SI4721::beginRDS(uint16_t programID) {
   
   _setProperty(PROP_TX_AUDIO_DEVIATION, 6625); // 66.25KHz (default is 68.25)
@@ -580,7 +603,12 @@ void SI4721::beginRDS(uint16_t programID) {
   
 }
 
-/// Set the RDS station name string 
+/// Set the RDS station name string. \n
+/// Your Station Name (Programme Service Name) is a static, \n
+/// 8 character display that represents your call letters or \n 
+/// station identity name. 
+/// @param *s string containing your 8 character name
+/// @return void
 void SI4721::setRDSstation(char *s) {
   uint8_t i, len = strlen(s);
   uint8_t slots = (len + 3) / 4;
@@ -594,7 +622,9 @@ void SI4721::setRDSstation(char *s) {
   
 }
 
-/// Load new data into RDS Group Buffer
+/// Load new data into RDS Radio Text Buffer.
+/// @param *s string containing arbitrary text to be transmitted as RDS Radio Text 
+/// @return void
 void SI4721::setRDSbuffer(char *s) {
   uint8_t i, len = strlen(s);
   uint8_t slots = (len + 3) / 4;
@@ -607,21 +637,23 @@ void SI4721::setRDSbuffer(char *s) {
 	_sendCommand(8, CMD_TX_RDS_BUFF, i == 0 ? 0x06 : 0x04, 0x20, i, rdsBuff[0], rdsBuff[1], rdsBuff[2], rdsBuff[3], 0); 
   }
 
-  setProperty(PROP_TX_COMPONENT_ENABLE, 0x0007); // stereo, pilot+rds
+  _setProperty(PROP_TX_COMPONENT_ENABLE, 0x0007); // stereo, pilot+rds
 
 }
 
 /// Get TX Status and Audio Input Metrics
+/// @param void
+/// @return ASQ_STATUS struct containing asq and audioInLevel values
 ASQ_STATUS SI4721::getASQ() {
   _sendCommand(2, CMD_TX_ASQ_STATUS, 0x1);
 
-  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)5);
+  _i2cPort->requestFrom((uint8_t)_i2caddr, (uint8_t)5);
 
   ASQ_STATUS result;
   
   uint8_t response[5];
   for(uint8_t i = 0; i < 5; i++){
-	  response[i] = Wire.read();
+	  response[i] = _i2cPort->read();
   }
   
   result.asq = response[1];
@@ -632,16 +664,18 @@ ASQ_STATUS SI4721::getASQ() {
 }
 
 /// Get TX Tuning Status
+/// @param void
+/// @return TX_STATUS struct containing frequency, dBuV, antennaCap, and noiseLevel values
 TX_STATUS SI4721::getTuneStatus() {
   _sendCommand(2, CMD_TX_TUNE_STATUS, 0x1);
 
-  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)8);
+  _i2cPort->requestFrom((uint8_t)_i2caddr, (uint8_t)8);
 
   TX_STATUS result;
   
   uint8_t response[8];
   for(uint8_t i = 0; i < 8; i++){
-	  response[i] = Wire.read();
+	  response[i] = _i2cPort->read();
   }  
   
   result.frequency = response[2];
@@ -718,22 +752,22 @@ void SI4721::_sendCommand(int cnt, int cmd, ...) {
     Serial.println("error: _sendCommand: too much parameters!");
 
   } else {
-    Wire.beginTransmission(SI4721_ADR);
-    Wire.write(cmd);
+    _i2cPort->beginTransmission(_i2caddr);
+    _i2cPort->write(cmd);
 
     va_list params;
     va_start(params, cmd);
 
     for (uint8_t i = 1; i < cnt; i++) {
       uint8_t c = va_arg(params, int);
-      Wire.write(c);
+      _i2cPort->write(c);
     }
-    Wire.endTransmission();
+    _i2cPort->endTransmission();
     va_end(params);
 
     // wait for Command being processed
-    Wire.requestFrom(SI4721_ADR, 1); // We want to read the status byte.
-    _status = Wire.read();
+    _i2cPort->requestFrom(_i2caddr, 1); // We want to read the status byte.
+    _status = _i2cPort->read();
   } // if
 
 } // _sendCommand()
@@ -741,19 +775,19 @@ void SI4721::_sendCommand(int cnt, int cmd, ...) {
 
 /// Set a property in the radio chip
 void SI4721::_setProperty(uint16_t prop, uint16_t value) {
-  Wire.beginTransmission(SI4721_ADR);
-  Wire.write(CMD_SET_PROPERTY);
-  Wire.write(0);
+  _i2cPort->beginTransmission(_i2caddr);
+  _i2cPort->write(CMD_SET_PROPERTY);
+  _i2cPort->write(0);
 
-  Wire.write(prop >> 8);
-  Wire.write(prop & 0x00FF);
-  Wire.write(value >> 8);
-  Wire.write(value & 0x00FF);
+  _i2cPort->write(prop >> 8);
+  _i2cPort->write(prop & 0x00FF);
+  _i2cPort->write(value >> 8);
+  _i2cPort->write(value & 0x00FF);
 
-  Wire.endTransmission();
+  _i2cPort->endTransmission();
 
-  Wire.requestFrom(SI4721_ADR, 1); // We want to read the status byte.
-  _status = Wire.read();
+  _i2cPort->requestFrom(_i2caddr, 1); // We want to read the status byte.
+  _status = _i2cPort->read();
 } // _setProperty()
 
 
