@@ -58,6 +58,7 @@
 #define SKMODE  10
 #define SEEKUP  9
 #define SEEK  8
+#define DISABLE 6
 
 //Register 0x03 - CHANNEL
 #define TUNE  15
@@ -170,11 +171,21 @@ bool SI4703::init() {
 } // init()
 
 
-// switch the power off
-void SI4703::term()
+// switch the power on
+void SI4703::powerUp()
 {
-  DEBUG_FUNC0("term");
-} // term
+  registers[POWERCFG] = 0x4001; //Enable the IC
+  registers[SYSCONFIG1] |= (1<<RDS); // Enable RDS
+  _saveRegisters(); //Update
+}
+
+// switch the power off
+void SI4703::powerDown()
+{
+  registers[SYSCONFIG1] &= (1<<RDS); // Disable RDS per datasheet pg. 20 "to prevent any unpredictable behavior"
+  registers[POWERCFG] &= DISABLE; // Set the disable bit
+  _saveRegisters(); //Update
+}
 
 
 // ----- Volume control -----
@@ -461,14 +472,14 @@ void SI4703::_waitEnd() {
   do {
     _readRegisters();
   } while ((registers[STATUSRSSI] & STC) == 0);
-  
+
   // DEBUG_VAL("Freq:", getFrequency());
-  
+
   _readRegisters();
   // get the SFBL bit.
   if (registers[STATUSRSSI] & SFBL)
   DEBUG_STR("Seek limit hit");
-  
+
   // end the seek mode
   registers[POWERCFG] &= ~(1<<SEEK);
   registers[CHANNEL]  &= ~(1<<TUNE); //Clear the tune after a tune has completed

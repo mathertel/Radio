@@ -33,16 +33,17 @@ class SI4703 : public RADIO {
     const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
 
   SI4703(uint8_t resetPin = 2, uint8_t sdaPin = SDA);
-  
+
   bool   init();  // initialize library and the chip.
-  void   term();  // terminate all radio functions.
-  
+  void   powerUp();
+  void   powerDown();
+
   // SI4703 specific features
 
   void setResetPin(uint8_t pin);
 
   // Control of the audio features
-  
+
   // Control the volume output of the radio chip
   void    setVolume(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..15.
 
@@ -66,9 +67,9 @@ class SI4703 : public RADIO {
 
   void seekUp(bool toNextSender = true);   // start seek mode upwards
   void seekDown(bool toNextSender = true); // start seek mode downwards
-  
+
   void checkRDS(); // read RDS data from the current station and process when data available.
-  
+
   // ----- combined status functions -----
 
   virtual void getRadioInfo(RADIO_INFO *info); ///< Retrieve some information about the current radio function of the chip.
@@ -76,7 +77,7 @@ class SI4703 : public RADIO {
   virtual void getAudioInfo(AUDIO_INFO *info); ///< Retrieve some information about the current audio function of the chip.
 
   // ----- debug Helpers send information to Serial port
-  
+
   void  debugScan();               // Scan all frequencies and report a status
   void  debugStatus();             // Report Info about actual Station
 
@@ -89,13 +90,13 @@ private:
   // ----- local variables
 
   // store the current values of the 16 chip internal 16-bit registers
-  uint16_t registers[16];  
+  uint16_t registers[16];
 
   // ----- low level communication to the chip using I2C bus
 
   void     _write16(uint16_t val);        // Write 16 Bit Value on I2C-Bus
   uint16_t _read16(void);
-  
+
   void _seek(bool seekUp = true);
   void _waitEnd();
 
