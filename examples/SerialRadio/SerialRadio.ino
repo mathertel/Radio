@@ -1,7 +1,7 @@
 ///
-/// \file SerialRadio.ino 
+/// \file SerialRadio.ino
 /// \brief Radio implementation using the Serial communication.
-/// 
+///
 /// \author Matthias Hertel, http://www.mathertel.de
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
@@ -16,10 +16,10 @@
 /// ------
 /// The necessary wiring of the various chips are described in the Testxxx example sketches.
 /// The boards have to be connected by using the following connections:
-/// 
+///
 /// Arduino port | SI4703 signal | RDA5807M signal
 /// :----------: | :-----------: | :-------------:
-/// GND (black)  | GND           | GND   
+/// GND (black)  | GND           | GND
 /// 3.3V (red)   | VCC           | VCC
 /// 5V (red)     | -             | -
 /// A5 (yellow)  | SCLK          | SCLK
@@ -76,8 +76,8 @@ int    i_sidx = 5;        ///< Start at Station with index=5
 /// by uncommenting the right radio object definition.
 
 // RADIO radio;       ///< Create an instance of a non functional radio.
-RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
-// SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
+// RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
+SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
 //SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
 
@@ -85,6 +85,14 @@ RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
 /// get a RDS parser
 RDSParser rds;
 
+/// Modified Julian Day from RDS Time
+typedef struct MJD_INFO {
+  int month;
+  int day;
+  int year;
+};
+
+MJD_INFO mjd_info;
 
 /// State definition for this radio implementation.
 enum RADIO_STATE {
@@ -100,7 +108,7 @@ RADIO_STATE state; ///< The state variable is used for parsing input characters.
 
 
 
-/// Update the Frequency on the LCD display.
+/// Update the Frequency
 void DisplayFrequency(RADIO_FREQ f)
 {
   char s[12];
@@ -109,13 +117,60 @@ void DisplayFrequency(RADIO_FREQ f)
 } // DisplayFrequency()
 
 
-/// Update the ServiceName text on the LCD display.
-void DisplayServiceName(char *name)
+/// Update the ServiceName text
+void DisplayRDSServiceName(char *name)
 {
-  Serial.print("RDS:");
+  Serial.print("RDS ServiceName:");
   Serial.println(name);
-} // DisplayServiceName()
+} // DisplayRDSServiceName()
 
+/// Update the text
+void DisplayRDSText(char *name)
+{
+  Serial.print("RDS Text:");
+  Serial.println(name);
+} // DisplayRDSText()
+
+/// Update the Date/Time
+void DisplayRDSTime(uint8_t hr, uint8_t mnt, uint32_t mjd, int8_t offset)
+{
+  Serial.print("  RDS Time: ");
+  if (hr < 10)
+    Serial.print('0');
+  Serial.print(hr);
+  Serial.print(':');
+  if (mnt < 10)
+    Serial.print('0');
+  Serial.print(mnt);
+  Serial.print("  Offset: ");
+  Serial.print(offset);
+
+  getMJDInfo(mjd, &mjd_info);
+  Serial.print("  Month: ");
+  Serial.print(mjd_info.month);
+  Serial.print("  Day: ");
+  Serial.print(mjd_info.day);
+  Serial.print("  Year: ");
+  Serial.println(mjd_info.year);
+} // DisplayRDSTime()
+
+
+void getMJDInfo(uint32_t mjd, MJD_INFO *mjdInfo)
+{
+  int _year = (int)((mjd - 15078.2) / 365.25);
+  int _month = (int)((mjd - 14956.1 - (int)(_year * 365.25)) / 30.6001);
+  int _day = (int)(mjd - 14956 - (int)(_year * 365.25) - (int)(_month * 30.6001));
+  int k = (_month == 14 || _month == 15) ? 1 : 0;
+
+  _year = _year + k + 1900;
+  _month = _month - 1 - k * 12;
+
+  long WD = (long)((mjd + 2) % 7) + 1; //modulo 7 | Day of the Week
+
+  mjdInfo->month = _month;
+  mjdInfo->day = _day;
+  mjdInfo->year = _year;
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -216,7 +271,7 @@ void setup() {
   Serial.print("Radio...");
   delay(500);
 
-  // Initialize the Radio 
+  // Initialize the Radio
   radio.init();
 
   // Enable information to the Serial port
@@ -237,7 +292,10 @@ void setup() {
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
-  rds.attachServicenNameCallback(DisplayServiceName);
+  rds.attachServicenNameCallback(DisplayRDSServiceName);
+  rds.attachTextCallback(DisplayRDSText);
+  rds.attachTimeCallback(DisplayRDSTime);
+
 
   runSerialCommand('?', 0);
 } // Setup
@@ -298,7 +356,7 @@ void loop() {
       lastf = f;
     } // if
     nextFreqTime = now + 400;
-  } // if  
+  } // if
 
 } // loop
 
