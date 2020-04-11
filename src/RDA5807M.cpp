@@ -220,6 +220,7 @@ void RDA5807M::setBand(RADIO_BAND newBand) {
   else if (newBand == RADIO_BAND_FMWORLD)
   r = RADIO_REG_CHAN_BAND_FMWORLD;
   registers[RADIO_REG_CHAN] = (r | RADIO_REG_CHAN_SPACE_100);
+  _saveRegister(RADIO_REG_CHAN);
 } // setBand()
 
 
