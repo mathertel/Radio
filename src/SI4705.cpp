@@ -15,10 +15,9 @@
 ///
 /// ChangeLog see SI4705.h.
 
-#include <Arduino.h>
-#include <Wire.h>     // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
+// Include the common radio library interface
+#include <radio.h>
 
-#include <radio.h>    // Include the common radio library interface
 #include <SI4705.h>
 
 // ----- Definitions for the Wire communication
@@ -45,7 +44,7 @@
 #define	CMD_POWER_DOWN	    0x11	//	Power down device.
 
 #define	CMD_SET_PROPERTY	0x12	//	Sets the value of a property.
-#define	CMD_GET_PROPERTY	0x13	//	Retrieves a property’s value.
+#define	CMD_GET_PROPERTY	0x13	//	Retrieves a propertyï¿½s value.
 #define	CMD_GET_INT_STATUS	0x14	//	Reads interrupt status bits.
 #define	CMD_GET_INT_STATUS_CTS	0x80	//	CTS flag in status
 

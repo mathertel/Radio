@@ -26,41 +26,43 @@
 
 // ----- Register Definitions -----
 
-#define DUMP_I2C 1
-
 // no chip-registers without a chip.
-
 
 // ----- implement
 
 /// Setup the radio object and initialize private variables to 0.
 /// Don't change the radio chip (yet).
-RADIO::RADIO() {
+RADIO::RADIO()
+{
   memset(this, 0, sizeof(RADIO));
 } // RADIO()
 
 
 /// The RADIO class doesn't implement a concrete chip so nothing has to be initialized.
-bool RADIO::init() {
-  return(false);
+bool RADIO::init()
+{
+  return (false);
 } // init()
 
 
 /// switch the power off
 /// The RADIO class doesn't implement a concrete chip so nothing has to be terminated.
-void RADIO::term() {
+void RADIO::term()
+{
 } // term()
 
 
 // ----- Volume control -----
 
-void RADIO::setVolume(uint8_t newVolume) {
+void RADIO::setVolume(uint8_t newVolume)
+{
   _volume = newVolume;
 } // setVolume()
 
 
-uint8_t RADIO::getVolume() {
-  return(_volume);
+uint8_t RADIO::getVolume()
+{
+  return (_volume);
 } // getVolume()
 
 
@@ -69,57 +71,65 @@ uint8_t RADIO::getVolume() {
 /// Control the bass boost mode of the radio chip.
 /// The base implementation ony stores the value to the internal variable.
 /// @param switchOn true to switch bassBoost mode on, false to switch bassBoost mode off.
-void RADIO::setBassBoost(bool switchOn) {
+void RADIO::setBassBoost(bool switchOn)
+{
   _bassBoost = switchOn;
 } // setBassBoost()
 
 
 /// Retrieve the current bass boost mode setting.
 /// The base implementation returns only the value in the internal variable.
-bool RADIO::getBassBoost() {
-  return(_bassBoost);
+bool RADIO::getBassBoost()
+{
+  return (_bassBoost);
 } // getBassBoost()
 
 
 // ----- mono control -----
 
 /// The base implementation ony stores the value to the internal variable.
-void RADIO::setMono(bool switchOn) {
+void RADIO::setMono(bool switchOn)
+{
   _mono = switchOn;
 } // setMono()
 
 
 /// The base implementation returns only the value in the internal variable.
-bool RADIO::getMono() {
-  return(_mono);
+bool RADIO::getMono()
+{
+  return (_mono);
 } // getMono()
 
 
 // ----- mute control -----
 
 /// The base implementation ony stores the value to the internal variable.
-void RADIO::setMute(bool switchOn) {
+void RADIO::setMute(bool switchOn)
+{
   _mute = switchOn;
 } // setMute()
 
 
 /// The base implementation returns only the value in the internal variable.
-bool RADIO::getMute() {
-  return(_mute);
+bool RADIO::getMute()
+{
+  return (_mute);
 } // getMute()
 
 
 // ----- softmute control -----
 
 /// The base implementation ony stores the value to the internal variable.
-void RADIO::setSoftMute(bool switchOn) {
+void RADIO::setSoftMute(bool switchOn)
+{
   _softMute = switchOn;
 } // setSoftMute()
 
 
 /// The base implementation returns only the value in the internal variable.
-bool RADIO::getSoftMute() {
-  return(_softMute);
+bool RADIO::getSoftMute()
+{
+  return (_softMute);
 } // getSoftMute()
 
 
@@ -128,7 +138,8 @@ bool RADIO::getSoftMute() {
 // some implementations to return internal variables if used by concrete chip implementations
 
 /// Start using the new band for receiving.
-void RADIO::setBand(RADIO_BAND newBand) {
+void RADIO::setBand(RADIO_BAND newBand)
+{
   _band = newBand;
   if (newBand == RADIO_BAND_FM) {
     _freqLow = 8700;
@@ -145,30 +156,48 @@ void RADIO::setBand(RADIO_BAND newBand) {
 
 /// Start using the new frequency for receiving.
 /// The new frequency is stored for later retrieval.
-void RADIO::setFrequency(RADIO_FREQ newFreq) {
+void RADIO::setFrequency(RADIO_FREQ newFreq)
+{
   _freq = newFreq;
 } // setFrequency()
 
 
-void RADIO::setBandFrequency(RADIO_BAND newBand, RADIO_FREQ newFreq) {
+void RADIO::setBandFrequency(RADIO_BAND newBand, RADIO_FREQ newFreq)
+{
   setBand(newBand);
   setFrequency(newFreq);
 } // setBandFrequency()
 
 
-void RADIO::seekUp(bool)   {}
+void RADIO::seekUp(bool) {}
 void RADIO::seekDown(bool) {}
 
-RADIO_BAND RADIO::getBand()         { return(_band); }
-RADIO_FREQ RADIO::getFrequency()    { return(_freq); }
-RADIO_FREQ RADIO::getMinFrequency() { return(_freqLow); }
-RADIO_FREQ RADIO::getMaxFrequency() { return(_freqHigh); }
-RADIO_FREQ RADIO::getFrequencyStep(){ return(_freqSteps); }
+RADIO_BAND RADIO::getBand()
+{
+  return (_band);
+}
+RADIO_FREQ RADIO::getFrequency()
+{
+  return (_freq);
+}
+RADIO_FREQ RADIO::getMinFrequency()
+{
+  return (_freqLow);
+}
+RADIO_FREQ RADIO::getMaxFrequency()
+{
+  return (_freqHigh);
+}
+RADIO_FREQ RADIO::getFrequencyStep()
+{
+  return (_freqSteps);
+}
 
 
 /// Return all the Radio settings.
 /// This implementation only knows some values from the last settings.
-void RADIO::getRadioInfo(RADIO_INFO *info) {
+void RADIO::getRadioInfo(RADIO_INFO *info)
+{
   // set everything to false and 0.
   memset(info, 0, sizeof(RADIO_INFO));
   // info->tuned = false;
@@ -183,7 +212,8 @@ void RADIO::getRadioInfo(RADIO_INFO *info) {
 
 /// Return current settings as far as no chip is required.
 /// When using the radio::setXXX methods, no chip specific implementation is needed.
-void RADIO::getAudioInfo(AUDIO_INFO *info) {
+void RADIO::getAudioInfo(AUDIO_INFO *info)
+{
   // set everything to false and 0.
   memset(info, 0, sizeof(AUDIO_INFO));
 
@@ -197,12 +227,15 @@ void RADIO::getAudioInfo(AUDIO_INFO *info) {
 
 /// In the general radio implementation there is no chip for RDS.
 /// This function needs to be implemented for radio chips with RDS receiving functionality.
-void RADIO::checkRDS() { /* no chip : nothing to check */ }
+void RADIO::checkRDS()
+{ /* no chip : nothing to check */
+}
 
 
 /// Send a 0.0.0.0 to the RDS receiver if there is any attached.
 /// This is to point out that there is a new situation and all existing data should be invalid from now on.
-void RADIO::clearRDS() { 
+void RADIO::clearRDS()
+{
   if (_sendRDS)
     _sendRDS(0, 0, 0, 0);
 } // clearRDS()
@@ -217,7 +250,8 @@ void RADIO::attachReceiveRDS(receiveRDSFunction newFunction)
 
 
 // format the current frequency for display and printing
-void RADIO::formatFrequency(char *s, uint8_t length) {
+void RADIO::formatFrequency(char *s, uint8_t length)
+{
   RADIO_BAND b = getBand();
   RADIO_FREQ f = getFrequency();
 
@@ -234,7 +268,7 @@ void RADIO::formatFrequency(char *s, uint8_t length) {
       s[3] = '.';
 
       // append units
-      strcpy(s+6, " MHz");
+      strcpy(s + 6, " MHz");
     } // if
 
     //     f = _freqLow + (channel * _bandSteps);
@@ -246,39 +280,52 @@ void RADIO::formatFrequency(char *s, uint8_t length) {
 
 
 // enable debugging information on Serial port.
-void RADIO::debugEnable(bool enable) {
+void RADIO::debugEnable(bool enable)
+{
   _debugEnabled = enable;
 } // debugEnable()
 
 
+// enable low level debugging information on Serial port.
+void RADIO::debugRegisters(bool enable)
+{
+  _debugRegisters = enable;
+} // debugRegisters()
+
+
 // print out all radio information
-void RADIO::debugRadioInfo() {
+void RADIO::debugRadioInfo()
+{
   RADIO_INFO info;
   this->getRadioInfo(&info);
 
-  Serial.print(info.rds    ? " RDS"    : " ---");
-  Serial.print(info.tuned  ? " TUNED"  : " -----");
+  Serial.print(info.rds ? " RDS" : " ---");
+  Serial.print(info.tuned ? " TUNED" : " -----");
   Serial.print(info.stereo ? " STEREO" : "  MONO ");
-  Serial.print("  RSSI: "); Serial.print(info.rssi);
-  Serial.print("  SNR: "); Serial.print(info.snr);
+  Serial.print("  RSSI: ");
+  Serial.print(info.rssi);
+  Serial.print("  SNR: ");
+  Serial.print(info.snr);
   Serial.println();
 } // debugRadioInfo()
 
 
 // print out all audio information
-void RADIO::debugAudioInfo() {
+void RADIO::debugAudioInfo()
+{
   AUDIO_INFO info;
   this->getAudioInfo(&info);
 
-  Serial.print(info.bassBoost ? " BASS"  : " ----");
-  Serial.print(info.mute      ? " MUTE"  : " ----");
-  Serial.print(info.softmute  ? " SOFTMUTE"  : " --------");
+  Serial.print(info.bassBoost ? " BASS" : " ----");
+  Serial.print(info.mute ? " MUTE" : " ----");
+  Serial.print(info.softmute ? " SOFTMUTE" : " --------");
   Serial.println();
 } // debugAudioInfo()
 
 
 /// The RADIO class doesn't have interesting status information so nothing is sent.
-void RADIO::debugStatus() {
+void RADIO::debugStatus()
+{
   // no output.
 } // debugStatus
 
@@ -286,7 +333,8 @@ void RADIO::debugStatus() {
 /// This is a special format routine used to format frequencies as strings with leading blanks.
 /// up to 5 digits only ("    0".."99999")
 /// *s MUST be able to hold the characters
-void RADIO::int16_to_s(char *s, uint16_t val) {
+void RADIO::int16_to_s(char *s, uint16_t val)
+{
   uint8_t n = 5;
 
   while (n > 0) {
@@ -294,8 +342,7 @@ void RADIO::int16_to_s(char *s, uint16_t val) {
     if ((n == 4) || (val > 0)) {
       s[n] = '0' + (val % 10);
       val = val / 10;
-    }
-    else {
+    } else {
       s[n] = ' ';
     }
   } // while
@@ -308,9 +355,12 @@ bool RADIO::_wireExists(TwoWire *port, int address)
 {
   port->beginTransmission(address);
   uint8_t err = port->endTransmission();
-#if DUMP_I2C
-  Serial.printf("_wireExists 0x%02x: %d\n", address, err);
-#endif
+  if (_debugRegisters) {
+    Serial.print("_wireExists(");
+    Serial.print(address);
+    Serial.print("): err=");
+    Serial.println(err);
+  }
   return (err == 0);
 }
 
@@ -321,9 +371,13 @@ int RADIO::_wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int
 {
   int done = 0;
 
-#if DUMP_I2C
-  Serial.printf("_wireRead 0x%02x:", reg);
-#endif
+  if (_debugRegisters) {
+    Serial.print("_wireRead(");
+    Serial.print(address);
+    Serial.print(", ");
+    Serial.print(reg);
+    Serial.println(")");
+  }
 
   if (data) {
     uint8_t *d = data;
@@ -336,32 +390,42 @@ int RADIO::_wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int
     while (port->available() && (done < len)) {
       *d = port->read();
       done++;
-#if DUMP_I2C
-      Serial.printf(" %02x", *d);
-#endif
+      if (_debugRegisters) {
+        _printHex2(*d);
+      }
       d++;
     }
 
-#if DUMP_I2C
-    Serial.println();
-#endif
+    if (_debugRegisters) {
+      Serial.println();
+    }
   }
 
   return (done);
 } // _wireRead()
 
 
-/// Prints a register as 4 character hexadecimal code with leading zeros.
+/// Prints a byte as 2 character hexadecimal code with leading zeros.
+void RADIO::_printHex2(uint8_t val)
+{
+  Serial.print(' ');
+  if (val <= 0x000F)
+    Serial.print('0'); // if less 2 Digit
+  Serial.print(val, HEX);
+} // _printHex2
+
+
+/// Prints a word as 4 character hexadecimal code with leading zeros.
 void RADIO::_printHex4(uint16_t val)
 {
-  if (val <= 0x000F) Serial.print('0');     // if less 2 Digit
-  if (val <= 0x00FF) Serial.print('0');     // if less 3 Digit
-  if (val <= 0x0FFF) Serial.print('0');     // if less 4 Digit
-  Serial.print(val, HEX);
   Serial.print(' ');
+  if (val <= 0x000F)
+    Serial.print('0'); // if less 2 Digit
+  if (val <= 0x00FF)
+    Serial.print('0'); // if less 3 Digit
+  if (val <= 0x0FFF)
+    Serial.print('0'); // if less 4 Digit
+  Serial.print(val, HEX);
 } // _printHex4
 
-
 // The End.
-
-

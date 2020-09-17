@@ -42,6 +42,7 @@
 #include <rda5807M.h>
 #include <si4703.h>
 #include <si4705.h>
+#include <si4721.h>
 #include <tea5767.h>
 
 #include <RDSParser.h>
@@ -90,7 +91,8 @@ int    i_sidx=5;        ///< Start at Station with index=5
 // RADIO radio;       ///< Create an instance of a non functional radio.
 // RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
 // SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
-SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
+// SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
+SI4721   radio;    ///< Create an instance of a SI4721 chip radio.
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
 
 
@@ -307,4 +309,3 @@ void loop() {
 } // loop
 
 // End.
-

@@ -189,9 +189,9 @@ public:
 
   // ----- Supporting RDS for FM bands -----
 
+  virtual void attachReceiveRDS(receiveRDSFunction newFunction); ///< Register a RDS processor function.
   virtual void checkRDS(); ///< Check if RDS Data is available and good.
   virtual void clearRDS(); ///< Clear RDS data in the attached RDS Receiver by sending 0,0,0,0.
-  virtual void attachReceiveRDS(receiveRDSFunction newFunction); ///< Register a RDS processor function.
 
   // ----- Utilitys -----
 
@@ -201,6 +201,7 @@ public:
   // ----- debug Helpers send information to Serial port
 
   virtual void debugEnable(bool enable = true);  ///< Enable sending debug information to the Serial port.
+  virtual void debugRegisters(bool enable = true);  ///< Enable sending debug information to the Serial port.
   virtual void debugRadioInfo(); ///< Print out all radio information.
   virtual void debugAudioInfo(); ///< Print out all audio information.
   virtual void debugStatus();    ///< Send debug information about actual available chip functionality and other internal things.
@@ -208,12 +209,13 @@ public:
   // ===== Wire Utilities =====
 
   /** check for a device on address */
-  static bool _wireExists(TwoWire *port, int address);
+  bool _wireExists(TwoWire *port, int address);
 
-  static int _wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len);
+  int _wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len);
 
 protected:
   bool _debugEnabled; ///< Set by debugEnable() and controls debugging functionality.
+  bool _debugRegisters; ///< Set by debugEnable() and controls debugging functionality.
 
   uint8_t _volume;    ///< Last set volume level.
   bool    _bassBoost; ///< Last set bass Boost effect.
@@ -226,11 +228,12 @@ protected:
 
   RADIO_FREQ _freqLow;    ///< Lowest frequency of the current selected band.
   RADIO_FREQ _freqHigh;   ///< Highest frequency of the current selected band.
-  RADIO_FREQ _freqSteps;  ///< Resulution of the tuner.
+  RADIO_FREQ _freqSteps;  ///< Resolution of the tuner.
 
   receiveRDSFunction _sendRDS; ///< Registered RDS Function that is called on new available data.
 
-  void _printHex4(uint16_t val); ///> Prints a register as 4 character hexadecimal code with leading zeros.
+  void _printHex2(uint8_t val); ///< Prints a byte as 2 character hexadecimal code with leading zeros.
+  void _printHex4(uint16_t val); ///< Prints a register as 4 character hexadecimal code with leading zeros.
 
 private:
   void int16_to_s(char *s, uint16_t val); ///< Converts a int16 number to a string, similar to itoa, but using the format "00000".
