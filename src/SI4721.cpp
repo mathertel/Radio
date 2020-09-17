@@ -17,9 +17,9 @@
 /// ChangeLog see SI4721.h.
 
 #include <Arduino.h>
-#include <Wire.h>     // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
+#include <Wire.h> // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
 
-#include <radio.h>    // Include the common radio library interface
+#include <radio.h> // Include the common radio library interface
 
 // Include the chip specific radio library interface
 #include <SI4721.h>
@@ -86,6 +86,9 @@
 #define PROP_FM_DEEMPHASIS 0x1100
 #define PROP_FM_DEEMPHASIS_50 0x01
 #define PROP_FM_DEEMPHASIS_75 0x02
+
+// stereo blend
+#define PROP_FM_BLEND_STEREO_THRESHOLD 0x1105
 
 // setup the antenna input pin
 #define PROP_FM_ANTENNA_INPUT 0x1107
@@ -161,14 +164,16 @@
 #define PROP_TX_PREEMPHASIS_75 0x00
 
 /// Initialize the extra variables in SI4721
-SI4721::SI4721() {
+SI4721::SI4721()
+{
   _realVolume = 0;
 }
 
 /// Initialize the library and the chip.
 /// Set all internal variables to the standard values.
 /// @return bool The return value is true when a SI4721 chip was found.
-bool SI4721::init(TwoWire &wirePort, uint8_t deviceAddress) {
+bool SI4721::init(TwoWire &wirePort, uint8_t deviceAddress)
+{
   bool result; // chip found ?.
   DEBUG_FUNC0("init");
 
@@ -188,7 +193,7 @@ bool SI4721::init(TwoWire &wirePort, uint8_t deviceAddress) {
 
   // powering up is done by specifying the band etc. so it's implemented in setBand
 
-  return(result);
+  return (result);
 } // init()
 
 
@@ -206,6 +211,7 @@ void SI4721::term()
 /// @param newVolume The new volume level of audio output.
 void SI4721::setVolume(uint8_t newVolume)
 {
+  DEBUG_FUNC1("setVolume", newVolume);
   setVolumeX(newVolume * 4);
 } // setVolume()
 
@@ -214,7 +220,8 @@ void SI4721::setVolume(uint8_t newVolume)
 /// @param newVolume The new volume level of audio output.
 void SI4721::setVolumeX(uint8_t newVolume)
 {
-  if (newVolume > 63) newVolume = 63;
+  if (newVolume > 63)
+    newVolume = 63;
   _setProperty(PROP_RX_VOLUME, newVolume);
   _realVolume = newVolume;
   RADIO::setVolume(newVolume / 4);
@@ -223,8 +230,9 @@ void SI4721::setVolumeX(uint8_t newVolume)
 
 /// Retrieve the current output volume in the range 0..63.
 /// @return uint8_t actual volume.
-uint8_t SI4721::getVolumeX() {
-  return(_realVolume);
+uint8_t SI4721::getVolumeX()
+{
+  return (_realVolume);
 } // getVolumeX()
 
 
@@ -232,7 +240,8 @@ uint8_t SI4721::getVolumeX() {
 /// In mute mode no output will be produced by the radio chip.
 /// @param switchOn The new state of the mute mode. True to switch on, false to switch off.
 /// @return void
-void SI4721::setMute(bool switchOn) {
+void SI4721::setMute(bool switchOn)
+{
   RADIO::setMute(switchOn);
 
   if (switchOn) {
@@ -244,7 +253,6 @@ void SI4721::setMute(bool switchOn) {
     _setProperty(PROP_RX_HARD_MUTE, 0x00);
   } // if
 } // setMute()
-
 
 
 /// Control the FM deemphasis of the radio chip
@@ -260,7 +268,10 @@ void SI4721::setDeemphasis(uint8_t uS)
 /// If switched on the radio output is muted when no sender was found.
 /// @param switchOn The new state of the softmute mode. True to switch on, false to switch off.
 /// @return void
-void SI4721::setSoftMute(bool switchOn) {
+void SI4721::setSoftMute(bool switchOn)
+{
+  DEBUG_FUNC1("setSoftMute", switchOn);
+
   RADIO::setSoftMute(switchOn);
 
   if (switchOn) {
@@ -278,6 +289,8 @@ void SI4721::setSoftMute(bool switchOn) {
 /// @return void
 void SI4721::setBassBoost(bool switchOn)
 {
+  DEBUG_FUNC1("setBassBoost", switchOn);
+  DEBUG_STR("not supported.");
   RADIO::setBassBoost(false);
 } // setBassBoost()
 
@@ -288,16 +301,18 @@ void SI4721::setBassBoost(bool switchOn)
 /// @return void
 void SI4721::setMono(bool switchOn)
 {
+  DEBUG_FUNC1("setMono", switchOn);
   RADIO::setMono(switchOn);
   if (switchOn) {
     // disable automatic stereo feature
-    _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 127);
-    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 127);
+    _setProperty(PROP_FM_BLEND_STEREO_THRESHOLD, 127);
+    // not available in SI4721:
+    // _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 127);
+    // _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 127);
 
   } else {
     // Automatic stereo feature on.
-    _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 0x0031); // default = 49
-    _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 0x001E); // default = 30
+    _setProperty(PROP_FM_BLEND_STEREO_THRESHOLD, 49); // default = 49 dBμV
   } // if
 } // setMono
 
@@ -323,7 +338,7 @@ void SI4721::setBand(RADIO_BAND newBand)
     // Give the device some time to power down before restart
     delay(500);
 
-    // Power up in receive mode
+    // Power up in receive mode without patch
     _sendCommand(3, CMD_POWER_UP, (CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_1_FUNC_FM), CMD_POWER_UP_2_ANALOGOUT);
 
     // delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
@@ -334,17 +349,17 @@ void SI4721::setBand(RADIO_BAND newBand)
     _setProperty(PROP_FM_ANTENNA_INPUT, PROP_FM_ANTENNA_INPUT_SHORT); // sets antenna input
     setFrequency(_freqLow);
 
+    setMono(true);
+    setSoftMute(true);
+    setVolume(0);
+    setMute(false);
+
     // adjust sensibility for scanning
     _setProperty(FM_SEEK_TUNE_SNR_THRESHOLD, 12);
     _setProperty(FM_SEEK_TUNE_RSSI_TRESHOLD, 42);
 
-    _setProperty(PROP_GPO_IEN, 0); // no interrupts
-
-    // RDS
-    _setProperty(PROP_RDS_INTERRUPT_SOURCE, PROP_RDS_INTERRUPT_SOURCE_RDSRECV); // Set the CTS status bit after receiving RDS data.
-    _setProperty(PROP_RDS_INT_FIFO_COUNT, 4);
-    _setProperty(PROP_RDS_CONFIG, 0xFF01); // accept all correctable data and enable rds
-
+    // _setProperty(PROP_GPO_IEN, 0); // no interrupts
+    _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN | PROP_GPO_IEN_RDSIEN); //  | PROP_GPO_IEN_RDSIEN ????
 
   } else if (newBand == RADIO_BAND_FMTX) {
     // Power down the device
@@ -369,10 +384,10 @@ void SI4721::setBand(RADIO_BAND newBand)
 } // setBand()
 
 
-
 /// Retrieve the real frequency from the chip after manual or automatic tuning.
 /// @return RADIO_FREQ the current frequency.
-RADIO_FREQ SI4721::getFrequency() {
+RADIO_FREQ SI4721::getFrequency()
+{
 
   if (_band == RADIO_BAND_FMTX) {
     _readStatusData(CMD_TX_TUNE_STATUS, 0x01, tuneStatus, sizeof(tuneStatus));
@@ -393,7 +408,8 @@ RADIO_FREQ SI4721::getFrequency() {
 /// the stored value might not be the current frequency.
 /// @param newF The new frequency to be received/transmitted.
 /// @return void
-void SI4721::setFrequency(RADIO_FREQ newF) {
+void SI4721::setFrequency(RADIO_FREQ newF)
+{
   uint8_t status;
 
   RADIO::setFrequency(newF);
@@ -415,7 +431,8 @@ void SI4721::setFrequency(RADIO_FREQ newF) {
 
 
 /// Start seek mode upwards.
-void SI4721::seekUp(bool toNextSender) {
+void SI4721::seekUp(bool toNextSender)
+{
   uint8_t status;
 
   if (!toNextSender) {
@@ -440,7 +457,8 @@ void SI4721::seekUp(bool toNextSender) {
 
 
 /// Start seek mode downwards.
-void SI4721::seekDown(bool toNextSender) {
+void SI4721::seekDown(bool toNextSender)
+{
   uint8_t status;
   if (!toNextSender) {
     RADIO_FREQ newF = getFrequency() - _freqSteps;
@@ -488,39 +506,61 @@ void SI4721::_readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_
 
 
 /// Return a filled RADIO_INFO with the status of the radio features of the chip.
-void SI4721::getRadioInfo(RADIO_INFO *info) {
+void SI4721::getRadioInfo(RADIO_INFO *info)
+{
   RADIO::getRadioInfo(info);
 
   _readStatusData(CMD_FM_TUNE_STATUS, 0x01, tuneStatus, sizeof(tuneStatus));
 
   info->active = true;
-  if (tuneStatus[1] & 0x01) info->tuned = true;
+  if (tuneStatus[1] & 0x01)
+    info->tuned = true;
 
   _readStatusData(CMD_FM_RSQ_STATUS, 0x01, rsqStatus, sizeof(rsqStatus));
-  if (rsqStatus[3] & 0x80) info->stereo = true;
+  if (rsqStatus[3] & 0x80)
+    info->stereo = true;
   info->rssi = rsqStatus[4];
   info->snr = rsqStatus[5];
 
   _readStatusData(CMD_FM_RDS_STATUS, 0x05, rdsStatus.buffer, sizeof(rdsStatus));
-  if (rdsStatus.resp2 & 0x01) info->rds = true;
+  if (rdsStatus.resp2 & 0x01)
+    info->rds = true;
 } // getRadioInfo()
 
 
 /// Return a filled AUIO_INFO with the actual audio settings.
-void SI4721::getAudioInfo(AUDIO_INFO *info) {
+void SI4721::getAudioInfo(AUDIO_INFO *info)
+{
   RADIO::getAudioInfo(info);
 } // getAudioInfo()
 
+
+// initialize RDS mode
+void SI4721::attachReceiveRDS(receiveRDSFunction newFunction)
+{
+  DEBUG_FUNC0("attachReceiveRDS");
+
+  // enable RDS
+  _setProperty(PROP_RDS_INTERRUPT_SOURCE, PROP_RDS_INTERRUPT_SOURCE_RDSRECV); // Set the CTS status bit after receiving RDS data.
+  _setProperty(PROP_RDS_INT_FIFO_COUNT, 4);
+  _setProperty(PROP_RDS_CONFIG, 0xFF01); // accept all correctable data and enable rds
+
+  RADIO::attachReceiveRDS(newFunction);
+}
 
 /// Retrieve the next RDS data if available.
 void SI4721::checkRDS()
 {
   if (_sendRDS) {
     // fetch the interrupt status first
-    uint8_t status = _readStatus();
+    // uint8_t status = _readStatus();
 
     // fetch the current RDS data
+    // _wireRead(_i2cPort, _i2caddr, )
     _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
+
+    // Serial.print("Status:");
+    // Serial.println(rdsStatus.status, HEX);
 
     if ((rdsStatus.resp2 = 0x01) && (rdsStatus.rdsFifoUsed) && (rdsStatus.blockErrors == 0)) {
       // RDS is in sync, it's a complete entry and no errors
@@ -528,9 +568,9 @@ void SI4721::checkRDS()
 #define RDSBLOCKWORD(h, l) (h << 8 | l)
 
       _sendRDS(RDSBLOCKWORD(rdsStatus.blockAH, rdsStatus.blockAL),
-        RDSBLOCKWORD(rdsStatus.blockBH, rdsStatus.blockBL),
-        RDSBLOCKWORD(rdsStatus.blockCH, rdsStatus.blockCL),
-        RDSBLOCKWORD(rdsStatus.blockDH, rdsStatus.blockDL));
+               RDSBLOCKWORD(rdsStatus.blockBH, rdsStatus.blockBL),
+               RDSBLOCKWORD(rdsStatus.blockCH, rdsStatus.blockCL),
+               RDSBLOCKWORD(rdsStatus.blockDH, rdsStatus.blockDL));
     } // if
   } // if _sendRDS
 } // checkRDS()
@@ -540,7 +580,8 @@ void SI4721::checkRDS()
 /// Set the output power of the device.
 /// @param pwr Output power of the device in dBµV (valid range is 88 to 115)
 /// @return void
-void SI4721::setTXpower(uint8_t pwr) {
+void SI4721::setTXpower(uint8_t pwr)
+{
   _sendCommand(5, CMD_TX_TUNE_POWER, 0, 0, pwr, 0);
 }
 
@@ -550,7 +591,8 @@ void SI4721::setTXpower(uint8_t pwr) {
 /// will use 0xBEEF as your Program ID.
 /// @param programID Optional 4 character hexadecimal ID
 /// @return void
-void SI4721::beginRDS(uint16_t programID) {
+void SI4721::beginRDS(uint16_t programID)
+{
 
   _setProperty(PROP_TX_AUDIO_DEVIATION, 6625); // 66.25KHz (default is 68.25)
   _setProperty(PROP_TX_RDS_DEVIATION, 200); // 2KHz (default)
@@ -571,7 +613,8 @@ void SI4721::beginRDS(uint16_t programID) {
 /// station identity name.
 /// @param *s string containing your 8 character name
 /// @return void
-void SI4721::setRDSstation(char *s) {
+void SI4721::setRDSstation(char *s)
+{
   uint8_t i, len = strlen(s);
   uint8_t slots = (len + 3) / 4;
 
@@ -586,7 +629,8 @@ void SI4721::setRDSstation(char *s) {
 /// Load new data into RDS Radio Text Buffer.
 /// @param *s string containing arbitrary text to be transmitted as RDS Radio Text
 /// @return void
-void SI4721::setRDSbuffer(char *s) {
+void SI4721::setRDSbuffer(char *s)
+{
   uint8_t i, len = strlen(s);
   uint8_t slots = (len + 3) / 4;
   char slot[5];
@@ -604,7 +648,8 @@ void SI4721::setRDSbuffer(char *s) {
 /// Get TX Status and Audio Input Metrics
 /// @param void
 /// @return ASQ_STATUS struct containing asq and audioInLevel values
-ASQ_STATUS SI4721::getASQ() {
+ASQ_STATUS SI4721::getASQ()
+{
   _sendCommand(2, CMD_TX_ASQ_STATUS, 0x1);
 
   _i2cPort->requestFrom((uint8_t)_i2caddr, (uint8_t)5);
@@ -625,7 +670,8 @@ ASQ_STATUS SI4721::getASQ() {
 /// Get TX Tuning Status
 /// @param void
 /// @return TX_STATUS struct containing frequency, dBuV, antennaCap, and noiseLevel values
-TX_STATUS SI4721::getTuneStatus() {
+TX_STATUS SI4721::getTuneStatus()
+{
   _sendCommand(2, CMD_TX_TUNE_STATUS, 0x1);
 
   _i2cPort->requestFrom((uint8_t)_i2caddr, (uint8_t)8);
@@ -633,7 +679,7 @@ TX_STATUS SI4721::getTuneStatus() {
   TX_STATUS result;
 
   uint8_t response[8];
-  for(uint8_t i = 0; i < 8; i++){
+  for (uint8_t i = 0; i < 8; i++) {
     response[i] = _i2cPort->read();
   }
 
@@ -656,56 +702,90 @@ void SI4721::debugStatus()
   _readStatusData(CMD_FM_TUNE_STATUS, 0x03, tuneStatus, sizeof(tuneStatus));
 
   Serial.print("Tune-Status: ");
-  Serial.print(tuneStatus[0], HEX); Serial.print(' ');
-  Serial.print(tuneStatus[1], HEX); Serial.print(' ');
+  Serial.print(tuneStatus[0], HEX);
+  Serial.print(' ');
+  Serial.print(tuneStatus[1], HEX);
+  Serial.print(' ');
 
-  Serial.print("TUNE:"); Serial.print((tuneStatus[2] << 8) + tuneStatus[3]); Serial.print(' ');
+  Serial.print("TUNE:");
+  Serial.print((tuneStatus[2] << 8) + tuneStatus[3]);
+  Serial.print(' ');
   // RSSI and SNR when tune is complete (not the actual one ?)
-  Serial.print("RSSI:"); Serial.print(tuneStatus[4]); Serial.print(' ');
-  Serial.print("SNR:");  Serial.print(tuneStatus[5]); Serial.print(' ');
-  Serial.print("MULT:"); Serial.print(tuneStatus[6]); Serial.print(' ');
-  Serial.print(tuneStatus[7]); Serial.print(' ');
+  Serial.print("RSSI:");
+  Serial.print(tuneStatus[4]);
+  Serial.print(' ');
+  Serial.print("SNR:");
+  Serial.print(tuneStatus[5]);
+  Serial.print(' ');
+  Serial.print("MULT:");
+  Serial.print(tuneStatus[6]);
+  Serial.print(' ');
+  Serial.print(tuneStatus[7]);
+  Serial.print(' ');
   Serial.println();
 
   Serial.print("RSQ-Status: ");
   _readStatusData(CMD_FM_RSQ_STATUS, 0x01, rsqStatus, sizeof(rsqStatus));
-  Serial.print(rsqStatus[0], HEX); Serial.print(' ');
-  Serial.print(rsqStatus[1], HEX); Serial.print(' ');
-  Serial.print(rsqStatus[2], HEX); Serial.print(' '); if (rsqStatus[2] & 0x08) Serial.print("SMUTE ");
-  Serial.print(rsqStatus[3], HEX); Serial.print(' '); if (rsqStatus[3] & 0x80) Serial.print("STEREO ");
+  Serial.print(rsqStatus[0], HEX);
+  Serial.print(' ');
+  Serial.print(rsqStatus[1], HEX);
+  Serial.print(' ');
+  Serial.print(rsqStatus[2], HEX);
+  Serial.print(' ');
+  if (rsqStatus[2] & 0x08)
+    Serial.print("SMUTE ");
+  Serial.print(rsqStatus[3], HEX);
+  Serial.print(' ');
+  if (rsqStatus[3] & 0x80)
+    Serial.print("STEREO ");
   // The current RSSI and SNR.
-  Serial.print("RSSI:"); Serial.print(rsqStatus[4]); Serial.print(' ');
-  Serial.print("SNR:");  Serial.print(rsqStatus[5]); Serial.print(' ');
-  Serial.print(rsqStatus[7], HEX); Serial.print(' ');
+  Serial.print("RSSI:");
+  Serial.print(rsqStatus[4]);
+  Serial.print(' ');
+  Serial.print("SNR:");
+  Serial.print(rsqStatus[5]);
+  Serial.print(' ');
+  Serial.print(rsqStatus[7], HEX);
+  Serial.print(' ');
   Serial.println();
 
   Serial.print("RDS-Status: ");
   _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
   for (uint8_t n = 0; n < 12; n++) {
-    Serial.print(rsqStatus[n], HEX); Serial.print(' ');
+    Serial.print(rsqStatus[n], HEX);
+    Serial.print(' ');
   } // for
   Serial.println();
 
   // AGC settings and status
   Serial.print("AGC-Status: ");
   _readStatusData(CMD_FM_AGC_STATUS, 0x01, agcStatus, sizeof(agcStatus));
-  Serial.print(agcStatus[0], HEX); Serial.print(' ');
-  Serial.print(agcStatus[1], HEX); Serial.print(' ');
-  Serial.print(agcStatus[2], HEX); Serial.print(' ');
+  Serial.print(agcStatus[0], HEX);
+  Serial.print(' ');
+  Serial.print(agcStatus[1], HEX);
+  Serial.print(' ');
+  Serial.print(agcStatus[2], HEX);
+  Serial.print(' ');
   Serial.println();
 
 } // debugStatus
 
 
 /// wait until the current seek and tune operation is over.
-void SI4721::_waitEnd() {
+void SI4721::_waitEnd()
+{
   DEBUG_FUNC0("_waitEnd");
 } // _waitEnd()
 
 
 /// Send an array of bytes to the radio chip
-void SI4721::_sendCommand(int cnt, int cmd, ...) {
-  if (_debugEnabled) Serial.printf("CMD(%2x):");
+void SI4721::_sendCommand(int cnt, int cmd, ...)
+{
+  if (_debugRegisters) {
+    Serial.print("CMD(");
+    _printHex2(cmd);
+    Serial.println(")");
+  }
   if (cnt > 8) {
     // see AN332: "Writing more than 8 bytes results in unpredictable device behavior."
     Serial.println("error: _sendCommand: too much parameters!");
@@ -719,7 +799,8 @@ void SI4721::_sendCommand(int cnt, int cmd, ...) {
 
     for (uint8_t i = 1; i < cnt; i++) {
       uint8_t c = va_arg(params, int);
-      if (_debugEnabled) Serial.printf("%02x ", c);
+      if (_debugRegisters)
+        _printHex2(c);
       _i2cPort->write(c);
     }
     _i2cPort->endTransmission();
@@ -730,14 +811,17 @@ void SI4721::_sendCommand(int cnt, int cmd, ...) {
     _status = _i2cPort->read();
   } // if
 
-  if (_debugEnabled) Serial.println();
+  if (_debugRegisters)
+    Serial.println();
 } // _sendCommand()
 
 
 /// Set a property in the radio chip
 void SI4721::_setProperty(uint16_t prop, uint16_t value)
 {
-  if (_debugEnabled) Serial.printf("PROP(%04x): %04x\n", prop, value);
+  if (_debugRegisters) {
+    // Serial.printf("PROP(%04x): %04x\n", prop, value);
+  }
   _i2cPort->beginTransmission(_i2caddr);
   _i2cPort->write(CMD_SET_PROPERTY);
   _i2cPort->write(0);
