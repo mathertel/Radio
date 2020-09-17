@@ -27,7 +27,8 @@
 /// * 31.08.2014 Doxygen style comments added.
 /// * 05.02.2015 mainpage content added.
 /// * 29.04.2015 clear RDS function, need to clear RDS info after tuning.
-///
+/// * 17.09.2020 Wire Util functions added.
+
 /// TODO:
 /// --------
 /// * multi-Band enabled
@@ -35,9 +36,10 @@
 /// \mainpage
 /// An Arduino library to control radio for receiving FM broadcast signals.
 /// 
-/// Currently the following chios are supported:
+/// Currently the following chips are supported:
 /// * The SI4703 from Silicon Labs
 /// * The SI4705 from Silicon Labs
+/// * The SI4721 from Silicon Labs
 /// * The TEA5767 from NXP
 /// * The RDA5807M from RDA Microelectronics
 ///
@@ -98,12 +100,12 @@ extern "C" {
 enum RADIO_BAND {
   RADIO_BAND_NONE = 0, ///< No band selected.
 
-  RADIO_BAND_FM = 1, ///< FM band 87.5 – 108 MHz (USA, Europe) selected.
-  RADIO_BAND_FMWORLD = 2, ///< FM band 76 – 108 MHz (Japan, Worldwide) selected.
-  RADIO_BAND_AM = 3, ///< AM band selected.
-  RADIO_BAND_KW = 4, ///< KW band selected.
+  RADIO_BAND_FM      = 0x01, ///< FM band 87.5 ï¿½ 108 MHz (USA, Europe) selected.
+  RADIO_BAND_FMWORLD = 0x02, ///< FM band 76 ï¿½ 108 MHz (Japan, Worldwide) selected.
+  RADIO_BAND_AM      = 0x03, ///< AM band selected.
+  RADIO_BAND_KW      = 0x04, ///< KW band selected.
 
-  RADIO_BAND_MAX = 4  ///< Maximal band enumeration value.
+  RADIO_BAND_FMTX    = 0x11, ///< Transmit for FM.
 };
 
 
@@ -202,6 +204,13 @@ public:
   virtual void debugRadioInfo(); ///< Print out all radio information.
   virtual void debugAudioInfo(); ///< Print out all audio information.
   virtual void debugStatus();    ///< Send debug information about actual available chip functionality and other internal things.
+
+  // ===== Wire Utilities =====
+
+  /** check for a device on address */
+  static bool _wireExists(TwoWire *port, int address);
+
+  static int _wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len);
 
 protected:
   bool _debugEnabled; ///< Set by debugEnable() and controls debugging functionality.

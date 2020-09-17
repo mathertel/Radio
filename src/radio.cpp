@@ -17,13 +17,16 @@
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
-/// ChangeLog see: radio.h 
+/// ChangeLog see: radio.h
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Wire.h>
+#include <radio.h>
 
-#include "radio.h"
 
 // ----- Register Definitions -----
+
+#define DUMP_I2C 1
 
 // no chip-registers without a chip.
 
@@ -132,8 +135,7 @@ void RADIO::setBand(RADIO_BAND newBand) {
     _freqHigh = 10800;
     _freqSteps = 10;
 
-  }
-  else if (newBand == RADIO_BAND_FMWORLD) {
+  } else if (newBand == RADIO_BAND_FMWORLD) {
     _freqLow = 7600;
     _freqHigh = 10800;
     _freqSteps = 10;
@@ -227,7 +229,9 @@ void RADIO::formatFrequency(char *s, uint8_t length) {
       int16_to_s(s, (uint16_t)f);
 
       // insert decimal point
-      s[5] = s[4]; s[4] = s[3]; s[3] = '.';
+      s[5] = s[4];
+      s[4] = s[3];
+      s[3] = '.';
 
       // append units
       strcpy(s+6, " MHz");
@@ -296,6 +300,55 @@ void RADIO::int16_to_s(char *s, uint16_t val) {
     }
   } // while
 } // int16_to_s()
+
+
+// ===== Wire Utilities =====
+
+bool RADIO::_wireExists(TwoWire *port, int address)
+{
+  port->beginTransmission(address);
+  uint8_t err = port->endTransmission();
+#if DUMP_I2C
+  Serial.printf("_wireExists 0x%02x: %d\n", address, err);
+#endif
+  return (err == 0);
+}
+
+/** read a sequence of register values into a buffer.
+ * @return number of register values read.
+ */
+int RADIO::_wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len)
+{
+  int done = 0;
+
+#if DUMP_I2C
+  Serial.printf("_wireRead 0x%02x:", reg);
+#endif
+
+  if (data) {
+    uint8_t *d = data;
+
+    port->beginTransmission(address);
+    port->write(reg);
+    port->endTransmission();
+
+    port->requestFrom(address, len);
+    while (port->available() && (done < len)) {
+      *d = port->read();
+      done++;
+#if DUMP_I2C
+      Serial.printf(" %02x", *d);
+#endif
+      d++;
+    }
+
+#if DUMP_I2C
+    Serial.println();
+#endif
+  }
+
+  return (done);
+} // _wireRead()
 
 
 /// Prints a register as 4 character hexadecimal code with leading zeros.
