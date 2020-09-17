@@ -9,18 +9,17 @@
 /// See http://www.mathertel.de/License.aspx
 ///
 /// This library enables the use of the Radio Chip SI4721.
+/// Settings are compatible top the following board from sparkfun: https://www.sparkfun.com/products/15853
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
 /// ChangeLog:
 /// ----------
 /// * 01.12.2019 created.
-
+/// * 17.09.2020 move si4721 specific initialization into setBand()
 
 #ifndef SI4721_h
 #define SI4721_h
-
-#define SI4721_ADR 0x63  ///< The I2C address of SI4721 is 0x61 or 0x63
 
 #include <Arduino.h>
 
@@ -29,6 +28,10 @@
 
 // Include the radio library that is extended by the SI4721 library.
 #include <radio.h>
+
+// SI4721 specifics
+
+#define SI4721_ADR 0x11  ///< The I2C address of SI4721 is 0x11 or 0x63
 
 // A structure for storing ASQ Status and Audio Input Metrics
 typedef struct ASQ_STATUS {
@@ -54,8 +57,11 @@ public:
 
   SI4721();
 
-  bool   init(TwoWire &wirePort = Wire, uint8_t deviceAddress = SI4721_ADR);  ///< Initialize the library and the chip.
-  void   term();  ///< Terminate all radio functions in the chip.
+  /** Initialize the library and the chip. */
+  bool   init(TwoWire &wirePort = Wire, uint8_t deviceAddress = SI4721_ADR);
+
+  /** Terminate all radio functions in the chip. */
+  void   term();
 
   // ----- Audio functions -----
 
@@ -94,8 +100,6 @@ public:
   
   // ----- transmit functions
   
-  void setModeReceive();
-  void setModeTransmit();
   void beginRDS(uint16_t programID = 0xBEEF);
   void setRDSstation(char *s);
   void setRDSbuffer(char *s);  
@@ -112,8 +116,6 @@ private:
   // ----- local variables
 
   uint8_t _realVolume; ///< The real volume set to the chip.
-  
-  bool _transmitMode = false; ///< Remember which mode we're in 
   
   uint8_t _fmDeemphasis = 50; ///< RX Deemphasis and TX Preemphasis in uS
 
@@ -181,7 +183,7 @@ private:
   void _waitEnd();
   
   TwoWire *_i2cPort;
-  uint8_t _i2caddr;
+  int _i2caddr;
   
 };
 
