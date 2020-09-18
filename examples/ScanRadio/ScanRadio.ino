@@ -3,8 +3,8 @@
 /// \brief This sketch implements a scanner that lists all availabe radio stations including some information.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2015 by Matthias Hertel.\n
-/// This work is licensed under a BSD style license.\n
+/// \copyright Copyright (c) by Matthias Hertel.\n
+/// This work is licensed under a BSD 3-Clause license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
 /// \details
@@ -24,6 +24,7 @@
 /// * 17.05.2015 created.
 /// * 27.05.2015 first version is working (beta with SI4705).
 /// * 04.07.2015 2 scan algorithms working with good results with SI4705.
+/// * 18.09.2020 more RDS output, better command handling.
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -55,8 +56,8 @@ RDSParser rds;
 enum RADIO_STATE {
   STATE_PARSECOMMAND, ///< waiting for a new command character.
 
-  STATE_PARSEINT,     ///< waiting for digits for the parameter.
-  STATE_EXEC          ///< executing the command.
+  STATE_PARSEINT, ///< waiting for digits for the parameter.
+  STATE_EXEC ///< executing the command.
 };
 
 RADIO_STATE kbState; ///< The state of parsing input characters.
@@ -65,7 +66,9 @@ int16_t kbValue;
 
 
 uint16_t g_block1;
-bool lowLevelDebug = true;
+bool lowLevelDebug = false;
+RADIO_FREQ frequency;
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -277,6 +280,7 @@ void runSerialCommand(char cmd, int16_t value)
 
 
   } else if (cmd == 'f') {
+    frequency = value;
     radio.setFrequency(value);
   }
 
@@ -293,10 +297,12 @@ void runSerialCommand(char cmd, int16_t value)
 
   // not in help:
   else if (cmd == '!') {
-    if (value == 0)
+    if (value == 0) {
       radio.term();
-    if (value == 1)
+    } else if (value == 1) {
       radio.init();
+      radio.setBandFrequency(RADIO_BAND_FM, frequency);
+    }
 
   } else if (cmd == 'i') {
     // info
@@ -340,7 +346,8 @@ void setup()
   // Initialize the Radio
   radio.init();
 
-  radio.setBandFrequency(RADIO_BAND_FM, 8930);
+  frequency = 8930;
+  radio.setBandFrequency(RADIO_BAND_FM, frequency);
 
   // delay(100);
 
