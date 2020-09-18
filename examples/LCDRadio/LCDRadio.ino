@@ -309,7 +309,7 @@ void setup() {
 
   radio.setMono(false);
   radio.setMute(false);
-  // radio.debugRegisters();
+  // radio._wireDebug();
 
   Serial.write('>');
   

@@ -50,24 +50,27 @@ SI4721 radio; ///< Create an instance of a SI4705 chip radio.
 /// get a RDS parser
 RDSParser rds;
 
-/// State definition for this radio implementation.
-enum SCAN_STATE {
-  STATE_START, ///< waiting for a new command character.
-  STATE_NEWFREQ,
-  STATE_WAITFIXED,
-  STATE_WAITRDS,
-  STATE_PRINT,
-  STATE_END ///< executing the command.
+// Keyboard input
+
+enum RADIO_STATE {
+  STATE_PARSECOMMAND, ///< waiting for a new command character.
+
+  STATE_PARSEINT,     ///< waiting for digits for the parameter.
+  STATE_EXEC          ///< executing the command.
 };
 
-SCAN_STATE state; ///< The state variable is used for parsing input characters.
+RADIO_STATE kbState; ///< The state of parsing input characters.
+char kbCommand;
+int16_t kbValue;
+
 
 uint16_t g_block1;
+bool lowLevelDebug = true;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-// use a function inbetween the radio chip and the RDS parser
+// use a function in between the radio chip and the RDS parser
 // to catch the block1 value (used for sender identification)
 void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4)
 {
@@ -80,10 +83,15 @@ void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t blo
 void DisplayTime(uint8_t hour, uint8_t minute)
 {
   Serial.print("Time: ");
+  if (hour < 10)
+    Serial.print('0');
   Serial.print(hour);
   Serial.print(':');
+  if (minute < 10)
+    Serial.print('0');
   Serial.println(minute);
-}
+} // DisplayTime()
+
 
 /// Update the ServiceName text on the LCD display.
 void DisplayServiceName(char *name)
@@ -146,6 +154,7 @@ void runSerialCommand(char cmd, int16_t value)
     Serial.println("m mute/unmute");
     Serial.println("u soft mute/unmute");
     Serial.println("x debug...");
+    Serial.println("* toggle i2c debug output");
 
     // ----- control the volume and audio output -----
 
@@ -290,6 +299,7 @@ void runSerialCommand(char cmd, int16_t value)
       radio.init();
 
   } else if (cmd == 'i') {
+    // info
     char s[12];
     radio.formatFrequency(s, sizeof(s));
     Serial.print("Station:");
@@ -299,10 +309,12 @@ void runSerialCommand(char cmd, int16_t value)
     Serial.print("Audio:");
     radio.debugAudioInfo();
 
-  } // info
-
-  else if (cmd == 'x') {
+  } else if (cmd == 'x') {
     radio.debugStatus(); // print chip specific data.
+
+  } else if (cmd == '*') {
+    lowLevelDebug = !lowLevelDebug;
+    radio._wireDebug(lowLevelDebug);
   }
 } // runSerialCommand()
 
@@ -322,8 +334,8 @@ void setup()
 #endif
 
   // Enable information to the Serial port
-  radio.debugEnable();
-  radio.debugRegisters(false);
+  radio.debugEnable(true);
+  radio._wireDebug(lowLevelDebug);
 
   // Initialize the Radio
   radio.init();
@@ -341,21 +353,43 @@ void setup()
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
   rds.attachServicenNameCallback(DisplayServiceName);
-  rds.attachTextCallback(DisplayServiceName);
+  rds.attachTextCallback(DisplayText);
   rds.attachTimeCallback(DisplayTime);
 
   runSerialCommand('?', 0);
+  kbState = STATE_PARSECOMMAND;
 } // Setup
 
 
 /// Constantly check for serial input commands and trigger command execution.
 void loop()
 {
-  char c;
   if (Serial.available() > 0) {
     // read the next char from input.
-    c = Serial.read();
-    runSerialCommand(c, 8930);
+    char c = Serial.peek();
+
+    if ((kbState == STATE_PARSECOMMAND) && (c < 0x20)) {
+      // ignore unprintable chars
+      Serial.read();
+
+    } else if (kbState == STATE_PARSECOMMAND) {
+      // read a kbCommand.
+      kbCommand = Serial.read();
+      kbState = STATE_PARSEINT;
+
+    } else if (kbState == STATE_PARSEINT) {
+      if ((c >= '0') && (c <= '9')) {
+        // build up the value.
+        c = Serial.read();
+        kbValue = (kbValue * 10) + (c - '0');
+      } else {
+        // not a value -> execute
+        runSerialCommand(kbCommand, kbValue);
+        kbCommand = ' ';
+        kbState = STATE_PARSECOMMAND;
+        kbValue = 0;
+      } // if
+    } // if
   } // if
 
   // check for RDS data

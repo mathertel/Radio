@@ -270,8 +270,6 @@ void SI4721::setDeemphasis(uint8_t uS)
 /// @return void
 void SI4721::setSoftMute(bool switchOn)
 {
-  DEBUG_FUNC1("setSoftMute", switchOn);
-
   RADIO::setSoftMute(switchOn);
 
   if (switchOn) {
@@ -289,7 +287,6 @@ void SI4721::setSoftMute(bool switchOn)
 /// @return void
 void SI4721::setBassBoost(bool switchOn)
 {
-  DEBUG_FUNC1("setBassBoost", switchOn);
   DEBUG_STR("not supported.");
   RADIO::setBassBoost(false);
 } // setBassBoost()
@@ -301,7 +298,6 @@ void SI4721::setBassBoost(bool switchOn)
 /// @return void
 void SI4721::setMono(bool switchOn)
 {
-  DEBUG_FUNC1("setMono", switchOn);
   RADIO::setMono(switchOn);
   if (switchOn) {
     // disable automatic stereo feature
@@ -362,6 +358,7 @@ void SI4721::setBand(RADIO_BAND newBand)
     _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN | PROP_GPO_IEN_RDSIEN); //  | PROP_GPO_IEN_RDSIEN ????
 
   } else if (newBand == RADIO_BAND_FMTX) {
+    RADIO::setBand(newBand);
     // Power down the device
     _sendCommand(1, CMD_POWER_DOWN);
 
@@ -427,6 +424,7 @@ void SI4721::setFrequency(RADIO_FREQ newF)
   do {
     status = _readStatus();
   } while (!(status & CMD_GET_INT_STATUS_CTS));
+  Serial.println(status);
 } // setFrequency()
 
 
@@ -491,17 +489,8 @@ uint8_t SI4721::_readStatus()
 /// Load status information from to the chip.
 void SI4721::_readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len)
 {
-  _i2cPort->beginTransmission(_i2caddr);
-  _i2cPort->write(cmd);
-  _i2cPort->write(param);
-
-  _i2cPort->endTransmission();
-  _i2cPort->requestFrom(_i2caddr, (int)len); //We want to read some bytes.
-
-  for (uint8_t n = 0; n < len; n++) {
-    //Read in these bytes
-    values[n] = _i2cPort->read();
-  } // for
+  uint8_t buffer[2] = {cmd, param};
+  _wireRead(_i2cPort, _i2caddr, buffer, 2, values, len);
 } // _readStatusData()
 
 
@@ -552,15 +541,8 @@ void SI4721::attachReceiveRDS(receiveRDSFunction newFunction)
 void SI4721::checkRDS()
 {
   if (_sendRDS) {
-    // fetch the interrupt status first
-    // uint8_t status = _readStatus();
-
     // fetch the current RDS data
-    // _wireRead(_i2cPort, _i2caddr, )
     _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
-
-    // Serial.print("Status:");
-    // Serial.println(rdsStatus.status, HEX);
 
     if ((rdsStatus.resp2 = 0x01) && (rdsStatus.rdsFifoUsed) && (rdsStatus.blockErrors == 0)) {
       // RDS is in sync, it's a complete entry and no errors
@@ -781,7 +763,7 @@ void SI4721::_waitEnd()
 /// Send an array of bytes to the radio chip
 void SI4721::_sendCommand(int cnt, int cmd, ...)
 {
-  if (_debugRegisters) {
+  if (_wireDebugEnabled) {
     Serial.print("CMD(");
     _printHex2(cmd);
     Serial.println(")");
@@ -799,7 +781,7 @@ void SI4721::_sendCommand(int cnt, int cmd, ...)
 
     for (uint8_t i = 1; i < cnt; i++) {
       uint8_t c = va_arg(params, int);
-      if (_debugRegisters)
+      if (_wireDebugEnabled)
         _printHex2(c);
       _i2cPort->write(c);
     }
@@ -811,7 +793,7 @@ void SI4721::_sendCommand(int cnt, int cmd, ...)
     _status = _i2cPort->read();
   } // if
 
-  if (_debugRegisters)
+  if (_wireDebugEnabled)
     Serial.println();
 } // _sendCommand()
 
@@ -819,7 +801,7 @@ void SI4721::_sendCommand(int cnt, int cmd, ...)
 /// Set a property in the radio chip
 void SI4721::_setProperty(uint16_t prop, uint16_t value)
 {
-  if (_debugRegisters) {
+  if (_wireDebugEnabled) {
     // Serial.printf("PROP(%04x): %04x\n", prop, value);
   }
   _i2cPort->beginTransmission(_i2caddr);

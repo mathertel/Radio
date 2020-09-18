@@ -979,7 +979,7 @@ void setupRadio() {
 
   radio.setMono(false);
   radio.setMute(false);
-  // radio.debugRegisters();
+  // radio._wireDebug();
   radio.setVolume(8);
 
   // Setup rotary encoder
