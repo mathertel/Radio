@@ -73,6 +73,7 @@ uint8_t RADIO::getVolume()
 /// @param switchOn true to switch bassBoost mode on, false to switch bassBoost mode off.
 void RADIO::setBassBoost(bool switchOn)
 {
+  DEBUG_FUNC1("setBassBoost", switchOn);
   _bassBoost = switchOn;
 } // setBassBoost()
 
@@ -90,6 +91,7 @@ bool RADIO::getBassBoost()
 /// The base implementation ony stores the value to the internal variable.
 void RADIO::setMono(bool switchOn)
 {
+  DEBUG_FUNC1("setMono", switchOn);
   _mono = switchOn;
 } // setMono()
 
@@ -122,6 +124,7 @@ bool RADIO::getMute()
 /// The base implementation ony stores the value to the internal variable.
 void RADIO::setSoftMute(bool switchOn)
 {
+  DEBUG_FUNC1("setSoftMute", switchOn);
   _softMute = switchOn;
 } // setSoftMute()
 
@@ -140,6 +143,7 @@ bool RADIO::getSoftMute()
 /// Start using the new band for receiving.
 void RADIO::setBand(RADIO_BAND newBand)
 {
+  DEBUG_FUNC1("setBand", newBand);
   _band = newBand;
   if (newBand == RADIO_BAND_FM) {
     _freqLow = 8700;
@@ -158,6 +162,7 @@ void RADIO::setBand(RADIO_BAND newBand)
 /// The new frequency is stored for later retrieval.
 void RADIO::setFrequency(RADIO_FREQ newFreq)
 {
+  DEBUG_FUNC1("setFrequency", newFreq);
   _freq = newFreq;
 } // setFrequency()
 
@@ -279,18 +284,15 @@ void RADIO::formatFrequency(char *s, uint8_t length)
 } // formatFrequency()
 
 
-// enable debugging information on Serial port.
+/**
+ * Enable debugging information on Serial port.
+ * This is for logging on a higher level than i2c data transport.
+ * @param enable true to switch logging on.
+ */
 void RADIO::debugEnable(bool enable)
 {
   _debugEnabled = enable;
 } // debugEnable()
-
-
-// enable low level debugging information on Serial port.
-void RADIO::debugRegisters(bool enable)
-{
-  _debugRegisters = enable;
-} // debugRegisters()
 
 
 // print out all radio information
@@ -316,9 +318,9 @@ void RADIO::debugAudioInfo()
   AUDIO_INFO info;
   this->getAudioInfo(&info);
 
-  Serial.print(info.bassBoost ? " BASS" : " ----");
   Serial.print(info.mute ? " MUTE" : " ----");
   Serial.print(info.softmute ? " SOFTMUTE" : " --------");
+  Serial.print(info.bassBoost ? " BASS" : " ----");
   Serial.println();
 } // debugAudioInfo()
 
@@ -351,11 +353,21 @@ void RADIO::int16_to_s(char *s, uint16_t val)
 
 // ===== Wire Utilities =====
 
+/**
+ * Enable low level i2c debugging information on Serial port.
+ * @param enable true to switch logging on.
+ */
+void RADIO::_wireDebug(bool enable)
+{
+  _wireDebugEnabled = enable;
+} // _wireDebug()
+
+
 bool RADIO::_wireExists(TwoWire *port, int address)
 {
   port->beginTransmission(address);
   uint8_t err = port->endTransmission();
-  if (_debugRegisters) {
+  if (_wireDebugEnabled) {
     Serial.print("_wireExists(");
     Serial.print(address);
     Serial.print("): err=");
@@ -364,44 +376,83 @@ bool RADIO::_wireExists(TwoWire *port, int address)
   return (err == 0);
 }
 
-/** read a sequence of register values into a buffer.
- * @return number of register values read.
+
+/**
+ * Write and optionally read data on the i2c bus.
+ * A debug output can be enabled using _wireDebug().
+ * @param port i2c port to be used.
+ * @param address i2c address to be used.
+ * @param reg the register to be read (1 byte send).
+ * @param data buffer array with received data. If this parameter is nullptr no data will be requested.
+ * @param len length of data buffer.
+ * @return number of register values received.
  */
 int RADIO::_wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len)
 {
-  int done = 0;
+  return(_wireRead(port, address, &reg, 1, data, len));
+} // _wireRead()
 
-  if (_debugRegisters) {
+
+/**
+ * Write and optionally read data on the i2c bus.
+ * A debug output can be enabled using _wireDebug().
+ * @param port i2c port to be used.
+ * @param address i2c address to be used.
+ * @param cmdData array with data to be send.
+ * @param cmdLen length of cmdData.
+ * @param data buffer array with received data. If this parameter is nullptr no data will be requested.
+ * @param len length of data buffer.
+ * @return number of register values received.
+ */
+int RADIO::_wireRead(TwoWire *port, int address, uint8_t *cmdData, int cmdLen, uint8_t *data, int len)
+{
+  int recieved = 0;
+
+  // send out command sequence
+  port->beginTransmission(address);
+  if (_wireDebugEnabled) {
     Serial.print("_wireRead(");
     Serial.print(address);
-    Serial.print(", ");
-    Serial.print(reg);
-    Serial.println(")");
+    Serial.print(',');
   }
 
+  for (int i = 0; i <= cmdLen; i++) {
+    uint8_t d = cmdData[i];
+    port->write(d);
+    if (_wireDebugEnabled) {
+      _printHex2(d);
+    } // if
+  } // for
+
+  port->endTransmission();
+  if (_wireDebugEnabled) {
+    Serial.print(')');
+  }
+
+  // read requested data (when buffer is available)
   if (data) {
     uint8_t *d = data;
 
-    port->beginTransmission(address);
-    port->write(reg);
-    port->endTransmission();
-
     port->requestFrom(address, len);
-    while (port->available() && (done < len)) {
+    if (_wireDebugEnabled) {
+      Serial.print(':');
+    }
+
+    while (port->available() && (recieved < len)) {
       *d = port->read();
-      done++;
-      if (_debugRegisters) {
+      recieved++;
+      if (_wireDebugEnabled) {
         _printHex2(*d);
       }
       d++;
     }
 
-    if (_debugRegisters) {
-      Serial.println();
+    if (_wireDebugEnabled) {
+      Serial.println('.');
     }
-  }
+  } // if (data)
 
-  return (done);
+  return (recieved);
 } // _wireRead()
 
 

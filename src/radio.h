@@ -35,7 +35,7 @@
 
 /// \mainpage
 /// An Arduino library to control radio for receiving FM broadcast signals.
-/// 
+///
 /// Currently the following chips are supported:
 /// * The SI4703 from Silicon Labs
 /// * The SI4705 from Silicon Labs
@@ -200,22 +200,56 @@ public:
 
   // ----- debug Helpers send information to Serial port
 
-  virtual void debugEnable(bool enable = true);  ///< Enable sending debug information to the Serial port.
-  virtual void debugRegisters(bool enable = true);  ///< Enable sending debug information to the Serial port.
+  /**
+   * Enable debugging information on Serial port.
+   * This is for logging on a higher level than i2c data transport.
+   * @param enable true to switch logging on.
+   */
+  virtual void debugEnable(bool enable = true);
+
   virtual void debugRadioInfo(); ///< Print out all radio information.
   virtual void debugAudioInfo(); ///< Print out all audio information.
-  virtual void debugStatus();    ///< Send debug information about actual available chip functionality and other internal things.
+  virtual void debugStatus(); ///< Send debug information about actual available chip functionality and other internal things.
 
   // ===== Wire Utilities =====
+
+  /**
+   * Enable low level i2c debugging information on Serial port.
+   * @param enable true to switch logging on.
+   */
+  virtual void _wireDebug(bool enable = true);
 
   /** check for a device on address */
   bool _wireExists(TwoWire *port, int address);
 
+  /**
+   * Write and optionally read data on the i2c bus.
+   * A debug output can be enabled using _wireDebug().
+   * @param port i2c port to be used.
+   * @param address i2c address to be used.
+   * @param reg the register to be read (1 byte send).
+   * @param data buffer array with received data. If this parameter is nullptr no data will be requested.
+   * @param len length of data buffer.
+   * @return number of register values received.
+   */
   int _wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len);
+
+  /**
+   * Write and optionally read data on the i2c bus.
+   * A debug output can be enabled using _wireDebug().
+   * @param port i2c port to be used.
+   * @param address i2c address to be used.
+   * @param cmdData array with data to be send.
+   * @param cmdLen length of cmdData.
+   * @param data buffer array with received data. If this parameter is nullptr no data will be requested.
+   * @param len length of data buffer.
+   * @return number of register values received.
+   */
+  int _wireRead(TwoWire *port, int address, uint8_t *cmdData, int cmdLen, uint8_t *data, int len);
 
 protected:
   bool _debugEnabled; ///< Set by debugEnable() and controls debugging functionality.
-  bool _debugRegisters; ///< Set by debugEnable() and controls debugging functionality.
+  bool _wireDebugEnabled; ///< Set by _wireDebug() and controls i2c data level debugging.
 
   uint8_t _volume;    ///< Last set volume level.
   bool    _bassBoost; ///< Last set bass Boost effect.
