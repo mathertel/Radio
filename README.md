@@ -55,6 +55,7 @@ The basic examples only startup the chips and set a static station and volume:LC
 The examples can be used with several chips:
 
 * The **SerialRadio** example needs only an arduino and uses the Serial in- and output to change the settings and report information.
+* The **ScanRadio** is similar to the SerialRadio example but includes some experimental scanning approaches.
 * The **LCDRadio** example is similar to SerialRadio but also populates some information to an attached LCD.
 * The **LCDKeypadRadio** example uses the popular LCDKeypad shield.
 * The **WebRadio** example is the most advanced radio that runs on an Arduino Mega with an Ethernet Shield and an rotator encoder. You can also control the radio by using a web site that is available on the Arduino.
