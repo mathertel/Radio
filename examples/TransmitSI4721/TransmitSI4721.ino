@@ -1,6 +1,6 @@
 ///
-/// \file  TestSI4705.ino
-/// \brief An Arduino sketch to operate a SI4705 chip based radio using the Radio library.
+/// \file  TransmitSI4721.ino
+/// \brief An Arduino sketch to operate a SI4721 chip in transmit mode using the Radio library.
 ///
 /// \author N Poole, nickpoole.me
 /// \author Matthias Hertel, http://www.mathertel.de
@@ -8,7 +8,7 @@
 /// This work is licensed under a BSD style license. See http://www.mathertel.de/License.aspx
 ///
 /// \details
-/// This sketch implements a "as simple as possible" radio without any possibility to modify the settings after initializing the chip.\n
+/// This sketch implements FM transmit mode with RDS broadcasting. \n
 /// The radio chip is initialized and setup to a fixed band and frequency. These settings can be changed by modifying the 
 /// FIX_BAND and FIX_STATION definitions. 
 ///
@@ -40,46 +40,47 @@
 
 // ----- Fixed settings here. -----
 
-#define FIX_BAND     RADIO_BAND_FM   ///< The band that will be tuned by this sketch is FM.
-#define FIX_STATION  8930            ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME   4               ///< The volume that will be set by this sketch is level 4.
+#define FIX_BAND     RADIO_BAND_FM   	///< The band that will be tuned by this sketch is FM.
+#define FIX_STATION  8930            	///< The station that will be tuned by this sketch is 89.30 MHz.
+#define FIX_VOLUME   4               	///< The volume that will be set by this sketch is level 4.
+#define RDS_SERVICENAME "Testing"		///< The rds service name that will be set by this sketch is "Testing"
+#define RDS_TEXTBUFFER "Hello World!"	///< The rds text buffer that will be set by this sketch is "Hello World!"
 
-SI4705 radio;    // Create an instance of Class for SI4705 Chip
+SI4721 transmitter; // Create an instance of Class for SI4721 Chip
 
 /// Setup a FM only radio configuration
 /// with some debugging on the Serial port
 void setup() {
   // open the Serial port
   Serial.begin(57600);
-  Serial.println("Radio...");
+  Serial.println("Radio Initialize...");
   delay(200);
 
   // Initialize the Radio 
-  radio.init();
-
-  // Enable information to the Serial port
-  radio.debugEnable();
-
-  // Set all radio setting to the fixed values.
-  radio.setBandFrequency(FIX_BAND, FIX_STATION);
-  radio.setVolume(FIX_VOLUME);
-  radio.setMono(false);
-  radio.setMute(false);
+  // transmitter.setDeemphasis(75); // Un-comment this line in the USA to set correct deemphasis/preemphasis timing
+  transmitter.init();
+  transmitter.setModeTransmit();
+  transmitter.setTXpower(115);
+  transmitter.setBandFrequency(FIX_BAND, FIX_STATION);
+  transmitter.beginRDS();
+  transmitter.setRDSstation(RDS_SERVICENAME);
+  transmitter.setRDSbuffer(RDS_TEXTBUFFER);  
+  
 } // setup
 
 
 /// show the current chip data every 3 seconds.
 void loop() {
-  char s[12];
-  radio.formatFrequency(s, sizeof(s));
-  Serial.print("Station:"); 
-  Serial.println(s);
+
+  Serial.print("Transmitting on ");
+  Serial.print(transmitter.getTuneStatus().frequency);
+  Serial.println("kHz...");
   
-  Serial.print("Radio:"); 
-  radio.debugRadioInfo();
-  
-  Serial.print("Audio:"); 
-  radio.debugAudioInfo();
+  Serial.print("ASQ: ");
+  Serial.println(transmitter.getASQ().asq);
+
+  Serial.print("Audio In Level: ");
+  Serial.println(transmitter.getASQ().audioInLevel);
 
   delay(3000);
 } // loop

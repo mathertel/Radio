@@ -1,6 +1,6 @@
 ///
 /// \file  TestSI4721.ino
-/// \brief An Arduino sketch to operate a SI4705 chip based radio using the Radio library.
+/// \brief An Arduino sketch to operate a SI4721 chip based radio using the Radio library.
 ///
 /// \author N Poole, nickpoole.me
 /// \author Matthias Hertel, http://www.mathertel.de
@@ -35,25 +35,28 @@
 #include <Wire.h>
 #include <radio.h>
 #include <si4721.h>
+#include <RDSParser.h>
 
 // ----- Fixed settings here. -----
 
 #define FIX_BAND     RADIO_BAND_FM   ///< The band that will be tuned by this sketch is FM.
 #define FIX_STATION  8930            ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME   4               ///< The volume that will be set by this sketch is level 4.
+#define FIX_VOLUME   15               ///< The volume that will be set by this sketch is level 15.
 
 SI4721 radio;    // Create an instance of Class for SI4705 Chip
+
+RDSParser rds;	// get a RDS parser
 
 /// Setup a FM only radio configuration
 /// with some debugging on the Serial port
 void setup() {
   // open the Serial port
   Serial.begin(57600);
-  Serial.println("Radio...");
+  Serial.println("Radio Initialize...");
   delay(200);
 
   // Initialize the Radio 
-  // SET_FM_DEEMPHASIS = 75; // Un-comment this line in the USA
+  // radio.setDeemphasis(75); // Un-comment this line in the USA to set correct deemphasis timing
   radio.init();
 
   // Enable information to the Serial port
@@ -62,12 +65,15 @@ void setup() {
   // Set all radio setting to the fixed values.
   radio.setBandFrequency(FIX_BAND, FIX_STATION);
   radio.setVolume(FIX_VOLUME);
-  radio.setMono(false);
-  radio.setMute(false);
+
+  // Set RDS settings
+  radio.attachReceiveRDS(RDS_process);
+  rds.attachTextCallback(DisplayText);	// function to call when valid RDS Text data is received
+  rds.attachServicenNameCallback(DisplayName);	// function to call when valid RDS Service Name data is received  
 } // setup
 
 
-/// show the current chip data every 3 seconds.
+/// show the current chip data every 3 seconds and check RDS for valid data.
 void loop() {
   char s[12];
   radio.formatFrequency(s, sizeof(s));
@@ -79,8 +85,27 @@ void loop() {
   
   Serial.print("Audio:"); 
   radio.debugAudioInfo();
+  
+  radio.checkRDS();
 
   delay(3000);
 } // loop
+
+/// when valid RDS Text is received, print it
+void DisplayText(char *text)
+{
+  Serial.print("RDS Text:"); Serial.println(text);
+}
+
+/// when a valid RDS Service Name is received, print it
+void DisplayName(char *name)
+{
+  Serial.print("RDS Name:"); Serial.println(name);
+}
+
+/// process incoming RDS data
+void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
+  rds.processData(block1, block2, block3, block4);
+}
 
 // End.
