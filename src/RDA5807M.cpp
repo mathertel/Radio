@@ -17,8 +17,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-
 #include <radio.h>
+
 #include <RDA5807M.h>
 
 // ----- Register Definitions -----

@@ -40,6 +40,7 @@
 #include <radio.h>
 #include <RDA5807M.h>
 #include <SI4703.h>
+#include <SI4721.h>
 #include <TEA5767.h>
 
 #include <RDSParser.h>
@@ -96,7 +97,8 @@ unsigned long encoderLastTime;
 
 // RADIO radio;    // Create an instance of a non functional radio.
 // RDA5807M radio;    // Create an instance of a RDA5807 chip radio
-SI4703   radio;    // Create an instance of a SI4703 chip radio.
+// SI4703   radio;    // Create an instance of a SI4703 chip radio.
+SI4721   radio;    // Create an instance of a SI4721 chip radio.
 // TEA5767  radio;    // Create an instance of a TEA5767 chip radio.
 
 /// The lcd object has to be defined by using a LCD library that supports the standard functions
@@ -307,7 +309,7 @@ void setup() {
 
   radio.setMono(false);
   radio.setMute(false);
-  // radio.debugRegisters();
+  // radio._wireDebug();
 
   Serial.write('>');
   
@@ -541,4 +543,3 @@ void loop() {
 } // loop
 
 // End.
-

@@ -27,17 +27,19 @@
 /// * 31.08.2014 Doxygen style comments added.
 /// * 05.02.2015 mainpage content added.
 /// * 29.04.2015 clear RDS function, need to clear RDS info after tuning.
-///
+/// * 17.09.2020 Wire Util functions added.
+
 /// TODO:
 /// --------
 /// * multi-Band enabled
 
 /// \mainpage
 /// An Arduino library to control radio for receiving FM broadcast signals.
-/// 
-/// Currently the following chios are supported:
+///
+/// Currently the following chips are supported:
 /// * The SI4703 from Silicon Labs
 /// * The SI4705 from Silicon Labs
+/// * The SI4721 from Silicon Labs
 /// * The TEA5767 from NXP
 /// * The RDA5807M from RDA Microelectronics
 ///
@@ -98,12 +100,12 @@ extern "C" {
 enum RADIO_BAND {
   RADIO_BAND_NONE = 0, ///< No band selected.
 
-  RADIO_BAND_FM = 1, ///< FM band 87.5 – 108 MHz (USA, Europe) selected.
-  RADIO_BAND_FMWORLD = 2, ///< FM band 76 – 108 MHz (Japan, Worldwide) selected.
-  RADIO_BAND_AM = 3, ///< AM band selected.
-  RADIO_BAND_KW = 4, ///< KW band selected.
+  RADIO_BAND_FM      = 0x01, ///< FM band 87.5 ï¿½ 108 MHz (USA, Europe) selected.
+  RADIO_BAND_FMWORLD = 0x02, ///< FM band 76 ï¿½ 108 MHz (Japan, Worldwide) selected.
+  RADIO_BAND_AM      = 0x03, ///< AM band selected.
+  RADIO_BAND_KW      = 0x04, ///< KW band selected.
 
-  RADIO_BAND_MAX = 4  ///< Maximal band enumeration value.
+  RADIO_BAND_FMTX    = 0x11, ///< Transmit for FM.
 };
 
 
@@ -187,9 +189,9 @@ public:
 
   // ----- Supporting RDS for FM bands -----
 
+  virtual void attachReceiveRDS(receiveRDSFunction newFunction); ///< Register a RDS processor function.
   virtual void checkRDS(); ///< Check if RDS Data is available and good.
   virtual void clearRDS(); ///< Clear RDS data in the attached RDS Receiver by sending 0,0,0,0.
-  virtual void attachReceiveRDS(receiveRDSFunction newFunction); ///< Register a RDS processor function.
 
   // ----- Utilitys -----
 
@@ -198,13 +200,56 @@ public:
 
   // ----- debug Helpers send information to Serial port
 
-  virtual void debugEnable(bool enable = true);  ///< Enable sending debug information to the Serial port.
+  /**
+   * Enable debugging information on Serial port.
+   * This is for logging on a higher level than i2c data transport.
+   * @param enable true to switch logging on.
+   */
+  virtual void debugEnable(bool enable = true);
+
   virtual void debugRadioInfo(); ///< Print out all radio information.
   virtual void debugAudioInfo(); ///< Print out all audio information.
-  virtual void debugStatus();    ///< Send debug information about actual available chip functionality and other internal things.
+  virtual void debugStatus(); ///< Send debug information about actual available chip functionality and other internal things.
+
+  // ===== Wire Utilities =====
+
+  /**
+   * Enable low level i2c debugging information on Serial port.
+   * @param enable true to switch logging on.
+   */
+  virtual void _wireDebug(bool enable = true);
+
+  /** check for a device on address */
+  bool _wireExists(TwoWire *port, int address);
+
+  /**
+   * Write and optionally read data on the i2c bus.
+   * A debug output can be enabled using _wireDebug().
+   * @param port i2c port to be used.
+   * @param address i2c address to be used.
+   * @param reg the register to be read (1 byte send).
+   * @param data buffer array with received data. If this parameter is nullptr no data will be requested.
+   * @param len length of data buffer.
+   * @return number of register values received.
+   */
+  int _wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len);
+
+  /**
+   * Write and optionally read data on the i2c bus.
+   * A debug output can be enabled using _wireDebug().
+   * @param port i2c port to be used.
+   * @param address i2c address to be used.
+   * @param cmdData array with data to be send.
+   * @param cmdLen length of cmdData.
+   * @param data buffer array with received data. If this parameter is nullptr no data will be requested.
+   * @param len length of data buffer.
+   * @return number of register values received.
+   */
+  int _wireRead(TwoWire *port, int address, uint8_t *cmdData, int cmdLen, uint8_t *data, int len);
 
 protected:
   bool _debugEnabled; ///< Set by debugEnable() and controls debugging functionality.
+  bool _wireDebugEnabled; ///< Set by _wireDebug() and controls i2c data level debugging.
 
   uint8_t _volume;    ///< Last set volume level.
   bool    _bassBoost; ///< Last set bass Boost effect.
@@ -217,11 +262,12 @@ protected:
 
   RADIO_FREQ _freqLow;    ///< Lowest frequency of the current selected band.
   RADIO_FREQ _freqHigh;   ///< Highest frequency of the current selected band.
-  RADIO_FREQ _freqSteps;  ///< Resulution of the tuner.
+  RADIO_FREQ _freqSteps;  ///< Resolution of the tuner.
 
   receiveRDSFunction _sendRDS; ///< Registered RDS Function that is called on new available data.
 
-  void _printHex4(uint16_t val); ///> Prints a register as 4 character hexadecimal code with leading zeros.
+  void _printHex2(uint8_t val); ///< Prints a byte as 2 character hexadecimal code with leading zeros.
+  void _printHex4(uint16_t val); ///< Prints a register as 4 character hexadecimal code with leading zeros.
 
 private:
   void int16_to_s(char *s, uint16_t val); ///< Converts a int16 number to a string, similar to itoa, but using the format "00000".

@@ -16,7 +16,7 @@
 /// * 01.09.2014 created and RDS sender name working.
 /// * 01.11.2014 RDS time added.
 /// * 27.03.2015 Reset RDS data by sending a 0 in blockA in the case the frequency changes.
-/// 
+///
 
 
 #ifndef __RDSPARSER_H__

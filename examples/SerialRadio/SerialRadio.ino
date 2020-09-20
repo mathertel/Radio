@@ -228,7 +228,7 @@ void setup() {
 
   radio.setMono(false);
   radio.setMute(false);
-  // radio.debugRegisters();
+  // radio._wireDebug();
   radio.setVolume(8);
 
   Serial.write('>');

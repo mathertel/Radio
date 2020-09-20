@@ -30,7 +30,6 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-
 #include <radio.h>
 
 // ----- library definition -----
