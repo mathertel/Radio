@@ -8,7 +8,7 @@
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
-/// This library enables the use of the Radio Chip SI4721.
+/// This library enables the use of the Radio Chip SI4721 for receiving and transmitting.
 /// Settings are compatible top the following board from sparkfun: https://www.sparkfun.com/products/15853
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
@@ -16,7 +16,7 @@
 /// ChangeLog:
 /// ----------
 /// * 01.12.2019 created.
-/// * 17.09.2020 move si4721 specific initialization into setBand()
+/// * 17.09.2020 si4721 specific initialization moved into setBand()
 
 #ifndef SI4721_h
 #define SI4721_h
@@ -81,7 +81,13 @@ public:
 
   void setMono(bool switchOn); ///< Control the mono/stereo mode of the radio chip.
 
-  void setBand(RADIO_BAND newBand); ///< Control the band of the radio chip.
+  /**
+   * Start using the new band for receiving or transmitting.
+   * This function resets the mode so it should not be called without good reason to avoid breaks.
+   * @param newBand The new band to be enabled.
+   * @return void
+   */
+  void setBand(RADIO_BAND newBand);
 
   void setFrequency(RADIO_FREQ newF); ///< Control the frequency.
   RADIO_FREQ getFrequency(void);

@@ -5,7 +5,7 @@
 /// \author N Poole, nickpoole.me
 /// \author Matthias Hertel, http://www.mathertel.de
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
-/// This work is licensed under a BSD style license. See http://www.mathertel.de/License.aspx
+/// This work is licensed under a BSD 3-Clause License. See http://www.mathertel.de/License.aspx
 ///
 /// \details
 /// This sketch implements a "as simple as possible" radio without any possibility to modify the settings after initializing the chip.\n
@@ -69,11 +69,11 @@ void setup()
   } else {
     Serial.print("Device NOT found at address ");
     Serial.println(SI4721_ADR);
-
   }
 
   // Enable debug information to the Serial port
-  radio.debugEnable();
+  radio.debugEnable(false);
+  radio._wireDebug(false);
 
   // Initialize the Radio
   radio.init(Wire, SI4721_ADR);

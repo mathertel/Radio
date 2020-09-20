@@ -202,6 +202,7 @@
 SI4721::SI4721()
 {
   _realVolume = 0;
+  _txPower = 90;
 }
 
 /// Initialize the library and the chip.
@@ -332,16 +333,19 @@ void SI4721::setBassBoost(bool switchOn)
 void SI4721::setMono(bool switchOn)
 {
   RADIO::setMono(switchOn);
-  if (switchOn) {
-    // disable automatic stereo feature
-    _setProperty(PROP_FM_BLEND_STEREO_THRESHOLD, 127);
-    // not available in SI4721:
-    // _setProperty(PROP_FM_BLEND_RSSI_STEREO_THRESHOLD, 127);
-    // _setProperty(PROP_FM_BLEND_RSSI_MONO_THRESHOLD, 127);
+  if (_band == RADIO_BAND_FMTX) {
+    // switch Off ???
+    // _setProperty(PROP_TX_COMPONENT_ENABLE, 0x0007); // stereo, pilot+rds
 
-  } else {
-    // Automatic stereo feature on.
-    _setProperty(PROP_FM_BLEND_STEREO_THRESHOLD, 49); // default = 49 dBμV
+  } else if (_band == RADIO_BAND_FM) {
+    if (switchOn) {
+      // disable automatic stereo feature
+      _setProperty(PROP_FM_BLEND_STEREO_THRESHOLD, 127);
+
+    } else {
+      // Automatic stereo feature on.
+      _setProperty(PROP_FM_BLEND_STEREO_THRESHOLD, 49); // default = 49 dBμV
+    } // if
   } // if
 } // setMono
 
@@ -350,26 +354,27 @@ void SI4721::setMono(bool switchOn)
 
 /**
  * Start using the new band for receiving or transmitting.
+ * This function resets the mode so it should not be called without good reason to avoid breaks.
  * @param newBand The new band to be enabled.
  * @return void
  */
 void SI4721::setBand(RADIO_BAND newBand)
 {
+  // Power down the device
+  _sendCommand(1, CMD_POWER_DOWN);
+  // Give the device some time to power down before restart
+  delay(500);
+
   if (newBand == RADIO_BAND_FM) {
     // set band boundaries and steps
     RADIO::setBand(newBand);
-
-    // Power down the device
-    _sendCommand(1, CMD_POWER_DOWN);
-
-    // Give the device some time to power down before restart
-    delay(500);
 
     // Power up in receive mode without patch
     _sendCommand(3, CMD_POWER_UP, (CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_1_FUNC_FM), CMD_POWER_UP_2_ANALOGOUT);
 
     // delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
     delay(500);
+
     _setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
     _setProperty(PROP_FM_DEEMPHASIS, _fmDeemphasis == 75 ? PROP_FM_DEEMPHASIS_75 : PROP_FM_DEEMPHASIS_50); // Europe 50μS / USA 75μS deemphasis
     _setProperty(PROP_FM_SEEK_FREQ_SPACING, _freqSteps); // in 100kHz spacing
@@ -390,24 +395,41 @@ void SI4721::setBand(RADIO_BAND newBand)
 
   } else if (newBand == RADIO_BAND_FMTX) {
     RADIO::setBand(newBand);
-    // Power down the device
-    _sendCommand(1, CMD_POWER_DOWN);
-
-    // Give the device some time to power down before restart
-    delay(500);
 
     // Power up in transmit mode
-    _sendCommand(3, CMD_POWER_UP, 0x12, 0x50);
+    _sendCommand(3, CMD_POWER_UP, (CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_1_FUNC_FMTX), CMD_POWER_UP_2_ANALOGIN);
     // delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
     delay(500);
+
     _setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
     _setProperty(PROP_TX_PREEMPHASIS, _fmDeemphasis == 75 ? PROP_TX_PREEMPHASIS_75 : PROP_TX_PREEMPHASIS_50); // uses the RX deemphasis as the TX preemphasis
     _setProperty(PROP_TX_ACOMP_GAIN, 10); // sets max gain
-    _setProperty(PROP_TX_ACOMP_ENABLE, 0x0); // turns on limiter and AGC
+    _setProperty(PROP_TX_ACOMP_ENABLE, 0x0); // turns off limiter and AGC
 
-  } else {
-    _sendCommand(1, CMD_POWER_DOWN);
+    setTXPower(_txPower); // set Power after frequency
 
+    // ----------------------
+    // not all features of the FM transmitting functionality of the chip are featured by this library.
+    // There are more options you may adapt. See `AN332 Programming Guide.pdf`.
+
+    // other possible setting:
+    // _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN | PROP_GPO_IEN_ERRIEN | PROP_GPO_IEN_CTSIEN);
+    // _setProperty(PROP_TX_COMPONENT_ENABLE, PROP_TX_COMPONENT_ENABLE_RDS | PROP_TX_COMPONENT_ENABLE_LMR | PROP_TX_COMPONENT_ENABLE_PILOT);
+
+    // _setProperty(PROP_TX_AUDIO_DEVIATION, 6825); // default value
+    // _setProperty(PROP_TX_PILOT_DEVIATION, 675); // default value
+    // _setProperty(PROP_TX_RDS_DEVIATION, 200); // default value
+
+    // _setProperty(PROP_TX_ACOMP_GAIN, 0x0F); // sets max gain
+    // _setProperty(PROP_TX_ACOMP_ENABLE, 0x03); // turns on limiter and AGC
+
+    // _setProperty(PROP_TX_ACOMP_THRESHOLD, 0xFFD8);
+    // _setProperty(PROP_TX_ACOMP_ATTACK_TIME, 0x0002);
+    // _setProperty(PROP_TX_ACOMP_RELEASE_TIME, 0x0004);
+    // _setProperty(PROP_TX_LIMITER_RELEASE_TIME, 0x000D);
+
+    // _setProperty(PROP_TX_LINE_INPUT_MUTE, 0x0000);
+    // _setProperty(PROP_TX_LINE_INPUT_LEVEL, PROP_TX_LINE_INPUT_LEVEL_60 | 0x27C); // not too sensitive
   } // if
 } // setBand()
 
@@ -444,12 +466,13 @@ void SI4721::setFrequency(RADIO_FREQ newF)
 
   if (_band == RADIO_BAND_FMTX) {
     _sendCommand(4, CMD_TX_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)&0xff);
+    setTXPower(_txPower); // ???
+
   } else {
     _sendCommand(5, CMD_FM_TUNE_FREQ, 0, (newF >> 8) & 0xff, (newF)&0xff, 0);
+    // reset the RDSParser
+    clearRDS();
   }
-
-  // reset the RDSParser
-  clearRDS();
 
   // loop until status ok.
   do {
@@ -802,60 +825,35 @@ void SI4721::_waitEnd()
 /// Send an array of bytes to the radio chip
 void SI4721::_sendCommand(int cnt, int cmd, ...)
 {
-  if (_wireDebugEnabled) {
-    Serial.print("CMD(");
-    _printHex2(cmd);
-    Serial.println(")");
+  uint8_t cmdData[12];
+
+  va_list params;
+  va_start(params, cmd);
+  cmdData[0] = cmd;
+  for (uint8_t i = 1; i < cnt; i++) {
+    cmdData[i] = va_arg(params, int);
   }
-  if (cnt > 8) {
-    // see AN332: "Writing more than 8 bytes results in unpredictable device behavior."
-    Serial.println("error: _sendCommand: too much parameters!");
 
-  } else {
-    _i2cPort->beginTransmission(_i2caddr);
-    _i2cPort->write(cmd);
+  _wireRead(_i2cPort, _i2caddr, cmdData, cnt, &_status, 1);
 
-    va_list params;
-    va_start(params, cmd);
-
-    for (uint8_t i = 1; i < cnt; i++) {
-      uint8_t c = va_arg(params, int);
-      if (_wireDebugEnabled)
-        _printHex2(c);
-      _i2cPort->write(c);
-    }
-    _i2cPort->endTransmission();
-    va_end(params);
-
-    // wait for Command being processed
-    _i2cPort->requestFrom(_i2caddr, 1); // We want to read the status byte.
+  // wait for command is executed finally.
+  while (!(_status & CMD_GET_INT_STATUS_CTS)) {
+    delay(10);
+    _i2cPort->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
     _status = _i2cPort->read();
-  } // if
-
-  if (_wireDebugEnabled)
-    Serial.println();
+    if (_wireDebugEnabled) {
+      Serial.print(" =0x");
+      Serial.println(_status, HEX);
+    }
+  } // while
 } // _sendCommand()
 
 
 /// Set a property in the radio chip
 void SI4721::_setProperty(uint16_t prop, uint16_t value)
 {
-  if (_wireDebugEnabled) {
-    // Serial.printf("PROP(%04x): %04x\n", prop, value);
-  }
-  _i2cPort->beginTransmission(_i2caddr);
-  _i2cPort->write(CMD_SET_PROPERTY);
-  _i2cPort->write(0);
-
-  _i2cPort->write(prop >> 8);
-  _i2cPort->write(prop & 0x00FF);
-  _i2cPort->write(value >> 8);
-  _i2cPort->write(value & 0x00FF);
-
-  _i2cPort->endTransmission();
-
-  _i2cPort->requestFrom(_i2caddr, 1); // We want to read the status byte.
-  _status = _i2cPort->read();
+  uint8_t cmdData[6] = {CMD_SET_PROPERTY, 0, prop >> 8, prop & 0x00FF, value >> 8, value & 0x00FF};
+  _wireRead(_i2cPort, _i2caddr, cmdData, 6, &_status, 1);
 } // _setProperty()
 
 

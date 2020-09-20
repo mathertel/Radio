@@ -389,7 +389,7 @@ bool RADIO::_wireExists(TwoWire *port, int address)
  */
 int RADIO::_wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int len)
 {
-  return(_wireRead(port, address, &reg, 1, data, len));
+  return (_wireRead(port, address, &reg, 1, data, len));
 } // _wireRead()
 
 
@@ -428,7 +428,9 @@ int RADIO::_wireRead(TwoWire *port, int address, uint8_t *cmdData, int cmdLen, u
 
   // read requested data (when buffer is available)
   if (data) {
-    Serial.print(" -> ");
+    if (_wireDebugEnabled) {
+      Serial.print(" -> ");
+    }
     uint8_t *d = data;
 
     port->requestFrom(address, len);
