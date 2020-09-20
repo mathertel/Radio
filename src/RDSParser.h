@@ -6,7 +6,7 @@
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
-/// 
+///
 /// \details
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
@@ -24,11 +24,11 @@
 
 #include <Arduino.h>
 
-/// callback function for passing a ServicenName 
+/// callback function for passing a ServicenName
 extern "C" {
   typedef void(*receiveServicenNameFunction)(char *name);
   typedef void(*receiveTextFunction)(char *name);
-  typedef void(*receiveTimeFunction)(uint8_t hour, uint8_t minute);
+  typedef void(*receiveTimeFunction)(uint8_t hour, uint8_t minute, uint32_t MJD, int8_t offset);
 }
 
 
@@ -64,7 +64,7 @@ private:
 
   uint16_t _lastRDSMinutes; ///< last RDS time send to callback.
 
-  char _RDSText[64 + 2];
+  char _RDSText[64 + 2], _lastRDSText[64 + 2];
 
 }; //RDSParser
 
