@@ -19,3 +19,8 @@
 *.exe
 *.out
 *.app
+
+/temp
+/.vscode
+/.development
+_*
