@@ -30,11 +30,13 @@
 
 #define CMD_POWER_UP 0x01 // Power up device and mode selection.
 #define CMD_POWER_UP_1_FUNC_FM 0x00
+#define CMD_POWER_UP_1_FUNC_FMTX 0x02
 #define CMD_POWER_UP_1_XOSCEN 0x10
 #define CMD_POWER_UP_1_PATCH 0x20
 #define CMD_POWER_UP_1_GPO2OEN 0x40
 #define CMD_POWER_UP_1_CTSIEN 0x80
 #define CMD_POWER_UP_2_ANALOGOUT 0x05
+#define CMD_POWER_UP_2_ANALOGIN 0x50
 
 #define CMD_GET_REV 0x10 //	Returns revision information on the device.
 #define CMD_POWER_DOWN 0x11 //	Power down device.
@@ -55,13 +57,75 @@
 #define CMD_FM_AGC_STATUS 0x27 //	Queries the current AGC settings All
 #define CMD_FM_AGC_OVERRIDE 0x28 //	Override AGC setting by disabling and forcing it to a fixed value
 
+// FM Transmit Commands
+
 #define CMD_TX_TUNE_FREQ 0x30
 #define CMD_TX_TUNE_POWER 0x31
 #define CMD_TX_TUNE_MEASURE 0x32
 #define CMD_TX_TUNE_STATUS 0x33
+#define CMD_TX_TUNE_STATUS_IN_INTACK 0x01
+
 #define CMD_TX_ASQ_STATUS 0x34
+#define CMD_TX_ASQ_STATUS_IN_INTACK 0x01
+#define CMD_TX_ASQ_STATUS_OUT_IALL 0x01
+#define CMD_TX_ASQ_STATUS_OUT_IALH 0x02
+#define CMD_TX_ASQ_STATUS_OUT_OVERMOD 0x04
+
 #define CMD_TX_RDS_BUFF 0x35
+#define CMD_TX_RDS_BUFF_IN_INTACK 0x01
+#define CMD_TX_RDS_BUFF_IN_MTBUFF 0x02
+#define CMD_TX_RDS_BUFF_IN_LDBUFF 0x04
+#define CMD_TX_RDS_BUFF_IN_FIFO 0x80
+
 #define CMD_TX_RDS_PS 0x36
+
+// FM Transmit Parameters
+
+#define PROP_DIGITAL_INPUT_FORMAT 0x0101
+#define PROP_DIGITAL_INPUT_SAMPLE_RATE 0x0103
+#define PROP_REFCLK_FREQ 0x0201
+#define PROP_REFCLK_PRESCALE 0x0202
+
+#define PROP_TX_COMPONENT_ENABLE 0x2100
+#define PROP_TX_COMPONENT_ENABLE_PILOT 0x0001
+#define PROP_TX_COMPONENT_ENABLE_LMR 0x0002
+#define PROP_TX_COMPONENT_ENABLE_RDS 0x0004
+
+
+#define PROP_TX_AUDIO_DEVIATION 0x2101
+#define PROP_TX_PILOT_DEVIATION 0x2102
+#define PROP_TX_RDS_DEVIATION 0x2103
+#define PROP_TX_LINE_INPUT_LEVEL 0x2104
+
+#define PROP_TX_LINE_INPUT_LEVEL_396 0x0000
+#define PROP_TX_LINE_INPUT_LEVEL_100 0x1000
+#define PROP_TX_LINE_INPUT_LEVEL_74 0x2000
+#define PROP_TX_LINE_INPUT_LEVEL_60 0x3000
+
+#define PROP_TX_LINE_INPUT_MUTE 0x2105
+#define PROP_TX_PILOT_FREQUENCY 0x2107
+#define PROP_TX_ACOMP_ENABLE 0x2200
+#define PROP_TX_ACOMP_THRESHOLD 0x2201
+#define PROP_TX_ACOMP_ATTACK_TIME 0x2202
+#define PROP_TX_ACOMP_RELEASE_TIME 0x2203
+#define PROP_TX_ACOMP_GAIN 0x2204
+#define PROP_TX_LIMITER_RELEASE_TIME 0x2205
+#define PROP_TX_ASQ_INTERRUPT_SOURCE 0x2300
+#define PROP_TX_ASQ_LEVEL_LOW 0x2301
+#define PROP_TX_ASQ_DURATION_LOW 0x2302
+#define PROP_TX_ASQ_LEVEL_HIGH 0x2303
+#define PROP_TX_ASQ_DURATION_HIGH 0x2304
+#define PROP_TX_RDS_INTERRUPT_SOURCE 0x2C00
+#define PROP_TX_RDS_PI 0x2C01
+#define PROP_TX_RDS_PS_MIX 0x2C02
+#define PROP_TX_RDS_PS_MISC 0x2C03
+#define PROP_TX_RDS_PS_REPEAT_COUNT 0x2C04
+#define PROP_TX_RDS_MESSAGE_COUNT 0x2C05
+#define PROP_TX_RDS_PS_AF 0x2C06
+#define PROP_TX_RDS_FIFO_SIZE 0x2C07
+
+
+// GPIO Control Commands
 
 #define CMD_GPIO_CTL 0x80 //	Configures GPO1, 2, and 3 as output or Hi-Z.
 #define CMD_GPIO_CTL_GPO1OEN 0x02
@@ -79,8 +143,10 @@
 // Property and Parameter definitions
 
 #define PROP_GPO_IEN 0x0001
-#define PROP_GPO_IEN_STCIEN 0x01
-#define PROP_GPO_IEN_RDSIEN 0x04
+#define PROP_GPO_IEN_STCIEN 0x0001
+#define PROP_GPO_IEN_RDSIEN 0x0004
+#define PROP_GPO_IEN_ERRIEN 0x0040
+#define PROP_GPO_IEN_CTSIEN 0x0080
 
 // Deemphasis time constant.
 #define PROP_FM_DEEMPHASIS 0x1100
@@ -126,37 +192,6 @@
 #define PROP_RX_HARD_MUTE_LEFT 0x02
 #define PROP_RX_HARD_MUTE_BOTH 0x03
 
-// Transmit Parameters
-#define PROP_DIGITAL_INPUT_FORMAT 0x0101
-#define PROP_DIGITAL_INPUT_SAMPLE_RATE 0x0103
-#define PROP_REFCLK_FREQ 0x0201
-#define PROP_REFCLK_PRESCALE 0x0202
-#define PROP_TX_COMPONENT_ENABLE 0x2100
-#define PROP_TX_AUDIO_DEVIATION 0x2101
-#define PROP_TX_PILOT_DEVIATION 0x2102
-#define PROP_TX_RDS_DEVIATION 0x2103
-#define PROP_TX_LINE_LEVEL_INPUT_LEVEL 0x2104
-#define PROP_TX_LINE_INPUT_MUTE 0x2105
-#define PROP_TX_PILOT_FREQUENCY 0x2107
-#define PROP_TX_ACOMP_ENABLE 0x2200
-#define PROP_TX_ACOMP_THRESHOLD 0x2201
-#define PROP_TX_ATTACK_TIME 0x2202
-#define PROP_TX_RELEASE_TIME 0x2203
-#define PROP_TX_ACOMP_GAIN 0x2204
-#define PROP_TX_LIMITER_RELEASE_TIME 0x2205
-#define PROP_TX_ASQ_INTERRUPT_SOURCE 0x2300
-#define PROP_TX_ASQ_LEVEL_LOW 0x2301
-#define PROP_TX_ASQ_DURATION_LOW 0x2302
-#define PROP_TX_AQS_LEVEL_HIGH 0x2303
-#define PROP_TX_AQS_DURATION_HIGH 0x2304
-#define PROP_TX_RDS_INTERRUPT_SOURCE 0x2C00
-#define PROP_TX_RDS_PI 0x2C01
-#define PROP_TX_RDS_PS_MIX 0x2C02
-#define PROP_TX_RDS_PS_MISC 0x2C03
-#define PROP_TX_RDS_PS_REPEAT_COUNT 0x2C04
-#define PROP_TX_RDS_MESSAGE_COUNT 0x2C05
-#define PROP_TX_RDS_PS_AF 0x2C06
-#define PROP_TX_RDS_FIFO_SIZE 0x2C07
 
 // Preemphasis time constant.
 #define PROP_TX_PREEMPHASIS 0x2106
@@ -187,12 +222,10 @@ bool SI4721::init(TwoWire &wirePort, uint8_t deviceAddress)
   // see if a chip can be found
   result = RADIO::_wireExists(_i2cPort, deviceAddress);
 
-
   // Power down the device
   _sendCommand(1, CMD_POWER_DOWN);
 
   // powering up is done by specifying the band etc. so it's implemented in setBand
-
   return (result);
 } // init()
 
@@ -322,8 +355,6 @@ void SI4721::setMono(bool switchOn)
  */
 void SI4721::setBand(RADIO_BAND newBand)
 {
-  DEBUG_FUNC1("setBand", newBand);
-
   if (newBand == RADIO_BAND_FM) {
     // set band boundaries and steps
     RADIO::setBand(newBand);
@@ -559,11 +590,19 @@ void SI4721::checkRDS()
 
 // ----- Transmitter functions -----
 
+/// Get the current output power.
+uint8_t SI4721::getTXPower()
+{
+  return (_txPower);
+}
+
+
 /// Set the output power of the device.
 /// @param pwr Output power of the device in dBµV (valid range is 88 to 115)
 /// @return void
-void SI4721::setTXpower(uint8_t pwr)
+void SI4721::setTXPower(uint8_t pwr)
 {
+  _txPower = pwr;
   _sendCommand(5, CMD_TX_TUNE_POWER, 0, 0, pwr, 0);
 }
 

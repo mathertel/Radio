@@ -105,7 +105,9 @@ public:
   void beginRDS(uint16_t programID = 0xBEEF);
   void setRDSstation(char *s);
   void setRDSbuffer(char *s);
-  void setTXpower(uint8_t pwr);
+
+  uint8_t getTXPower();
+  void setTXPower(uint8_t pwr);
 
   ASQ_STATUS getASQ();
   TX_STATUS getTuneStatus();
@@ -128,6 +130,8 @@ private:
   uint8_t rsqStatus[1 + 7];
   uint8_t rdsStatusx[1 + 12];
   uint8_t agcStatus[1 + 2];
+
+  uint8_t _txPower;
 
   /// structure used to read status information from the SI4721 radio chip.
   union {
