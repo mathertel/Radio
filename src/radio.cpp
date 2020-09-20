@@ -411,12 +411,12 @@ int RADIO::_wireRead(TwoWire *port, int address, uint8_t *cmdData, int cmdLen, u
   // send out command sequence
   port->beginTransmission(address);
   if (_wireDebugEnabled) {
-    Serial.print("_wireRead(");
+    Serial.print("_wire(");
     Serial.print(address);
-    Serial.print(',');
+    Serial.print("): ");
   }
 
-  for (int i = 0; i <= cmdLen; i++) {
+  for (int i = 0; i < cmdLen; i++) {
     uint8_t d = cmdData[i];
     port->write(d);
     if (_wireDebugEnabled) {
@@ -425,18 +425,13 @@ int RADIO::_wireRead(TwoWire *port, int address, uint8_t *cmdData, int cmdLen, u
   } // for
 
   port->endTransmission();
-  if (_wireDebugEnabled) {
-    Serial.print(')');
-  }
 
   // read requested data (when buffer is available)
   if (data) {
+    Serial.print(" -> ");
     uint8_t *d = data;
 
     port->requestFrom(address, len);
-    if (_wireDebugEnabled) {
-      Serial.print(':');
-    }
 
     while (port->available() && (recieved < len)) {
       *d = port->read();
