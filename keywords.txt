@@ -11,6 +11,7 @@ RDA5807M	KEYWORD1
 RADIO	KEYWORD1
 SI4703	KEYWORD1
 SI4705	KEYWORD1
+SI4721	KEYWORD1
 TEA5767	KEYWORD1
 
 RADIO_FREQ	KEYWORD1
@@ -59,14 +60,12 @@ attachReceiveRDS	KEYWORD2
 
 formatFrequency	KEYWORD2
 
-setModeReceive	KEYWORD2
-setModeTransmit	KEYWORD2
-beginRDS		KEYWORD2
+beginRDS	KEYWORD2
 setRDSstation	KEYWORD2
 setRDSbuffer	KEYWORD2
 
-getASQ
-getTuneStatus
+getASQ	KEYWORD2
+getTuneStatus	KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
