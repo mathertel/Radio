@@ -1,6 +1,6 @@
 ///
 /// \file ScanRadio.ino
-/// \brief This sketch implements a scanner that lists all availabe radio stations including some information.
+/// \brief This sketch implements a FM scanner that lists all availabe radio stations including some information.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
 /// \copyright Copyright (c) by Matthias Hertel.\n
@@ -8,8 +8,9 @@
 /// See http://www.mathertel.de/License.aspx
 ///
 /// \details
-/// This is a Arduino sketch that uses a state machine to scan through all radio stations the radio chip can detect
-/// and outputs them on the Serial interface.\n
+/// This is a Arduino sketch radio implementation that can be controlled using commands on the Serial input.
+/// There are some experimental scan algorythms implemented that uses a state machine to scan through all radio stations
+/// the radio chip can detect and outputs them on the Serial interface.
 /// Open the Serial console with 115200 baud to see current radio information and change various settings.
 ///
 /// Wiring
@@ -30,6 +31,7 @@
 #include <Wire.h>
 #include <radio.h>
 
+// all possible radio chips included.
 #include <RDA5807M.h>
 #include <SI4703.h>
 #include <SI4705.h>
@@ -41,21 +43,20 @@
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
-// RADIO radio;       ///< Create an instance of a non functional radio.
-// RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
-// SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
-// SI4705 radio; ///< Create an instance of a SI4705 chip radio.
+/// Create the radio instance that fits the current chip:
+// RDA5807M radio;  ///< Create an instance of a RDA5807 chip radio
+// SI4703   radio;  ///< Create an instance of a SI4703 chip radio.
+// SI4705 radio;    ///< Create an instance of a SI4705 chip radio.
 SI4721 radio; ///< Create an instance of a SI4705 chip radio.
-// TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
+// TEA5767  radio;  ///< Create an instance of a TEA5767 chip radio.
 
 /// get a RDS parser
 RDSParser rds;
 
-// Keyboard input
 
+/// State of Keyboard input for this radio implementation.
 enum RADIO_STATE {
   STATE_PARSECOMMAND, ///< waiting for a new command character.
-
   STATE_PARSEINT, ///< waiting for digits for the parameter.
   STATE_EXEC ///< executing the command.
 };
@@ -67,11 +68,8 @@ int16_t kbValue;
 
 uint16_t g_block1;
 bool lowLevelDebug = false;
-RADIO_FREQ frequency;
-
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 
 // use a function in between the radio chip and the RDS parser
 // to catch the block1 value (used for sender identification)
@@ -280,7 +278,6 @@ void runSerialCommand(char cmd, int16_t value)
 
 
   } else if (cmd == 'f') {
-    frequency = value;
     radio.setFrequency(value);
   }
 
@@ -295,13 +292,14 @@ void runSerialCommand(char cmd, int16_t value)
   }
 
 
-  // not in help:
   else if (cmd == '!') {
+    // not in help
+    RADIO_FREQ f = radio.getFrequency();
     if (value == 0) {
       radio.term();
     } else if (value == 1) {
       radio.init();
-      radio.setBandFrequency(RADIO_BAND_FM, frequency);
+      radio.setBandFrequency(RADIO_BAND_FM, f);
     }
 
   } else if (cmd == 'i') {
@@ -346,8 +344,7 @@ void setup()
   // Initialize the Radio
   radio.init();
 
-  frequency = 8930;
-  radio.setBandFrequency(RADIO_BAND_FM, frequency);
+  radio.setBandFrequency(RADIO_BAND_FM, 8930);
 
   // delay(100);
 
@@ -380,7 +377,7 @@ void loop()
       Serial.read();
 
     } else if (kbState == STATE_PARSECOMMAND) {
-      // read a kbCommand.
+      // read a command.
       kbCommand = Serial.read();
       kbState = STATE_PARSEINT;
 
