@@ -38,15 +38,43 @@ RADIO::RADIO()
 } // RADIO()
 
 
+void RADIO::setup(int feature, int value)
+{
+  if (feature == RADIO_RESETPIN) {
+    _resetPin = value;
+  } else if ((feature == RADIO_I2CADDRESS) && (value > 0)) {
+    _i2caddr = value;
+  }
+
+} // setup()
+
+
+/// The RADIO class doesn't implement a concrete chip so nothing has to be initialized.
+bool RADIO::initWire(TwoWire &port)
+{
+  DEBUG_FUNC0("RADIO::initWire");
+
+  _i2cPort = &port;
+  return (this->init());
+} // initWire()
+
+
 /// The RADIO class doesn't implement a concrete chip so nothing has to be initialized.
 bool RADIO::init()
 {
+  if (_resetPin >= 0) {
+    // create a reset impulse
+    pinMode(_resetPin, OUTPUT);
+    digitalWrite(_resetPin, LOW);  // Put chip into reset
+    delay(5);
+    digitalWrite(_resetPin, HIGH); // Bring chip out of reset
+    delay(5);
+  }
   return (false);
 } // init()
 
 
-/// switch the power off
-/// The RADIO class doesn't implement a concrete chip so nothing has to be terminated.
+/// The RADIO class doesn't implement a concrete chip so nothing has to be initialized.
 void RADIO::term()
 {
 } // term()
@@ -148,7 +176,7 @@ void RADIO::setBand(RADIO_BAND newBand)
   if (newBand == RADIO_BAND_FM) {
     _freqLow = 8700;
     _freqHigh = 10800;
-    _freqSteps = 10;
+    _freqSteps = 10; // 20 in USA ???
 
   } else if (newBand == RADIO_BAND_FMWORLD) {
     _freqLow = 7600;
@@ -353,6 +381,8 @@ void RADIO::int16_to_s(char *s, uint16_t val)
 
 // ===== Wire Utilities =====
 
+bool RADIO::_wireDebugFlag = false;
+
 /**
  * Enable low level i2c debugging information on Serial port.
  * @param enable true to switch logging on.
@@ -360,6 +390,7 @@ void RADIO::int16_to_s(char *s, uint16_t val)
 void RADIO::_wireDebug(bool enable)
 {
   _wireDebugEnabled = enable;
+  _wireDebugFlag = enable;
 } // _wireDebug()
 
 
@@ -375,6 +406,72 @@ bool RADIO::_wireExists(TwoWire *port, int address)
   }
   return (err == 0);
 }
+
+// a i2c transmission in one call
+void RADIO::_wireWriteTo(TwoWire *port, int address, uint8_t *cmdData, int cmdLen)
+{
+  if (cmdData && cmdLen > 0) {
+    // send out command sequence
+    port->beginTransmission(address);
+    if (_wireDebugFlag) {
+      Serial.print("--write(");
+      Serial.print(address);
+      Serial.print("): ");
+    }
+
+    for (int i = 0; i < cmdLen; i++) {
+      uint8_t d = cmdData[i];
+      port->write(d);
+      if (_wireDebugFlag) {
+        Serial.printf("%02x ", d);
+      } // if
+    } // for
+
+    port->endTransmission();
+  } // if
+} // _wireWriteTo
+
+
+// a i2c request in one call
+uint8_t RADIO::_wireReadFrom(TwoWire *port, int address, uint8_t *data, int len)
+{
+  uint8_t received = 0;
+  if (data && len > 0) {
+    while (!received) {
+      received = port->requestFrom(address, len);
+      if (_wireDebugFlag) {
+        Serial.printf("[%d]", received);
+      }
+    }
+
+    uint8_t *d = data;
+    for (int n = 0; n < received; n++) {
+      *d = port->read();
+      if (_wireDebugFlag) {
+        Serial.printf("%02x ", *d);
+      }
+      d++;
+    }
+  }
+  return (received);
+} // _wireReadFrom
+
+
+// write a 16 bit value in High-Low order to the Wire.
+void RADIO::_write16HL(TwoWire *port, uint16_t val)
+{
+  port->write(val >> 8);
+  port->write(val & 0xFF);
+} // _write16HL
+
+
+// read a 16 bit value in High-Low order from the Wire.
+uint16_t RADIO::_read16HL(TwoWire *port)
+{
+  uint8_t hiByte = port->read();
+  uint8_t loByte = port->read();
+  return ((hiByte << 8) + loByte);
+} // _read16HL
 
 
 /**
@@ -406,50 +503,27 @@ int RADIO::_wireRead(TwoWire *port, int address, uint8_t reg, uint8_t *data, int
  */
 int RADIO::_wireRead(TwoWire *port, int address, uint8_t *cmdData, int cmdLen, uint8_t *data, int len)
 {
-  int recieved = 0;
+  int received = 0;
 
-  // send out command sequence
-  port->beginTransmission(address);
-  if (_wireDebugEnabled) {
-    Serial.print("_wire(");
-    Serial.print(address);
-    Serial.print("): ");
-  }
-
-  for (int i = 0; i < cmdLen; i++) {
-    uint8_t d = cmdData[i];
-    port->write(d);
-    if (_wireDebugEnabled) {
-      _printHex2(d);
-    } // if
-  } // for
-
-  port->endTransmission();
+  RADIO::_wireWriteTo(port, address, cmdData, cmdLen);
 
   // read requested data (when buffer is available)
   if (data) {
-    if (_wireDebugEnabled) {
-      Serial.print(" -> ");
-    }
-    uint8_t *d = data;
-
-    port->requestFrom(address, len);
-
-    while (port->available() && (recieved < len)) {
-      *d = port->read();
-      recieved++;
-      if (_wireDebugEnabled) {
-        _printHex2(*d);
+    while (received == 0) {
+      if (RADIO::_wireDebugFlag) {
+        Serial.print(" -> ");
       }
-      d++;
+      received = RADIO::_wireReadFrom(port, address, data, len);
+      if (!(*data & 0x80))
+        received = 0;
     }
 
-    if (_wireDebugEnabled) {
+    if (RADIO::_wireDebugFlag) {
       Serial.println('.');
     }
   } // if (data)
 
-  return (recieved);
+  return (received);
 } // _wireRead()
 
 
