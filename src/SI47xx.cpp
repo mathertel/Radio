@@ -1,6 +1,6 @@
 ///
-/// \file SI4721.cpp
-/// \brief Implementation for the radio library to control the SI4721 radio chip.
+/// \file SI47xx.cpp
+/// \brief Implementation for the radio library to control the SI47xx radio chips.
 ///
 /// \author N Poole, nickpoole.me
 /// \author Matthias Hertel, http://www.mathertel.de
@@ -8,13 +8,13 @@
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
-/// This library enables the use of the Radio Chip SI4721.
+/// This library enables the use of the Radio Chip SI47xx.
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
 /// Many hints can be found in AN332: http://www.silabs.com/Support%20Documents/TechnicalDocs/AN332.pdf
 ///
-/// ChangeLog see SI4721.h.
+/// ChangeLog see SI47xx.h.
 
 #include <Arduino.h>
 #include <Wire.h> // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
@@ -22,39 +22,51 @@
 #include <radio.h> // Include the common radio library interface
 
 // Include the chip specific radio library interface
-#include <SI4721.h>
+#include <SI47xx.h>
 
 // ----- Radio chip specific definitions including the registers
+
+// SI47xx specifics
+
+#define SI47xx_ADR0 0x10
+#define SI47xx_ADR1 0x11 ///< The I2C address of SI4721/SI4730 is 0x11 or 0x63
+#define SI47xx_ADR2 0x61 ///< The I2C address of SI4721/SI4730 is 0x11 or 0x63
+#define SI47xx_ADR3 0x63 ///< The I2C address of SI4705 is 0x61 or 0x63
+
 
 // Commands and Parameter definitions
 
 #define CMD_POWER_UP 0x01 // Power up device and mode selection.
 #define CMD_POWER_UP_1_FUNC_FM 0x00
+#define CMD_POWER_UP_1_FUNC_AM 0x01
 #define CMD_POWER_UP_1_FUNC_FMTX 0x02
+#define CMD_POWER_UP_1_QUERY 0x0F
+
 #define CMD_POWER_UP_1_XOSCEN 0x10
 #define CMD_POWER_UP_1_PATCH 0x20
 #define CMD_POWER_UP_1_GPO2OEN 0x40
 #define CMD_POWER_UP_1_CTSIEN 0x80
+
 #define CMD_POWER_UP_2_ANALOGOUT 0x05
 #define CMD_POWER_UP_2_ANALOGIN 0x50
 
-#define CMD_GET_REV 0x10 //	Returns revision information on the device.
+#define CMD_GET_REV 0x10    //	Returns revision information on the device.
 #define CMD_POWER_DOWN 0x11 //	Power down device.
 
-#define CMD_SET_PROPERTY 0x12 //	Sets the value of a property.
-#define CMD_GET_PROPERTY 0x13 //	Retrieves a property’s value.
-#define CMD_GET_INT_STATUS 0x14 //	Reads interrupt status bits.
+#define CMD_SET_PROPERTY 0x12       //	Sets the value of a property.
+#define CMD_GET_PROPERTY 0x13       //	Retrieves a property’s value.
+#define CMD_GET_INT_STATUS 0x14     //	Reads interrupt status bits.
 #define CMD_GET_INT_STATUS_CTS 0x80 //	CTS flag in status
 
 
-#define CMD_PATCH_ARGS *0x15 //	Reserved command used for patch file downloads.
-#define CMD_PATCH_DATA *0x16 //	Reserved command used for patch file downloads.
-#define CMD_FM_TUNE_FREQ 0x20 //	Selects the FM tuning frequency.
-#define CMD_FM_SEEK_START 0x21 //	Begins searching for a valid frequency.
-#define CMD_FM_TUNE_STATUS 0x22 //	Queries the status of previous FM_TUNE_FREQ or FM_SEEK_START command.
-#define CMD_FM_RSQ_STATUS 0x23 //	Queries the status of the Received Signal Quality (RSQ) of the current channel
-#define CMD_FM_RDS_STATUS 0x24 //	Returns RDS information for current channel and reads an entry from RDS FIFO.
-#define CMD_FM_AGC_STATUS 0x27 //	Queries the current AGC settings All
+#define CMD_PATCH_ARGS *0x15     //	Reserved command used for patch file downloads.
+#define CMD_PATCH_DATA *0x16     //	Reserved command used for patch file downloads.
+#define CMD_FM_TUNE_FREQ 0x20    //	Selects the FM tuning frequency.
+#define CMD_FM_SEEK_START 0x21   //	Begins searching for a valid frequency.
+#define CMD_FM_TUNE_STATUS 0x22  //	Queries the status of previous FM_TUNE_FREQ or FM_SEEK_START command.
+#define CMD_FM_RSQ_STATUS 0x23   //	Queries the status of the Received Signal Quality (RSQ) of the current channel
+#define CMD_FM_RDS_STATUS 0x24   //	Returns RDS information for current channel and reads an entry from RDS FIFO.
+#define CMD_FM_AGC_STATUS 0x27   //	Queries the current AGC settings All
 #define CMD_FM_AGC_OVERRIDE 0x28 //	Override AGC setting by disabling and forcing it to a fixed value
 
 // FM Transmit Commands
@@ -198,42 +210,66 @@
 #define PROP_TX_PREEMPHASIS_50 0x01
 #define PROP_TX_PREEMPHASIS_75 0x00
 
-/// Initialize the extra variables in SI4721
-SI4721::SI4721()
+
+#define ELVRADIO
+
+/// Initialize the extra variables in SI47xx
+SI47xx::SI47xx()
 {
   _realVolume = 0;
   _txPower = 90;
 }
 
+
+void SI47xx::setup(int feature, int value)
+{
+  RADIO::setup(feature, value);
+  // if (feature == RADIO_ANTENNA) {
+  //   _sdaPin = value;
+  // } // if
+} // setup()
+
+
 /// Initialize the library and the chip.
 /// Set all internal variables to the standard values.
-/// @return bool The return value is true when a SI4721 chip was found.
-bool SI4721::init(TwoWire &wirePort, uint8_t deviceAddress)
+/// @return bool The return value is true when a SI47xx chip was found.
+bool SI47xx::init()
 {
-  bool result; // chip found ?.
+  bool found = true; // chip found ?.
   DEBUG_FUNC0("init");
 
-  RADIO::init();
+  RADIO::init(); // will create reset impulse
 
   // Now that the unit is reset and I2C interface mode, we need to begin I2C
-  _i2cPort = &wirePort;
   _i2cPort->begin();
-  _i2caddr = deviceAddress;
 
   // see if a chip can be found
-  result = RADIO::_wireExists(_i2cPort, deviceAddress);
-
-  // Power down the device
-  _sendCommand(1, CMD_POWER_DOWN);
+  if (_i2caddr == 0) {
+    // check some known addresses
+    // if (RADIO::_wireExists(_i2cPort, SI47xx_ADR0)) {
+    //   deviceAddress = SI47xx_ADR0;
+    // } else
+    if (RADIO::_wireExists(_i2cPort, SI47xx_ADR1)) {
+      _i2caddr = SI47xx_ADR1;
+    } else if (RADIO::_wireExists(_i2cPort, SI47xx_ADR2)) {
+      _i2caddr = SI47xx_ADR2;
+    } else if (RADIO::_wireExists(_i2cPort, SI47xx_ADR3)) {
+      _i2caddr = SI47xx_ADR3;
+    } else {
+      found = false;
+    }
+  } else {
+    found = RADIO::_wireExists(_i2cPort, _i2caddr);
+  } // if
 
   // powering up is done by specifying the band etc. so it's implemented in setBand
-  return (result);
+  return (found);
 } // init()
 
 
 /// Switch all functions of the chip off by powering down.
 /// @return void
-void SI4721::term()
+void SI47xx::term()
 {
   _sendCommand(1, CMD_POWER_DOWN);
 } // term
@@ -243,7 +279,7 @@ void SI4721::term()
 
 /// This function maps the newVolume value in the range 0..15 to the range 0..63 that is available in this chip.
 /// @param newVolume The new volume level of audio output.
-void SI4721::setVolume(uint8_t newVolume)
+void SI47xx::setVolume(uint8_t newVolume)
 {
   DEBUG_FUNC1("setVolume", newVolume);
   setVolumeX(newVolume * 4);
@@ -252,7 +288,7 @@ void SI4721::setVolume(uint8_t newVolume)
 
 /// This function sets the volume in the range 0..63.
 /// @param newVolume The new volume level of audio output.
-void SI4721::setVolumeX(uint8_t newVolume)
+void SI47xx::setVolumeX(uint8_t newVolume)
 {
   if (newVolume > 63)
     newVolume = 63;
@@ -264,7 +300,7 @@ void SI4721::setVolumeX(uint8_t newVolume)
 
 /// Retrieve the current output volume in the range 0..63.
 /// @return uint8_t actual volume.
-uint8_t SI4721::getVolumeX()
+uint8_t SI47xx::getVolumeX()
 {
   return (_realVolume);
 } // getVolumeX()
@@ -274,7 +310,7 @@ uint8_t SI4721::getVolumeX()
 /// In mute mode no output will be produced by the radio chip.
 /// @param switchOn The new state of the mute mode. True to switch on, false to switch off.
 /// @return void
-void SI4721::setMute(bool switchOn)
+void SI47xx::setMute(bool switchOn)
 {
   RADIO::setMute(switchOn);
 
@@ -293,7 +329,7 @@ void SI4721::setMute(bool switchOn)
 /// This number is also used as the pre-emphasis in transmit mode
 /// @param uS The new deemphasis value in µS
 /// @return void
-void SI4721::setDeemphasis(uint8_t uS)
+void SI47xx::setDeemphasis(uint8_t uS)
 {
   _fmDeemphasis = uS;
 }
@@ -302,7 +338,7 @@ void SI4721::setDeemphasis(uint8_t uS)
 /// If switched on the radio output is muted when no sender was found.
 /// @param switchOn The new state of the softmute mode. True to switch on, false to switch off.
 /// @return void
-void SI4721::setSoftMute(bool switchOn)
+void SI47xx::setSoftMute(bool switchOn)
 {
   RADIO::setSoftMute(switchOn);
 
@@ -316,12 +352,12 @@ void SI4721::setSoftMute(bool switchOn)
 } // setSoftMute()
 
 
-/// BassBoost is not supported by the SI4721 chip.
+/// BassBoost is not supported by the SI47xx chips.
 /// @param switchOn this functions ignores the switchOn parameter and always sets bassBoost to false.
 /// @return void
-void SI4721::setBassBoost(bool switchOn)
+void SI47xx::setBassBoost(bool switchOn)
 {
-  DEBUG_STR("not supported.");
+  DEBUG_STR("BassBoost is not supported.");
   RADIO::setBassBoost(false);
 } // setBassBoost()
 
@@ -330,7 +366,7 @@ void SI4721::setBassBoost(bool switchOn)
 /// In mono mode the stereo decoding will be switched off completely  and the noise is typically reduced.
 /// @param switchOn The new state of the mono mode. True to switch on, false to switch off.
 /// @return void
-void SI4721::setMono(bool switchOn)
+void SI47xx::setMono(bool switchOn)
 {
   RADIO::setMono(switchOn);
   if (_band == RADIO_BAND_FMTX) {
@@ -345,8 +381,8 @@ void SI4721::setMono(bool switchOn)
     } else {
       // Automatic stereo feature on.
       _setProperty(PROP_FM_BLEND_STEREO_THRESHOLD, 49); // default = 49 dBμV
-    } // if
-  } // if
+    }                                                   // if
+  }                                                     // if
 } // setMono
 
 
@@ -358,7 +394,7 @@ void SI4721::setMono(bool switchOn)
  * @param newBand The new band to be enabled.
  * @return void
  */
-void SI4721::setBand(RADIO_BAND newBand)
+void SI47xx::setBand(RADIO_BAND newBand)
 {
   // Power down the device
   _sendCommand(1, CMD_POWER_DOWN);
@@ -370,28 +406,54 @@ void SI4721::setBand(RADIO_BAND newBand)
     RADIO::setBand(newBand);
 
     // Power up in receive mode without patch
-    _sendCommand(3, CMD_POWER_UP, (CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_1_FUNC_FM), CMD_POWER_UP_2_ANALOGOUT);
+    _sendCommand(3, CMD_POWER_UP, (CMD_POWER_UP_1_XOSCEN | CMD_POWER_UP_1_CTSIEN | CMD_POWER_UP_1_FUNC_FM), CMD_POWER_UP_2_ANALOGOUT);
 
     // delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
     delay(500);
 
-    _setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
+#if defined(ELVRADIO)
+    // enable GPO1 output for mute function
+    _sendCommand(2, CMD_GPIO_CTL, CMD_GPIO_CTL_GPO1OEN);
+    _sendCommand(2, CMD_GPIO_SET, 0);
+#endif
+
+    // query chip
+    if (1) {
+      uint8_t values[15];
+      _wireRead(_i2cPort, _i2caddr, CMD_GET_REV, values, sizeof(values));
+      uint8_t chip = values[1];
+      DEBUG_VAL("Chip SI47xx", chip);
+
+      _hasRDS = ((chip == 3) || (chip == 5) || (chip == 21));
+      _hasAM = (chip == 30);
+      _hasTX = (chip == 21);
+    }
+
+    _setProperty(PROP_REFCLK_FREQ, 32768);                                                                 // crystal is 32.768
     _setProperty(PROP_FM_DEEMPHASIS, _fmDeemphasis == 75 ? PROP_FM_DEEMPHASIS_75 : PROP_FM_DEEMPHASIS_50); // Europe 50μS / USA 75μS deemphasis
-    _setProperty(PROP_FM_SEEK_FREQ_SPACING, _freqSteps); // in 100kHz spacing
-    _setProperty(PROP_FM_ANTENNA_INPUT, PROP_FM_ANTENNA_INPUT_SHORT); // sets antenna input
+    _setProperty(PROP_FM_SEEK_FREQ_SPACING, _freqSteps);                                                   // in 100kHz spacing
+
+    //  Antenna option for Si4704/05/06/20/21
+    if (_antennaOption == RADIO_ANTENNA_OPT1) {
+      _setProperty(PROP_FM_ANTENNA_INPUT, PROP_FM_ANTENNA_INPUT_FMI); // sets antenna input to FMI pin
+    } else if (_antennaOption == RADIO_ANTENNA_OPT2) {
+      _setProperty(PROP_FM_ANTENNA_INPUT, PROP_FM_ANTENNA_INPUT_SHORT); // sets antenna input to LPI pin
+    }
+
     setFrequency(_freqLow);
 
     setMono(true);
     setSoftMute(true);
-    setVolume(0);
+    setVolume(3);
     setMute(false);
 
     // adjust sensibility for scanning
     _setProperty(FM_SEEK_TUNE_SNR_THRESHOLD, 12);
     _setProperty(FM_SEEK_TUNE_RSSI_TRESHOLD, 42);
 
-    // _setProperty(PROP_GPO_IEN, 0); // no interrupts
-    _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN | PROP_GPO_IEN_RDSIEN); //  | PROP_GPO_IEN_RDSIEN ????
+    _setProperty(PROP_GPO_IEN, 0); // no interrupts
+    // _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN);
+    // _setProperty(PROP_GPO_IEN, PROP_GPO_IEN_STCIEN | PROP_GPO_IEN_RDSIEN); //  | PROP_GPO_IEN_RDSIEN ????
 
   } else if (newBand == RADIO_BAND_FMTX) {
     RADIO::setBand(newBand);
@@ -401,10 +463,10 @@ void SI4721::setBand(RADIO_BAND newBand)
     // delay 500 msec when using the crystal oscillator as mentioned in the note from the POWER_UP command.
     delay(500);
 
-    _setProperty(PROP_REFCLK_FREQ, 32768); // crystal is 32.768
+    _setProperty(PROP_REFCLK_FREQ, 32768);                                                                    // crystal is 32.768
     _setProperty(PROP_TX_PREEMPHASIS, _fmDeemphasis == 75 ? PROP_TX_PREEMPHASIS_75 : PROP_TX_PREEMPHASIS_50); // uses the RX deemphasis as the TX preemphasis
-    _setProperty(PROP_TX_ACOMP_GAIN, 10); // sets max gain
-    _setProperty(PROP_TX_ACOMP_ENABLE, 0x0); // turns off limiter and AGC
+    _setProperty(PROP_TX_ACOMP_GAIN, 10);                                                                     // sets max gain
+    _setProperty(PROP_TX_ACOMP_ENABLE, 0x0);                                                                  // turns off limiter and AGC
 
     setTXPower(_txPower); // set Power after frequency
 
@@ -436,7 +498,7 @@ void SI4721::setBand(RADIO_BAND newBand)
 
 /// Retrieve the real frequency from the chip after manual or automatic tuning.
 /// @return RADIO_FREQ the current frequency.
-RADIO_FREQ SI4721::getFrequency()
+RADIO_FREQ SI47xx::getFrequency()
 {
 
   if (_band == RADIO_BAND_FMTX) {
@@ -458,7 +520,7 @@ RADIO_FREQ SI4721::getFrequency()
 /// the stored value might not be the current frequency.
 /// @param newF The new frequency to be received/transmitted.
 /// @return void
-void SI4721::setFrequency(RADIO_FREQ newF)
+void SI47xx::setFrequency(RADIO_FREQ newF)
 {
   uint8_t status;
 
@@ -483,7 +545,7 @@ void SI4721::setFrequency(RADIO_FREQ newF)
 
 
 /// Start seek mode upwards.
-void SI4721::seekUp(bool toNextSender)
+void SI47xx::seekUp(bool toNextSender)
 {
   uint8_t status;
 
@@ -509,7 +571,7 @@ void SI4721::seekUp(bool toNextSender)
 
 
 /// Start seek mode downwards.
-void SI4721::seekDown(bool toNextSender)
+void SI47xx::seekDown(bool toNextSender)
 {
   uint8_t status;
   if (!toNextSender) {
@@ -532,7 +594,7 @@ void SI4721::seekDown(bool toNextSender)
 
 
 /// Load the status information from to the chip.
-uint8_t SI4721::_readStatus()
+uint8_t SI47xx::_readStatus()
 {
   uint8_t data[1];
   _wireRead(_i2cPort, _i2caddr, CMD_GET_INT_STATUS, data, 1);
@@ -541,7 +603,7 @@ uint8_t SI4721::_readStatus()
 
 
 /// Load status information from to the chip.
-void SI4721::_readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len)
+void SI47xx::_readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_t len)
 {
   uint8_t buffer[2] = {cmd, param};
   _wireRead(_i2cPort, _i2caddr, buffer, 2, values, len);
@@ -549,7 +611,7 @@ void SI4721::_readStatusData(uint8_t cmd, uint8_t param, uint8_t *values, uint8_
 
 
 /// Return a filled RADIO_INFO with the status of the radio features of the chip.
-void SI4721::getRadioInfo(RADIO_INFO *info)
+void SI47xx::getRadioInfo(RADIO_INFO *info)
 {
   RADIO::getRadioInfo(info);
 
@@ -565,36 +627,40 @@ void SI4721::getRadioInfo(RADIO_INFO *info)
   info->rssi = rsqStatus[4];
   info->snr = rsqStatus[5];
 
-  _readStatusData(CMD_FM_RDS_STATUS, 0x05, rdsStatus.buffer, sizeof(rdsStatus));
-  if (rdsStatus.resp2 & 0x01)
-    info->rds = true;
+  if (_hasRDS) {
+    _readStatusData(CMD_FM_RDS_STATUS, 0x05, rdsStatus.buffer, sizeof(rdsStatus));
+    if (rdsStatus.resp2 & 0x01)
+      info->rds = true;
+  }
 } // getRadioInfo()
 
 
 /// Return a filled AUIO_INFO with the actual audio settings.
-void SI4721::getAudioInfo(AUDIO_INFO *info)
+void SI47xx::getAudioInfo(AUDIO_INFO *info)
 {
   RADIO::getAudioInfo(info);
 } // getAudioInfo()
 
 
 // initialize RDS mode
-void SI4721::attachReceiveRDS(receiveRDSFunction newFunction)
+void SI47xx::attachReceiveRDS(receiveRDSFunction newFunction)
 {
   DEBUG_FUNC0("attachReceiveRDS");
 
-  // enable RDS
-  _setProperty(PROP_RDS_INTERRUPT_SOURCE, PROP_RDS_INTERRUPT_SOURCE_RDSRECV); // Set the CTS status bit after receiving RDS data.
-  _setProperty(PROP_RDS_INT_FIFO_COUNT, 4);
-  _setProperty(PROP_RDS_CONFIG, 0xFF01); // accept all correctable data and enable rds
+  if (_hasRDS) {
+    // enable RDS
+    _setProperty(PROP_RDS_INTERRUPT_SOURCE, PROP_RDS_INTERRUPT_SOURCE_RDSRECV); // Set the CTS status bit after receiving RDS data.
+    _setProperty(PROP_RDS_INT_FIFO_COUNT, 4);
+    _setProperty(PROP_RDS_CONFIG, 0xFF01); // accept all correctable data and enable rds
 
-  RADIO::attachReceiveRDS(newFunction);
+    RADIO::attachReceiveRDS(newFunction);
+  }
 }
 
 /// Retrieve the next RDS data if available.
-void SI4721::checkRDS()
+void SI47xx::checkRDS()
 {
-  if (_sendRDS) {
+  if ((_hasRDS) && (_sendRDS)) {
     // fetch the current RDS data
     _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
 
@@ -608,13 +674,13 @@ void SI4721::checkRDS()
                RDSBLOCKWORD(rdsStatus.blockCH, rdsStatus.blockCL),
                RDSBLOCKWORD(rdsStatus.blockDH, rdsStatus.blockDL));
     } // if
-  } // if _sendRDS
+  }   // if _sendRDS
 } // checkRDS()
 
 // ----- Transmitter functions -----
 
 /// Get the current output power.
-uint8_t SI4721::getTXPower()
+uint8_t SI47xx::getTXPower()
 {
   return (_txPower);
 }
@@ -623,7 +689,7 @@ uint8_t SI4721::getTXPower()
 /// Set the output power of the device.
 /// @param pwr Output power of the device in dBµV (valid range is 88 to 115)
 /// @return void
-void SI4721::setTXPower(uint8_t pwr)
+void SI47xx::setTXPower(uint8_t pwr)
 {
   _txPower = pwr;
   _sendCommand(5, CMD_TX_TUNE_POWER, 0, 0, pwr, 0);
@@ -635,16 +701,16 @@ void SI4721::setTXPower(uint8_t pwr)
 /// will use 0xBEEF as your Program ID.
 /// @param programID Optional 4 character hexadecimal ID
 /// @return void
-void SI4721::beginRDS(uint16_t programID)
+void SI47xx::beginRDS(uint16_t programID)
 {
 
-  _setProperty(PROP_TX_AUDIO_DEVIATION, 6625); // 66.25KHz (default is 68.25)
-  _setProperty(PROP_TX_RDS_DEVIATION, 200); // 2KHz (default)
+  _setProperty(PROP_TX_AUDIO_DEVIATION, 6625);        // 66.25KHz (default is 68.25)
+  _setProperty(PROP_TX_RDS_DEVIATION, 200);           // 2KHz (default)
   _setProperty(PROP_TX_RDS_INTERRUPT_SOURCE, 0x0001); // RDS IRQ
-  _setProperty(PROP_TX_RDS_PI, programID); // program identifier
-  _setProperty(PROP_TX_RDS_PS_MIX, 0x03); // 50% mix (default)
-  _setProperty(PROP_TX_RDS_PS_MISC, 0x1808); // RDSD0 & RDSMS (default)
-  _setProperty(PROP_TX_RDS_PS_REPEAT_COUNT, 3); // 3 repeats (default)
+  _setProperty(PROP_TX_RDS_PI, programID);            // program identifier
+  _setProperty(PROP_TX_RDS_PS_MIX, 0x03);             // 50% mix (default)
+  _setProperty(PROP_TX_RDS_PS_MISC, 0x1808);          // RDSD0 & RDSMS (default)
+  _setProperty(PROP_TX_RDS_PS_REPEAT_COUNT, 3);       // 3 repeats (default)
   _setProperty(PROP_TX_RDS_MESSAGE_COUNT, 1);
   _setProperty(PROP_TX_RDS_PS_AF, 0xE0E0); // no AF
   _setProperty(PROP_TX_RDS_FIFO_SIZE, 0);
@@ -657,7 +723,7 @@ void SI4721::beginRDS(uint16_t programID)
 /// station identity name.
 /// @param *s string containing your 8 character name
 /// @return void
-void SI4721::setRDSstation(char *s)
+void SI47xx::setRDSstation(char *s)
 {
   uint8_t i, len = strlen(s);
   uint8_t slots = (len + 3) / 4;
@@ -665,7 +731,7 @@ void SI4721::setRDSstation(char *s)
   for (uint8_t i = 0; i < slots; i++) {
     uint8_t psChar[4] = {' ', ' ', ' ', ' '};
     memcpy(psChar, s, min(4, (int)strlen(s))); // copy from index of string s to the minimum of 4 or the length of s
-    s += 4; // advance index of s by 4
+    s += 4;                                    // advance index of s by 4
     _sendCommand(6, CMD_TX_RDS_PS, i, psChar[0], psChar[1], psChar[2], psChar[3], 0);
   }
 }
@@ -673,7 +739,7 @@ void SI4721::setRDSstation(char *s)
 /// Load new data into RDS Radio Text Buffer.
 /// @param *s string containing arbitrary text to be transmitted as RDS Radio Text
 /// @return void
-void SI4721::setRDSbuffer(char *s)
+void SI47xx::setRDSbuffer(char *s)
 {
   uint8_t i, len = strlen(s);
   uint8_t slots = (len + 3) / 4;
@@ -692,7 +758,7 @@ void SI4721::setRDSbuffer(char *s)
 /// Get TX Status and Audio Input Metrics
 /// @param void
 /// @return ASQ_STATUS struct containing asq and audioInLevel values
-ASQ_STATUS SI4721::getASQ()
+ASQ_STATUS SI47xx::getASQ()
 {
   _sendCommand(2, CMD_TX_ASQ_STATUS, 0x1);
 
@@ -714,7 +780,7 @@ ASQ_STATUS SI4721::getASQ()
 /// Get TX Tuning Status
 /// @param void
 /// @return TX_STATUS struct containing frequency, dBuV, antennaCap, and noiseLevel values
-TX_STATUS SI4721::getTuneStatus()
+TX_STATUS SI47xx::getTuneStatus()
 {
   _sendCommand(2, CMD_TX_TUNE_STATUS, 0x1);
 
@@ -740,7 +806,7 @@ TX_STATUS SI4721::getTuneStatus()
 // ----- Debug functions -----
 
 /// Send the current values of all registers to the Serial port.
-void SI4721::debugStatus()
+void SI47xx::debugStatus()
 {
   RADIO::debugStatus();
   _readStatusData(CMD_FM_TUNE_STATUS, 0x03, tuneStatus, sizeof(tuneStatus));
@@ -793,13 +859,15 @@ void SI4721::debugStatus()
   Serial.print(' ');
   Serial.println();
 
-  Serial.print("RDS-Status: ");
-  _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
-  for (uint8_t n = 0; n < 12; n++) {
-    Serial.print(rsqStatus[n], HEX);
-    Serial.print(' ');
-  } // for
-  Serial.println();
+  if (_hasRDS) {
+    Serial.print("RDS-Status: ");
+    _readStatusData(CMD_FM_RDS_STATUS, 0x01, rdsStatus.buffer, sizeof(rdsStatus));
+    for (uint8_t n = 0; n < 12; n++) {
+      Serial.print(rsqStatus[n], HEX);
+      Serial.print(' ');
+    } // for
+    Serial.println();
+  }
 
   // AGC settings and status
   Serial.print("AGC-Status: ");
@@ -816,14 +884,14 @@ void SI4721::debugStatus()
 
 
 /// wait until the current seek and tune operation is over.
-void SI4721::_waitEnd()
+void SI47xx::_waitEnd()
 {
   DEBUG_FUNC0("_waitEnd");
 } // _waitEnd()
 
 
 /// Send an array of bytes to the radio chip
-void SI4721::_sendCommand(int cnt, int cmd, ...)
+void SI47xx::_sendCommand(int cnt, int cmd, ...)
 {
   uint8_t cmdData[12];
 
@@ -850,7 +918,7 @@ void SI4721::_sendCommand(int cnt, int cmd, ...)
 
 
 /// Set a property in the radio chip
-void SI4721::_setProperty(uint16_t prop, uint16_t value)
+void SI47xx::_setProperty(uint16_t prop, uint16_t value)
 {
   uint8_t cmdData[6] = {CMD_SET_PROPERTY, 0, prop >> 8, prop & 0x00FF, value >> 8, value & 0x00FF};
   _wireRead(_i2cPort, _i2caddr, cmdData, 6, &_status, 1);

@@ -135,14 +135,6 @@ bool SI4705::init() {
   // powering up is done by specifying the band etc. so it's implemented in setBand
   setBand(RADIO_BAND_FM);
 
-  // set some common properties
-  _setProperty(PROP_FM_ANTENNA_INPUT, PROP_FM_ANTENNA_INPUT_SHORT);
-
-#if defined(ELVRADIO)
-  // enable GPO1 output for mute function
-  _sendCommand(2, CMD_GPIO_CTL, CMD_GPIO_CTL_GPO1OEN);
-#endif
-
   // set volume to 0 and mute so no noise gets out here.
   _setProperty(PROP_RX_VOLUME, 0);
 
@@ -291,6 +283,16 @@ void SI4705::setBand(RADIO_BAND newBand) {
     delay(500);
     _setProperty(PROP_FM_DEEMPHASIS, PROP_FM_DEEMPHASIS_50); // for Europe 50 deemphasis
     _setProperty(PROP_FM_SEEK_FREQ_SPACING, _freqSteps); // in 100kHz spacing
+
+  // set some common properties
+  _setProperty(PROP_FM_ANTENNA_INPUT, PROP_FM_ANTENNA_INPUT_SHORT);
+
+#if defined(ELVRADIO)
+  // enable GPO1 output for mute function
+  _sendCommand(2, CMD_GPIO_CTL, CMD_GPIO_CTL_GPO1OEN);
+#endif
+
+
 
   } else {
     _sendCommand(1, CMD_POWER_DOWN);

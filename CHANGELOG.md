@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - unpublished 
+
+This release focus on adding the SI4730 chip and unifying some interfaces and behavior and testing with all known boards.
+
+* AM mode of SI4730 is supported.
+* initializing a chip using the init() functions will not yet turn on any functionality but setBand will do.
+* The examples for the SI47xx chips following the AN332 programming guide have been unified.
+
 ## [2.0.0] - 2020-09-17 
 
 > **Important changes**

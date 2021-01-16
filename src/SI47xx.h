@@ -1,6 +1,6 @@
 ///
-/// \file SI4721.h
-/// \brief Library header file for the radio library to control the SI4721 radio chip.
+/// \file SI47xx.h
+/// \brief Library header file for the radio library to control the SI47xx radio chips.
 ///
 /// \author N Poole, nickpoole.me
 /// \author Matthias Hertel, http://www.mathertel.de
@@ -8,7 +8,7 @@
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
 ///
-/// This library enables the use of the Radio Chip SI4721 for receiving and transmitting.
+/// This library enables the use of the Radio Chip SI47xx for receiving and transmitting.
 /// Settings are compatible top the following board from sparkfun: https://www.sparkfun.com/products/15853
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
@@ -17,21 +17,18 @@
 /// ----------
 /// * 01.12.2019 created.
 /// * 17.09.2020 si4721 specific initialization moved into setBand()
+/// * 04.12.2020 more si47xx chips support.
 
-#ifndef SI4721_h
-#define SI4721_h
+#ifndef SI47xx_h
+#define SI47xx_h
 
 #include <Arduino.h>
 
 // The wire library is used for the communication with the radio chip.
 #include <Wire.h>
 
-// Include the radio library that is extended by the SI4721 library.
+// Include the radio library that is extended by the SI47xx library.
 #include <radio.h>
-
-// SI4721 specifics
-
-#define SI4721_ADR 0x11 ///< The I2C address of SI4721 is 0x11 or 0x63
 
 // A structure for storing ASQ Status and Audio Input Metrics
 typedef struct ASQ_STATUS {
@@ -49,17 +46,19 @@ typedef struct TX_STATUS {
 
 // ----- library definition -----
 
-/// Library to control the SI4721 radio chip.
-class SI4721 : public RADIO
+/// Library to control the SI47xx radio chip.
+class SI47xx : public RADIO
 {
 public:
   const uint8_t MAXVOLUME = 15; ///< max volume level for radio implementations.
-  const uint8_t MAXVOLUMEX = 63; ///< max volume level for the SI4721 specific implementation.
+  const uint8_t MAXVOLUMEX = 63; ///< max volume level for the SI47xx specific implementation.
 
-  SI4721();
+  SI47xx();
+
+  void setup(int feature, int value) override;
 
   /** Initialize the library and the chip. */
-  bool init(TwoWire &wirePort = Wire, uint8_t deviceAddress = SI4721_ADR);
+  bool init();
 
   /** Terminate all radio functions in the chip. */
   void term();
@@ -124,6 +123,9 @@ public:
 
 private:
   // ----- local variables
+  bool _hasRDS = false;
+  bool _hasAM = false;
+  bool _hasTX = false;
 
   uint8_t _realVolume; ///< The real volume set to the chip.
 
@@ -139,7 +141,7 @@ private:
 
   uint8_t _txPower;
 
-  /// structure used to read status information from the SI4721 radio chip.
+  /// structure used to read status information from the SI47xx radio chip.
   union {
     // use structured access
     struct {
@@ -162,7 +164,7 @@ private:
   } tuneStatus2; // union RDSSTATUS
 
 
-  /// structure used to read RDS information from the SI4721 radio chip.
+  /// structure used to read RDS information from the SI47xx radio chip.
   union {
     // use structured access
     struct {
@@ -201,9 +203,6 @@ private:
 
   void _seek(bool seekUp = true);
   void _waitEnd();
-
-  TwoWire *_i2cPort;
-  int _i2caddr;
 };
 
 #endif

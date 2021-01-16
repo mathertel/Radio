@@ -15,7 +15,7 @@
 ///
 /// Wiring
 /// ------ 
-/// The SI4703 board/chip has to be connected by using the following connections:
+/// The SI4705 board/chip has to be connected by using the following connections:
 /// | Arduino UNO pin | Radio chip signal  | 
 /// | --------------- | -------------------| 
 /// | 3.3V            | VCC                | 
@@ -42,7 +42,7 @@
 
 #define FIX_BAND     RADIO_BAND_FM   ///< The band that will be tuned by this sketch is FM.
 #define FIX_STATION  8930            ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME   4               ///< The volume that will be set by this sketch is level 4.
+#define FIX_VOLUME   8               ///< The volume that will be set by this sketch is level 4.
 
 SI4705 radio;    // Create an instance of Class for SI4705 Chip
 
@@ -50,7 +50,7 @@ SI4705 radio;    // Create an instance of Class for SI4705 Chip
 /// with some debugging on the Serial port
 void setup() {
   // open the Serial port
-  Serial.begin(57600);
+  Serial.begin(115200);
   Serial.println("Radio...");
   delay(200);
 
@@ -85,4 +85,3 @@ void loop() {
 } // loop
 
 // End.
-

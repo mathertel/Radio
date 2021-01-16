@@ -20,8 +20,7 @@ Currently the following radio receiver chips are supported:
 
 * The **RDA5807M** from RDA Microelectronics
 * The **SI4703** from Silicon Labs
-* The **SI4705** from Silicon Labs
-* The **SI4721** from Silicon Labs
+* The **SI4705**, **SI4721** and **SI4730** chips from Silicon Labs
 * The **TEA5767** from NXP
 
 They all are capable for receiving FM radio stations in stereo with European and US settings and can be controlled by using the I2C bus. However there are differences in the sensitivity and quality and well on receiving RDS information from the stations.
@@ -48,9 +47,9 @@ Within the Arduino library you can find examples that implement different scenar
 The basic examples only startup the chips and set a static station and volume:LCDKeypadRadio
 * **TestRDA5807M** to test the RDA5807M chip. 
 * **TestSI4703** to test the SI4703 chip.
-* **TestSI4705** to test the SI4705 chip.
-* **TestSI4721** to test the SI4721 chip.
+* **TestSI47xx** to test the SI4705, SI4721 and SI4730 chips.
 * **TestTEA5767** to test the TEA5767 chip.
+* **TransmitSI4721** to test transmission mode of SI4721 chip.
 
 The examples can be used with several chips:
 
