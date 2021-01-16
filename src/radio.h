@@ -140,6 +140,10 @@ typedef struct AUDIO_INFO {
 #define RADIO_RESETPIN 0x01
 #define RADIO_SDAPIN 0x02
 #define RADIO_I2CADDRESS 0x03
+#define RADIO_ANTENNA 0x04
+#define RADIO_ANTENNA_DEFAULT 0
+#define RADIO_ANTENNA_OPT1 1
+#define RADIO_ANTENNA_OPT2 2
 
 
 /// Library to control radio chips in general. This library acts as a base library for the chip specific implementations.
@@ -292,7 +296,10 @@ protected:
   int _i2caddr;
 
   // extra pins
-  uint8_t _resetPin = -1;
+  int _resetPin = -1;
+
+  // OPTIONS
+  int _antennaOption = 0;
 
 private:
   void int16_to_s(char *s, uint16_t val); ///< Converts a int16 number to a string, similar to itoa, but using the format "00000".

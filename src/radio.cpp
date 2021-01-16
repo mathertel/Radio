@@ -44,6 +44,8 @@ void RADIO::setup(int feature, int value)
     _resetPin = value;
   } else if ((feature == RADIO_I2CADDRESS) && (value > 0)) {
     _i2caddr = value;
+  } else if ((feature == RADIO_ANTENNA) && (value > 0)) {
+    _antennaOption = value;
   }
 
 } // setup()
@@ -423,7 +425,10 @@ void RADIO::_wireWriteTo(TwoWire *port, int address, uint8_t *cmdData, int cmdLe
       uint8_t d = cmdData[i];
       port->write(d);
       if (_wireDebugFlag) {
-        Serial.printf("%02x ", d);
+        // write a hex value to Serial
+        if (d < 16) Serial.print('0');
+        Serial.print(d, 16);
+        Serial.print(' ');
       } // if
     } // for
 
@@ -440,7 +445,9 @@ uint8_t RADIO::_wireReadFrom(TwoWire *port, int address, uint8_t *data, int len)
     while (!received) {
       received = port->requestFrom(address, len);
       if (_wireDebugFlag) {
-        Serial.printf("[%d]", received);
+        Serial.print('[');
+        Serial.print(received);
+        Serial.print(']');
       }
     }
 
@@ -448,7 +455,10 @@ uint8_t RADIO::_wireReadFrom(TwoWire *port, int address, uint8_t *data, int len)
     for (int n = 0; n < received; n++) {
       *d = port->read();
       if (_wireDebugFlag) {
-        Serial.printf("%02x ", *d);
+        // write a hex value to Serial
+        if (*d < 16) Serial.print('0');
+        Serial.print(*d, 16);
+        Serial.print(' ');
       }
       d++;
     }
