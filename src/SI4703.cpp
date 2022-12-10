@@ -160,6 +160,8 @@ bool SI4703::init() {
   registers[SYSCONFIG3] &= ~(SKSNR_MASK); // Clear seek mask bits
   registers[SYSCONFIG3] |= SKSNR_MID;     //Set volume
   
+  registers[POWERCFG] |= (1 << RDSMODE); // set force verbose bit
+	  
   _saveRegisters(); //Update
 
   delay(110); //Max powerup time, from datasheet page 13
@@ -238,17 +240,6 @@ void SI4703::setSoftMute(bool switchOn)
 
 } // setSoftMute()
 
-void SI4703::setRDSVerbose(bool verbose)
-{
-  DEBUG_FUNC1("setRDSVerbose", verbose);
-  _readRegisters(); //Read the current register set
-  if (verbose) {
-    registers[POWERCFG] |= (1 << RDSMODE); // set force verbose bit
-  } else {
-    registers[POWERCFG] &= ~(1 << RDSMODE); // clear force verbose bit
-  } // if
-  _saveRegisters();
-} // setRDSVerbose()
 
 // ----- Band and frequency control methods -----
 
