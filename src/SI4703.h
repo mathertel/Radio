@@ -65,9 +65,6 @@ class SI4703 : public RADIO {
   // Control the softMute function of the radio chip
   void   setSoftMute(bool switchOn); // Switch to soft mute mode.
 
-  // Control the RDS verbose function of the radio chip
-  void   setRDSVerbose(bool verbose); // Switch to verbose mode.
-
   void   writeGPIO(int GPIO, int val);
 
   // Control of the core receiver
