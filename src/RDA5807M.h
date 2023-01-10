@@ -76,7 +76,7 @@ class RDA5807M : public RADIO {
   void    debugScan();               // Scan all frequencies and report a status
   void    debugStatus();             // DebugInfo about actual chip data available
 
-  private:
+  protected:
   // ----- local variables
   uint16_t registers[16];  // memory representation of the registers
 
