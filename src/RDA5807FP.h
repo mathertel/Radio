@@ -8,7 +8,7 @@
 /// See http://www.mathertel.de/License.aspx
 ///
 /// \details
-/// This library enables the use of the Radio Chip RDA5807FP from http://www.rdamicro.com/ that supports FM radio bands and RDS data.
+/// This library enables the use of the Radio Chip RDA5807FP from http://www.rdamicro.com/ that supports FM radio bands, RDS data and I2S output.
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
@@ -16,7 +16,7 @@
 /// --------
 /// * 10.01.2023 created.
 
-// inherits all features from RDA5807M and adds I2S support
+// inherits all features from RDA5807M and adds basic I2S support
 
 #ifndef RDA5807FP_h
 #define RDA5807FP_h

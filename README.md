@@ -18,7 +18,7 @@ A more detailed article is available at [www.mathertel.de/Arduino/RadioLibrary.a
 
 Currently the following radio receiver chips are supported:
 
-* The **RDA5807M** from RDA Microelectronics
+* The **RDA5807M** and **RDA5807FP** with I2S support from RDA Microelectronics
 * The **SI4703** from Silicon Labs
 * The **SI4705**, **SI4721** and **SI4730** chips from Silicon Labs
 * The **TEA5767** from NXP
