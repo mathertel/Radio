@@ -38,7 +38,8 @@ Currently the following radio transmitter chips are supported:
 
 Contributions to the library like features, fixes and support of other chips and boards are welcome using Pull Requests.
 
-Please don't ask general programming questions in this project. Radio chip specific questions may be answered by the community (or not) and are closed after some months of inactivity.
+Please don't ask general programming questions in this project.
+Radio chip specific questions may be answered by the community (or not) and are closed after some months of inactivity.
 
 ## Examples
 
