@@ -23,6 +23,7 @@
 /// --------
 /// * 05.08.2014 created.
 /// * 04.10.2014 working.
+/// * 15.01.2023 ESP32, cleanup compiler warnings.
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -33,7 +34,7 @@
 #include <RDA5807M.h>
 #include <SI4703.h>
 #include <SI4705.h>
-#include <SI4721.h>
+#include <SI47xx.h>
 #include <TEA5767.h>
 
 #include <RDSParser.h>
@@ -64,15 +65,16 @@ RADIO_FREQ preset[] = {
     10500 // * FFH
 };
 
-int i_sidx = 5; ///< Start at Station with index=5
+int presetIndex = 5;  ///< Start at Station with index=5
 
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
 // RADIO radio;       ///< Create an instance of a non functional radio.
-RDA5807M radio; ///< Create an instance of a RDA5807 chip radio
+// RDA5807M radio; ///< Create an instance of a RDA5807 chip radio
 // SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
-//SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
+// SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
+SI47xx radio;
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
 
 
@@ -95,28 +97,25 @@ bool lowLevelDebug = false;
 
 
 /// Update the Frequency on the LCD display.
-void DisplayFrequency(RADIO_FREQ f)
-{
+void DisplayFrequency(RADIO_FREQ f) {
   char s[12];
   radio.formatFrequency(s, sizeof(s));
   Serial.print("FREQ:");
   Serial.println(s);
-} // DisplayFrequency()
+}  // DisplayFrequency()
 
 
 /// Update the ServiceName text on the LCD display.
-void DisplayServiceName(char *name)
-{
+void DisplayServiceName(const char *name) {
   Serial.print("RDS:");
   Serial.println(name);
-} // DisplayServiceName()
+}  // DisplayServiceName()
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4)
-{
+void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
   rds.processData(block1, block2, block3, block4);
 }
 
@@ -125,8 +124,7 @@ void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t blo
 /// See the "?" command for available commands.
 /// \param cmd The command character.
 /// \param value An optional parameter for the command.
-void runSerialCommand(char cmd, int16_t value)
-{
+void runSerialCommand(char cmd, int16_t value) {
   if (cmd == '?') {
     Serial.println();
     Serial.println("? Help");
@@ -176,16 +174,16 @@ void runSerialCommand(char cmd, int16_t value)
 
   else if (cmd == '>') {
     // next preset
-    if (i_sidx < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
-      i_sidx++;
-      radio.setFrequency(preset[i_sidx]);
-    } // if
+    if (presetIndex < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
+      presetIndex++;
+      radio.setFrequency(preset[presetIndex]);
+    }  // if
   } else if (cmd == '<') {
     // previous preset
-    if (i_sidx > 0) {
-      i_sidx--;
-      radio.setFrequency(preset[i_sidx]);
-    } // if
+    if (presetIndex > 0) {
+      presetIndex--;
+      radio.setFrequency(preset[presetIndex]);
+    }  // if
 
   } else if (cmd == 'f') {
     radio.setFrequency(value);
@@ -208,8 +206,9 @@ void runSerialCommand(char cmd, int16_t value)
     if (value == 0) {
       radio.term();
     } else if (value == 1) {
-      radio.init();
+      radio.initWire(Wire);
       radio.setBandFrequency(RADIO_BAND_FM, f);
+      radio.setVolume(10);
     }
 
   } else if (cmd == 'i') {
@@ -224,39 +223,42 @@ void runSerialCommand(char cmd, int16_t value)
     radio.debugAudioInfo();
 
   } else if (cmd == 'x') {
-    radio.debugStatus(); // print chip specific data.
+    radio.debugStatus();  // print chip specific data.
 
   } else if (cmd == '*') {
     lowLevelDebug = !lowLevelDebug;
     radio._wireDebug(lowLevelDebug);
   }
-} // runSerialCommand()
+}  // runSerialCommand()
 
 
 /// Setup a FM only radio configuration with I/O for commands and debugging on the Serial port.
-void setup()
-{
+void setup() {
+  delay(3000);
+
   // open the Serial port
   Serial.begin(115200);
-  Serial.print("Radio...");
-  delay(500);
+  Serial.println("Radio...");
+  delay(200);
 
 #ifdef ESP8266
   // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
   // need to be specified.
-  Wire.begin(D2, D1); // a common GPIO pin setting for I2C
+  Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
+
+#elif defined(ESP32)
+  Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
+
 #endif
 
   // Enable information to the Serial port
-  radio.debugEnable(true);
+  radio.debugEnable(false);
   radio._wireDebug(lowLevelDebug);
 
   // Initialize the Radio
-  radio.init();
+  radio.initWire(Wire);
 
-  radio.setBandFrequency(RADIO_BAND_FM, preset[i_sidx]); // 5. preset.
-
-  // delay(100);
+  radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]);  // 5. preset.
 
   radio.setMono(false);
   radio.setMute(false);
@@ -270,19 +272,16 @@ void setup()
 
   runSerialCommand('?', 0);
   kbState = STATE_PARSECOMMAND;
-} // Setup
+}  // Setup
 
 
 /// Constantly check for serial input commands and trigger command execution.
-void loop()
-{
-  int newPos;
+void loop() {
   unsigned long now = millis();
   static unsigned long nextFreqTime = 0;
-  static unsigned long nextRadioInfoTime = 0;
 
   // some internal static values for parsing the input
-  static RADIO_FREQ lastf = 0;
+  static RADIO_FREQ lastFrequency = 0;
   RADIO_FREQ f = 0;
 
   if (Serial.available() > 0) {
@@ -319,14 +318,14 @@ void loop()
   // update the display from time to time
   if (now > nextFreqTime) {
     f = radio.getFrequency();
-    if (f != lastf) {
+    if (f != lastFrequency) {
       // print current tuned frequency
       DisplayFrequency(f);
-      lastf = f;
-    } // if
+      lastFrequency = f;
+    }  // if
     nextFreqTime = now + 400;
-  } // if
+  }  // if
 
-} // loop
+}  // loop
 
 // End.

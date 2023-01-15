@@ -31,13 +31,13 @@
 #include <radio.h>
 
 // A structure for storing ASQ Status and Audio Input Metrics
-typedef struct ASQ_STATUS {
+struct ASQ_STATUS {
   uint8_t asq;
   uint8_t audioInLevel;
 };
 
 // A structure for storing TX Tuning Status
-typedef struct TX_STATUS {
+struct TX_STATUS {
   uint16_t frequency;
   uint8_t dBuV;
   uint8_t antennaCap;

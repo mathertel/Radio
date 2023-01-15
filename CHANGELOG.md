@@ -2,21 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.1.0] - unpublished 
+## [3.0.0] - 2023-01-15
 
-This release focus on adding the SI4730 chip and unifying some interfaces and behavior and testing with all known boards.
+* RDSParser::attachServiceNameCallback has been renamed to avoid typo.
+* Some functions have been corrected to use (const char *) instead of (char*) parameters to enforce that the passed strings are not changed
+  (e.g. receiveServiceNameFunction or receiveTextFunction). Be sure to change the parameter type avoid casting errors/warnings.
+* The interfaces to the Radio chip functionality has been changed to be more a property oriented interface.
+* A lot inline Documentation
+* fixing warnings from ESP32 compiler
+* The ESP32 processor can be used to compile some of the examples:
+  * SerialRadio.ino --  just uncomment the chip you have.
+  * TestSI4721.ino --  this example works with the SI4720 and SI4721 radio chips.
 
-* AM mode of SI4730 is supported.
-* initializing a chip using the init() functions will not yet turn on any functionality but setBand will do.
-* The examples for the SI47xx chips following the AN332 programming guide have been unified.
-
-## [2.0.0] - 2020-09-17 
+## [2.0.0] - 2020-09-17
 
 > **Important changes**
 >
 > This release focuses adding the si4721 radio chip to the library. The adoption was done using the board from sparkfun you can find here:
 > <https://www.sparkfun.com/products/15853>.
-> 
+>
 > This chip also supports sending FM signals, there is a special example 'TransmitSI4721.ino' to show this functionality.
 
 Thanks to [@NPoole](https://github.com/NPoole) for adding the adoption of the si4721 chip.
@@ -26,14 +30,13 @@ Thanks to [@NPoole](https://github.com/NPoole) for adding the adoption of the si
 
 * **[TestSI4721.ino](/examples/TestSI4721/TestSI4721.md)** - This is the simple fixed settings example to proof correct functionality and wiring.
 
-* **[TransmitSI4721.ino](/examples/TransmitSI4721/TransmitSI4721.md)** - This example shows how to implement FM transmission using the SI4721 chip. Please respect your local radio transmission policies and rules by your govermant.
-
+* **[TransmitSI4721.ino](/examples/TransmitSI4721/TransmitSI4721.md)** - This example shows how to implement FM transmission using the SI4721 chip. Please respect your local radio transmission policies and rules by your government.
 
 
 ### Enhancements
 
 * The base radio class implementations now has some I2c utility routings that will be further adopted in the chip libraries.
-* Some code to initialize the I2C bus has beed added to the examples to support ESP8266 boards.
+* Some code to initialize the I2C bus has been added to the examples to support ESP8266 boards.
 
 ### Fixes
 
@@ -46,7 +49,6 @@ With some chips that support multiple modes the power up should be handles when 
 
 This is verified for SI4721 for now.
 
-
 ### Known Issues
 
 The TransmitSI4721.ino example and the library doesn't offer all options for transmitting but some basic functionality.
@@ -58,4 +60,3 @@ Improvements are welcome.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as used for the Arduino libraries.
-
