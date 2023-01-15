@@ -20,7 +20,8 @@
 *.out
 *.app
 
-/temp
 /.vscode
 /.development
 _*
+/build
+.gitignore
