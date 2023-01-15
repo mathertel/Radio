@@ -24,10 +24,10 @@
 
 #include <Arduino.h>
 
-/// callback function for passing a ServiceName 
+/// callback function for passing a ServiceName, text and Time when RDS is available. 
 extern "C" {
-  typedef void(*receiveServiceNameFunction)(char *name);
-  typedef void(*receiveTextFunction)(char *name);
+  typedef void(*receiveServiceNameFunction)(const char *name);
+  typedef void(*receiveTextFunction)(const char *name);
   typedef void(*receiveTimeFunction)(uint8_t hour, uint8_t minute);
 }
 
