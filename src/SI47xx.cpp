@@ -17,6 +17,7 @@
 /// ChangeLog see SI47xx.h.
 
 #include <Arduino.h>
+#include <stdarg.h>
 #include <Wire.h> // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
 
 #include <radio.h> // Include the common radio library interface

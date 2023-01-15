@@ -15,6 +15,7 @@
 ///
 /// ChangeLog see SI4705.h.
 
+#include <stdarg.h>
 // Include the common radio library interface
 #include <radio.h>
 
