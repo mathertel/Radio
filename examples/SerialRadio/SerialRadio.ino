@@ -266,7 +266,7 @@ void setup()
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
-  rds.attachServicenNameCallback(DisplayServiceName);
+  rds.attachServiceNameCallback(DisplayServiceName);
 
   runSerialCommand('?', 0);
   kbState = STATE_PARSECOMMAND;

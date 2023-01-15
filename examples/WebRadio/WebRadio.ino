@@ -1011,7 +1011,7 @@ void setupRadio() {
   /// retrieve RDS data from the radio chip and forward to the RDS decoder library
   radio.attachReceiveRDS(RDS_process); // or (rds.processData)
 
-  rds.attachServicenNameCallback(DisplayServiceName);
+  rds.attachServiceNameCallback(DisplayServiceName);
   rds.attachTextCallback(DisplayText);
   rds.attachTimeCallback(DisplayTime);
 
