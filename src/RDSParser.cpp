@@ -32,10 +32,10 @@ void RDSParser::init() {
 } // init()
 
 
-void RDSParser::attachServicenNameCallback(receiveServicenNameFunction newFunction)
+void RDSParser::attachServiceNameCallback(receiveServiceNameFunction newFunction)
 {
   _sendServiceName = newFunction;
-} // attachServicenNameCallback
+} // attachServiceNameCallback
 
 void RDSParser::attachTextCallback(receiveTextFunction newFunction)
 {

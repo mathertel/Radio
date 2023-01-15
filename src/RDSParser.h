@@ -24,9 +24,9 @@
 
 #include <Arduino.h>
 
-/// callback function for passing a ServicenName 
+/// callback function for passing a ServiceName 
 extern "C" {
-  typedef void(*receiveServicenNameFunction)(char *name);
+  typedef void(*receiveServiceNameFunction)(char *name);
   typedef void(*receiveTextFunction)(char *name);
   typedef void(*receiveTimeFunction)(uint8_t hour, uint8_t minute);
 }
@@ -44,7 +44,7 @@ public:
   /// Pass all available RDS data through this function.
   void processData(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4);
 
-  void attachServicenNameCallback(receiveServicenNameFunction newFunction); ///< Register function for displaying a new Service Name.
+  void attachServiceNameCallback(receiveServiceNameFunction newFunction); ///< Register function for displaying a new Service Name.
   void attachTextCallback(receiveTextFunction newFunction); ///< Register the function for displaying a rds text.
   void attachTimeCallback(receiveTimeFunction newFunction); ///< Register function for displaying a new time
 
@@ -58,7 +58,7 @@ private:
   char _PSName2[10]; // including trailing '\00' character.
   char programServiceName[10];    // found station name or empty. Is max. 8 character long.
 
-  receiveServicenNameFunction _sendServiceName; ///< Registered ServiceName function.
+  receiveServiceNameFunction _sendServiceName; ///< Registered ServiceName function.
   receiveTimeFunction _sendTime; ///< Registered Time function.
   receiveTextFunction _sendText;
 
