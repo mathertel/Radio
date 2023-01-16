@@ -51,7 +51,7 @@
 #define RDSC 0x0E
 #define RDSD 0x0F
 
-// Register 0x02 - POWERCFG
+//Register 0x02 - POWERCFG
 #define DSMUTE 15
 #define DMUTE 14
 #define SETMONO 13
@@ -60,17 +60,17 @@
 #define SEEKUP 9
 #define SEEK 8
 
-// Register 0x03 - CHANNEL
+//Register 0x03 - CHANNEL
 #define TUNE 15
 
-// Register 0x04 - SYSCONFIG1
+//Register 0x04 - SYSCONFIG1
 #define RDS 12
 #define DE 11
 
 #define DE 11
 
 
-// Register 0x05 - SYSCONFIG2
+//Register 0x05 - SYSCONFIG2
 #define SEEKTH_MASK 0xFF00
 #define SEEKTH_MIN 0x0000
 #define SEEKTH_MID 0x1000
@@ -93,28 +93,28 @@
 #define SKCNT_MAX 0x0001
 
 
-// Register 0x0A - STATUSRSSI
-#define RDSR 0x8000  ///< RDS ready
-#define STC 0x4000   ///< Seek Tune Complete
-#define SFBL 0x2000  ///< Seek Fail Band Limit
+//Register 0x0A - STATUSRSSI
+#define RDSR 0x8000 ///<RDS ready
+#define STC 0x4000 ///<Seek Tune Complete
+#define SFBL 0x2000 ///< Seek Fail Band Limit
 #define AFCRL 0x1000
-#define RDSS 0x0800  ///< RDS syncronized
-#define SI 0x0100    ///< Stereo Indicator
+#define RDSS 0x0800 ///<RDS syncronized
+#define SI 0x0100 ///< Stereo Indicator
 #define RSSI 0x00FF
 
 // ----- implement
 
 // initialize the extra variables in SI4703
 SI4703::SI4703() {
-  _i2caddr = 0x10;  // standard address of chip
+  _i2caddr = 0x10; // standard address of chip
 }
 
 void SI4703::setup(int feature, int value) {
   RADIO::setup(feature, value);
   if (feature == RADIO_SDAPIN) {
     _sdaPin = value;
-  }  // if
-}  // setup()
+  } // if
+} // setup()
 
 
 // initialize all internals.
@@ -122,26 +122,26 @@ bool SI4703::init() {
   bool found = false;  // no chip found yet.
   DEBUG_FUNC0("SI4703::init");
 
-  // To get the Si4703 into 2-wire mode, SEN needs to be high and SDIO needs to be low after a reset
-  // The breakout board has SEN pulled high, but also has SDIO pulled high. Therefore, after a normal power up
-  // The Si4703 will be in an unknown state. RST must be controlled
+  //To get the Si4703 into 2-wire mode, SEN needs to be high and SDIO needs to be low after a reset
+  //The breakout board has SEN pulled high, but also has SDIO pulled high. Therefore, after a normal power up
+  //The Si4703 will be in an unknown state. RST must be controlled
 
   if (_sdaPin >= 0) {
-    pinMode(_sdaPin, OUTPUT);    // SDIO is connected to SDA for I2C
-    digitalWrite(_sdaPin, LOW);  // A low SDA during reset indicates a 2-wire interface
+    pinMode(_sdaPin, OUTPUT); // SDIO is connected to SDA for I2C
+    digitalWrite(_sdaPin, LOW); //A low SDA during reset indicates a 2-wire interface
   }
 
-  RADIO::init();  // will create reset impulse
+  RADIO::init(); // will create reset impulse
 
-  _i2cPort->begin();  // Now that the unit is reset and I2C inteface mode, we need to begin I2C
+  _i2cPort->begin(); //Now that the unit is reset and I2C inteface mode, we need to begin I2C
   found = RADIO::_wireExists(_i2cPort, _i2caddr);
 
-  _readRegisters();  // Read the current register set
-  // registers[0x07] = 0xBC04; //Enable the oscillator, from AN230 page 9, rev 0.5 (DOES NOT WORK, wtf Silicon Labs datasheet?)
-  registers[0x07] = 0x8100;  // Enable the oscillator, from AN230 page 9, rev 0.61 (works)
-  _saveRegisters();          // Update
+  _readRegisters(); //Read the current register set
+  //registers[0x07] = 0xBC04; //Enable the oscillator, from AN230 page 9, rev 0.5 (DOES NOT WORK, wtf Silicon Labs datasheet?)
+  registers[0x07] = 0x8100; //Enable the oscillator, from AN230 page 9, rev 0.61 (works)
+  _saveRegisters(); //Update
 
-  delay(500);  // Wait for clock to settle - from AN230 page 9
+  delay(500); //Wait for clock to settle - from AN230 page 9
 
   return (found);
 }  // init()
@@ -151,7 +151,7 @@ bool SI4703::init() {
 void SI4703::term() {
   DEBUG_FUNC0("SI4703::term");
   RADIO::term();
-}  // term
+} // term
 
 
 // ----- Volume control -----
@@ -160,26 +160,26 @@ void SI4703::setVolume(uint8_t newVolume) {
   DEBUG_FUNC1("setVolume", newVolume);
   if (newVolume > 15)
     newVolume = 15;
-  _readRegisters();                    // Read the current register set
-  registers[SYSCONFIG2] &= 0xFFF0;     // Clear volume bits
-  registers[SYSCONFIG2] |= newVolume;  // Set new volume
-  _saveRegisters();                    // Update
+  _readRegisters(); //Read the current register set
+  registers[SYSCONFIG2] &= 0xFFF0; //Clear volume bits
+  registers[SYSCONFIG2] |= newVolume; //Set new volume
+  _saveRegisters(); //Update
   RADIO::setVolume(newVolume);
-}  // setVolume()
+} // setVolume()
 
 
 // Mono / Stereo
 void SI4703::setMono(bool switchOn) {
   DEBUG_FUNC1("setMono", switchOn);
   RADIO::setMono(switchOn);
-  _readRegisters();  // Read the current register set
+  _readRegisters(); //Read the current register set
   if (switchOn) {
-    registers[POWERCFG] |= (1 << SETMONO);  // set force mono bit
+    registers[POWERCFG] |= (1 << SETMONO); // set force mono bit
   } else {
-    registers[POWERCFG] &= ~(1 << SETMONO);  // clear force mono bit
-  }                                          // if
+    registers[POWERCFG] &= ~(1 << SETMONO); // clear force mono bit
+  } // if
   _saveRegisters();
-}  // setMono
+} // setMono
 
 
 /// Switch mute mode.
@@ -188,13 +188,13 @@ void SI4703::setMute(bool switchOn) {
   RADIO::setMute(switchOn);
 
   if (switchOn) {
-    registers[POWERCFG] &= ~(1 << DMUTE);  // clear mute bit
+    registers[POWERCFG] &= ~(1 << DMUTE); // clear mute bit
   } else {
-    registers[POWERCFG] |= (1 << DMUTE);  // set mute bit
-  }                                       // if
+    registers[POWERCFG] |= (1 << DMUTE); // set mute bit
+  } // if
   _saveRegisters();
 
-}  // setMute()
+} // setMute()
 
 
 /// Switch soft mute mode.
@@ -203,13 +203,13 @@ void SI4703::setSoftMute(bool switchOn) {
   RADIO::setSoftMute(switchOn);
 
   if (switchOn) {
-    registers[POWERCFG] &= ~(1 << DSMUTE);  // clear mute bit
+    registers[POWERCFG] &= ~(1 << DSMUTE); // clear mute bit
   } else {
-    registers[POWERCFG] |= (1 << DSMUTE);  // set mute bit
-  }                                        // if
+    registers[POWERCFG] |= (1 << DSMUTE); // set mute bit
+  } // if
   _saveRegisters();
 
-}  // setSoftMute()
+} // setSoftMute()
 
 
 // ----- Band and frequency control methods -----
@@ -222,47 +222,45 @@ void SI4703::setBand(RADIO_BAND newBand) {
     RADIO::setBand(newBand);
     _freqLow = 8750;
 
-    _readRegisters();  // Read the current register set
+    _readRegisters(); //Read the current register set
 
     // PowerConfig
-    registers[POWERCFG] = 0x4001;  // Enable the IC
+    registers[POWERCFG] = 0x4001; //Enable the IC
     if (!_mute)
-      registers[POWERCFG] |= (1 << DMUTE);  // disable Mute
+      registers[POWERCFG] |= (1 << DMUTE); // disable Mute
     if (!_softMute)
-      registers[POWERCFG] |= (1 << DSMUTE);  // disable softmute
+      registers[POWERCFG] |= (1 << DSMUTE); // disable softmute
 
-    registers[SYSCONFIG1] |= (1 << RDS);  // Enable RDS
+    registers[SYSCONFIG1] |= (1 << RDS); //Enable RDS
 
     // registers[SYSCONFIG1] |= 0x0010;  //Enable GPIO3 as Stereo indicator ==> is not working with me.
 
 #ifdef IN_EUROPE
     // Freq(MHz) = 0.100(in Europe) * Channel + 87.5MHz
     _freqSteps = 10;
-    registers[SYSCONFIG1] |= (1 << DE);      // 50kHz Europe setup
-    registers[SYSCONFIG2] |= (1 << SPACE0);  // 100kHz channel spacing for Europe
+    registers[SYSCONFIG1] |= (1 << DE); //50kHz Europe setup
+    registers[SYSCONFIG2] |= (1 << SPACE0); //100kHz channel spacing for Europe
 #else
     // Freq(MHz) = 0.200(in USA) * Channel + 87.5MHz
     _freqSteps = 20;
-    registers[SYSCONFIG2] &= ~(1 << SPACE1 | 1 << SPACE0);  // Force 200kHz channel spacing for USA
+    registers[SYSCONFIG2] &= ~(1 << SPACE1 | 1 << SPACE0); //Force 200kHz channel spacing for USA
 #endif
 
     _volume = 1;
-    registers[SYSCONFIG2] &= 0xFFF0;            // Clear volume bits
-    registers[SYSCONFIG2] |= (_volume & 0x0F);  // Set volume
+    registers[SYSCONFIG2] &= 0xFFF0; //Clear volume bits
+    registers[SYSCONFIG2] |= (_volume & 0x0F); //Set volume
 
     // set seek parameters
-    registers[SYSCONFIG2] |= SEEKTH_MID;     // Set volume
-    registers[SYSCONFIG3] &= ~(SKSNR_MASK);  // Clear seek mask bits
-    registers[SYSCONFIG3] |= SKSNR_MID;      // Set volume
+    registers[SYSCONFIG2] |= SEEKTH_MID; //Set volume
+    registers[SYSCONFIG3] &= ~(SKSNR_MASK); // Clear seek mask bits
+    registers[SYSCONFIG3] |= SKSNR_MID; //Set volume
 
     registers[POWERCFG] |= (1 << RDSMODE);  // set force verbose bit
 
-    _saveRegisters();  // Update
-
-    delay(110);  // Max powerup time, from datasheet page 13
-
-  }  // if
-}  // setBand()
+    _saveRegisters(); //Update
+    delay(110); //Max powerup time, from datasheet page 13
+  } // if
+} // setBand()
 
 
 /**
@@ -271,10 +269,10 @@ void SI4703::setBand(RADIO_BAND newBand) {
  */
 RADIO_FREQ SI4703::getFrequency() {
   _readRegisters();
-  int channel = registers[READCHAN] & 0x03FF;  // Mask out everything but the lower 10 bits
+  int channel = registers[READCHAN] & 0x03FF; //Mask out everything but the lower 10 bits
   _freq = (channel * _freqSteps) + _freqLow;
   return (_freq);
-}  // getFrequency
+} // getFrequency
 
 
 /**
@@ -292,43 +290,43 @@ void SI4703::setFrequency(RADIO_FREQ newF) {
   _readRegisters();
   int channel = (newF - _freqLow) / _freqSteps;
 
-  // These steps come from AN230 page 20 rev 0.5
-  registers[CHANNEL] &= 0xFE00;       // Clear out the channel bits
-  registers[CHANNEL] |= channel;      // Mask in the new channel
-  registers[CHANNEL] |= (1 << TUNE);  // Set the TUNE bit to start
+  //These steps come from AN230 page 20 rev 0.5
+  registers[CHANNEL] &= 0xFE00; //Clear out the channel bits
+  registers[CHANNEL] |= channel; //Mask in the new channel
+  registers[CHANNEL] |= (1 << TUNE); //Set the TUNE bit to start
   _saveRegisters();
   _waitEnd();
-}  // setFrequency()
+} // setFrequency()
 
 
 // start seek mode upwards
 void SI4703::seekUp(bool toNextSender) {
   DEBUG_FUNC1("seekUp", toNextSender);
   _seek(true);
-}  // seekUp()
+} // seekUp()
 
 
 // start seek mode downwards
 void SI4703::seekDown(bool toNextSender) {
   DEBUG_FUNC1("seekDown", toNextSender);
   _seek(false);
-}  // seekDown()
+} // seekDown()
 
 
 // Load all status registers from to the chip
 void SI4703::_readRegisters() {
-  // Si4703 begins reading from register upper register of 0x0A and reads to 0x0F, then loops to 0x00.
-  _i2cPort->requestFrom(_i2caddr, 32);  // We want to read the entire register set from 0x0A to 0x09 = 32 bytes.
+  //Si4703 begins reading from register upper register of 0x0A and reads to 0x0F, then loops to 0x00.
+  _i2cPort->requestFrom(_i2caddr, 32); //We want to read the entire register set from 0x0A to 0x09 = 32 bytes.
 
-  // Remember, register 0x0A comes in first so we have to shuffle the array around a bit
-  for (int x = 0x0A;; x++) {  // Read in these 32 bytes
+  //Remember, register 0x0A comes in first so we have to shuffle the array around a bit
+  for (int x = 0x0A;; x++) { //Read in these 32 bytes
     if (x == 0x10)
-      x = 0;  // Loop back to zero
+      x = 0; //Loop back to zero
     registers[x] = _read16HL(_i2cPort);
     if (x == 0x09)
-      break;  // We're done!
+      break; //We're done!
   }           // for
-}  // _readRegisters()
+} // _readRegisters()
 
 
 // Save writable registers back to the chip
@@ -353,7 +351,7 @@ void SI4703::_saveRegisters() {
     Serial.print("Write Fail:");  // No ACK!
     Serial.println(ack, DEC);     // I2C error: 0 = success, 1 = data too long, 2 = rx NACK on address, 3 = rx NACK on data, 4 = other error
   }
-}  // _saveRegisters
+} // _saveRegisters
 
 
 /// Retrieve all the information related to the current radio receiving situation.
@@ -361,7 +359,7 @@ void SI4703::getRadioInfo(RADIO_INFO *info) {
   RADIO::getRadioInfo(info);  // all settings to last current settings
 
   _readRegisters();
-  info->active = true;  // ???
+  info->active = true; // ???
   if (registers[STATUSRSSI] & SI)
     info->stereo = true;
   info->rssi = registers[STATUSRSSI] & RSSI;
@@ -371,7 +369,7 @@ void SI4703::getRadioInfo(RADIO_INFO *info) {
     info->tuned = true;
   if (registers[POWERCFG] & (1 << SETMONO))
     info->mono = true;
-}  // getRadioInfo()
+} // getRadioInfo()
 
 
 /// Return current audio settings.
@@ -383,9 +381,9 @@ void SI4703::getAudioInfo(AUDIO_INFO *info) {
     info->mute = true;
   if (!(registers[POWERCFG] & (1 << DSMUTE)))
     info->softmute = true;
-  info->bassBoost = false;  // no bassBoost
+  info->bassBoost = false; // no bassBoost
   info->volume = registers[SYSCONFIG2] & 0x000F;
-}  // getAudioInfo()
+} // getAudioInfo()
 
 
 void SI4703::checkRDS() {
@@ -408,9 +406,9 @@ void SI4703::checkRDS() {
       Serial.print(" = 0x"); _printHex4( (registers[READCHAN] >> 12)&3 ); Serial.print(' ');
       Serial.print(" = 0x"); _printHex4( (registers[READCHAN] >> 10)&3 ); Serial.println();
       */
-    }  // if
-  }    // if
-}  // checkRDS
+    } // if
+  } // if
+} // checkRDS
 
 
 void SI4703::writeGPIO(int GPIO, int val) {
