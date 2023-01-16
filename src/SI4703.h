@@ -26,61 +26,58 @@
 
 // ----- library definition -----
 
+// writeGPIO parameters
 // GPIO1-3 Pins
-static const uint8_t  	GPIO1			= 0;	// GPIO1
-static const uint8_t  	GPIO2			= 2;	// GPIO2
-static const uint8_t  	GPIO3			= 4;	// GPIO3
+static const uint8_t GPIO1 = 0;  // GPIO1
+static const uint8_t GPIO2 = 2;  // GPIO2
+static const uint8_t GPIO3 = 4;  // GPIO3
 
 // GPIO1-3 Possible Values
-static const uint8_t 	GPIO_Z			= 0b00;	// High impedance (default)
-static const uint8_t 	GPIO_I			= 0b01;	// GPIO1-Reserved, GPIO2-STC/RDS int, or GPIO3-Mono/Sterio Indicator
-static const uint8_t 	GPIO_Low		= 0b10;	// Low output (GND level)
-static const uint8_t 	GPIO_High		= 0b11;	// High output (VIO level)
+static const uint8_t GPIO_Z = 0b00;     // High impedance (default)
+static const uint8_t GPIO_I = 0b01;     // GPIO1-Reserved, GPIO2-STC/RDS int, or GPIO3-Mono/Sterio Indicator
+static const uint8_t GPIO_Low = 0b10;   // Low output (GND level)
+static const uint8_t GPIO_High = 0b11;  // High output (VIO level)
 
 /// Library to control the SI4703 radio chip.
 class SI4703 : public RADIO {
-  public:
-    const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
+public:
+  const uint8_t MAXVOLUME = 15; ///< max volume level for radio implementations.
 
-  SI4703(uint8_t resetPin = 2, uint8_t sdaPin = SDA);
-  
-  bool   init();  // initialize library and the chip.
-  void   term();  // terminate all radio functions.
-  
-  // SI4703 specific features
+  SI4703();
 
-  void setResetPin(uint8_t pin);
+  void setup(int feature, int value) override;
+  bool init() override; // initialize library and the chip.
+  void term() override; // terminate all radio functions.
 
   // Control of the audio features
-  
+
   // Control the volume output of the radio chip
-  void    setVolume(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..15.
+  void setVolume(uint8_t newVolume) override; ///< Control the volume output of the radio chip in the range 0..15.
 
   // Control mono/stereo mode of the radio chip
-  void   setMono(bool switchOn); // Switch to mono mode.
+  void setMono(bool switchOn) override; // Switch to mono mode.
 
   // Control the mute function of the radio chip
-  void   setMute(bool switchOn); // Switch to mute mode.
+  void setMute(bool switchOn) override; // Switch to mute mode.
 
   // Control the softMute function of the radio chip
-  void   setSoftMute(bool switchOn); // Switch to soft mute mode.
+  void setSoftMute(bool switchOn) override; // Switch to soft mute mode.
 
-  void   writeGPIO(int GPIO, int val);
+  void writeGPIO(int GPIO, int val);
 
   // Control of the core receiver
 
   // Control the frequency
-  void setBand(RADIO_BAND newBand);
+  void setBand(RADIO_BAND newBand) override;
 
-  void    setFrequency(RADIO_FREQ newF);
+  void setFrequency(RADIO_FREQ newF);
   RADIO_FREQ getFrequency(void);
 
   void seekUp(bool toNextSender = true);   // start seek mode upwards
   void seekDown(bool toNextSender = true); // start seek mode downwards
-  
-  //void checkRDS(); // read RDS data from the current station and process when data available.
+
   void checkRDS(); // read RDS data from the current station and process when data available.
-  
+
   // ----- combined status functions -----
 
   virtual void getRadioInfo(RADIO_INFO *info); ///< Retrieve some information about the current radio function of the chip.
@@ -88,31 +85,26 @@ class SI4703 : public RADIO {
   virtual void getAudioInfo(AUDIO_INFO *info); ///< Retrieve some information about the current audio function of the chip.
 
   // ----- debug Helpers send information to Serial port
-  
-  void  debugScan();               // Scan all frequencies and report a status
-  void  debugStatus();             // Report Info about actual Station
+
+  void debugScan();   // Scan all frequencies and report a status
+  void debugStatus(); // Report Info about actual Station
 
   // ----- read/write registers of the chip
 
-  void  _readRegisters();  // read all status & data registers
-  void  _saveRegisters();  // Save writable registers back to the chip
+  void _readRegisters(); // read all status & data registers
+  void _saveRegisters(); // Save writable registers back to the chip
 
 private:
   // ----- local variables
+  int _sdaPin = -1;
 
   // store the current values of the 16 chip internal 16-bit registers
-  uint16_t registers[16];  
+  uint16_t registers[16];
 
   // ----- low level communication to the chip using I2C bus
 
-  void     _write16(uint16_t val);        // Write 16 Bit Value on I2C-Bus
-  uint16_t _read16(void);
-  
   void _seek(bool seekUp = true);
   void _waitEnd();
-
-  uint8_t _resetPin;
-  uint8_t _sdaPin;
 };
 
 #endif
