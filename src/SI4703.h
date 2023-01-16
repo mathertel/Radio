@@ -84,7 +84,7 @@ public:
 
 private:
   // ----- local variables
-  uint8_t _sdaPin = -1;
+  int _sdaPin = -1;
 
   // store the current values of the 16 chip internal 16-bit registers
   uint16_t registers[16];
