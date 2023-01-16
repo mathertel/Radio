@@ -16,9 +16,15 @@
 /// * 05.08.2014 created.
 
 #include <Arduino.h>
+#include <Wire.h>  // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
 
+#include <radio.h>  // Include the common radio library interface
 #include <SI4703.h>
-#include <radio.h> // Include the common radio library interface
+
+// ----- Definitions for the Wire communication
+
+#define SI4703_ADR 0x10  // 0b._001.0000 = I2C address of Si4703 - note that the Wire function assumes non-left-shifted I2C address, not 0b.0010.000W
+#define I2C_FAIL_MAX 10  // This is the number of attempts we will try to contact the device before erroring out
 
 
 // ----- Radio chip specific definitions including the registers
@@ -49,6 +55,7 @@
 #define DSMUTE 15
 #define DMUTE 14
 #define SETMONO 13
+#define RDSMODE 11
 #define SKMODE 10
 #define SEEKUP 9
 #define SEEK 8
@@ -98,14 +105,11 @@
 // ----- implement
 
 // initialize the extra variables in SI4703
-SI4703::SI4703()
-{
+SI4703::SI4703() {
   _i2caddr = 0x10; // standard address of chip
 }
 
-
-void SI4703::setup(int feature, int value)
-{
+void SI4703::setup(int feature, int value) {
   RADIO::setup(feature, value);
   if (feature == RADIO_SDAPIN) {
     _sdaPin = value;
@@ -113,13 +117,12 @@ void SI4703::setup(int feature, int value)
 } // setup()
 
 
-// initialize all internals and communication to radio chip.
-bool SI4703::init()
-{
-  bool found; // no chip found yet.
+// initialize all internals.
+bool SI4703::init() {
+  bool found = false;  // no chip found yet.
   DEBUG_FUNC0("SI4703::init");
 
-  //To get the Si4703 in 2-wire mode, SEN needs to be high and SDIO/SDA needs to be low after a reset
+  //To get the Si4703 into 2-wire mode, SEN needs to be high and SDIO needs to be low after a reset
   //The breakout board has SEN pulled high, but also has SDIO pulled high. Therefore, after a normal power up
   //The Si4703 will be in an unknown state. RST must be controlled
 
@@ -141,20 +144,19 @@ bool SI4703::init()
   delay(500); //Wait for clock to settle - from AN230 page 9
 
   return (found);
-} // init()
+}  // init()
 
 
 // switch the power off
-void SI4703::term()
-{
+void SI4703::term() {
+  DEBUG_FUNC0("SI4703::term");
   RADIO::term();
 } // term
 
 
 // ----- Volume control -----
 
-void SI4703::setVolume(uint8_t newVolume)
-{
+void SI4703::setVolume(uint8_t newVolume) {
   DEBUG_FUNC1("setVolume", newVolume);
   if (newVolume > 15)
     newVolume = 15;
@@ -167,8 +169,7 @@ void SI4703::setVolume(uint8_t newVolume)
 
 
 // Mono / Stereo
-void SI4703::setMono(bool switchOn)
-{
+void SI4703::setMono(bool switchOn) {
   DEBUG_FUNC1("setMono", switchOn);
   RADIO::setMono(switchOn);
   _readRegisters(); //Read the current register set
@@ -182,8 +183,7 @@ void SI4703::setMono(bool switchOn)
 
 
 /// Switch mute mode.
-void SI4703::setMute(bool switchOn)
-{
+void SI4703::setMute(bool switchOn) {
   DEBUG_FUNC1("setMute", switchOn);
   RADIO::setMute(switchOn);
 
@@ -198,8 +198,7 @@ void SI4703::setMute(bool switchOn)
 
 
 /// Switch soft mute mode.
-void SI4703::setSoftMute(bool switchOn)
-{
+void SI4703::setSoftMute(bool switchOn) {
   DEBUG_FUNC1("setSoftMute", switchOn);
   RADIO::setSoftMute(switchOn);
 
@@ -216,8 +215,7 @@ void SI4703::setSoftMute(bool switchOn)
 // ----- Band and frequency control methods -----
 
 // tune to new band.
-void SI4703::setBand(RADIO_BAND newBand)
-{
+void SI4703::setBand(RADIO_BAND newBand) {
 
   if (newBand == RADIO_BAND_FM) {
     // init chip here for FM
@@ -238,9 +236,13 @@ void SI4703::setBand(RADIO_BAND newBand)
     // registers[SYSCONFIG1] |= 0x0010;  //Enable GPIO3 as Stereo indicator ==> is not working with me.
 
 #ifdef IN_EUROPE
+    // Freq(MHz) = 0.100(in Europe) * Channel + 87.5MHz
+    _freqSteps = 10;
     registers[SYSCONFIG1] |= (1 << DE); //50kHz Europe setup
     registers[SYSCONFIG2] |= (1 << SPACE0); //100kHz channel spacing for Europe
 #else
+    // Freq(MHz) = 0.200(in USA) * Channel + 87.5MHz
+    _freqSteps = 20;
     registers[SYSCONFIG2] &= ~(1 << SPACE1 | 1 << SPACE0); //Force 200kHz channel spacing for USA
 #endif
 
@@ -253,8 +255,7 @@ void SI4703::setBand(RADIO_BAND newBand)
     registers[SYSCONFIG3] &= ~(SKSNR_MASK); // Clear seek mask bits
     registers[SYSCONFIG3] |= SKSNR_MID; //Set volume
 
-    registers[SYSCONFIG3] &= ~(SKCNT_MASK); // Clear seek mask bits
-    registers[SYSCONFIG3] |= SKCNT_MID; //Set volume
+    registers[POWERCFG] |= (1 << RDSMODE);  // set force verbose bit
 
     _saveRegisters(); //Update
     delay(110); //Max powerup time, from datasheet page 13
@@ -263,11 +264,10 @@ void SI4703::setBand(RADIO_BAND newBand)
 
 
 /**
-* @brief Retrieve the real frequency from the chip after automatic tuning.
-* @return RADIO_FREQ the current frequency.
-*/
-RADIO_FREQ SI4703::getFrequency()
-{
+ * @brief Retrieve the real frequency from the chip after automatic tuning.
+ * @return RADIO_FREQ the current frequency.
+ */
+RADIO_FREQ SI4703::getFrequency() {
   _readRegisters();
   int channel = registers[READCHAN] & 0x03FF; //Mask out everything but the lower 10 bits
   _freq = (channel * _freqSteps) + _freqLow;
@@ -276,12 +276,11 @@ RADIO_FREQ SI4703::getFrequency()
 
 
 /**
-* @brief Change the frequency in the chip.
-* @param newF
-* @return void
-*/
-void SI4703::setFrequency(RADIO_FREQ newF)
-{
+ * @brief Change the frequency in the chip.
+ * @param newF
+ * @return void
+ */
+void SI4703::setFrequency(RADIO_FREQ newF) {
   DEBUG_FUNC1("setFrequency", newF);
   if (newF < _freqLow)
     newF = _freqLow;
@@ -301,24 +300,21 @@ void SI4703::setFrequency(RADIO_FREQ newF)
 
 
 // start seek mode upwards
-void SI4703::seekUp(bool toNextSender)
-{
+void SI4703::seekUp(bool toNextSender) {
   DEBUG_FUNC1("seekUp", toNextSender);
   _seek(true);
 } // seekUp()
 
 
 // start seek mode downwards
-void SI4703::seekDown(bool toNextSender)
-{
+void SI4703::seekDown(bool toNextSender) {
   DEBUG_FUNC1("seekDown", toNextSender);
   _seek(false);
 } // seekDown()
 
 
 // Load all status registers from to the chip
-void SI4703::_readRegisters()
-{
+void SI4703::_readRegisters() {
   //Si4703 begins reading from register upper register of 0x0A and reads to 0x0F, then loops to 0x00.
   _i2cPort->requestFrom(_i2caddr, 32); //We want to read the entire register set from 0x0A to 0x09 = 32 bytes.
 
@@ -329,40 +325,38 @@ void SI4703::_readRegisters()
     registers[x] = _read16HL(_i2cPort);
     if (x == 0x09)
       break; //We're done!
-  } // for
+  }           // for
 } // _readRegisters()
 
 
 // Save writable registers back to the chip
 // The registers 02 through 06, containing the configuration
 // using the sequential write access mode.
-void SI4703::_saveRegisters()
-{
-  //Write the current 9 control registers (0x02 to 0x07) to the Si4703
-  //It's a little weird, you don't write an I2C addres
-  //The Si4703 assumes you are writing to 0x02 first, then increments
+void SI4703::_saveRegisters() {
+  // Write the current 9 control registers (0x02 to 0x07) to the Si4703
+  // It's a little weird, you don't write an I2C addres
+  // The Si4703 assumes you are writing to 0x02 first, then increments
 
   _i2cPort->beginTransmission(_i2caddr);
-  //A write command automatically begins with register 0x02 so no need to send a write-to address
-  //First we send the 0x02 to 0x07 control registers
-  //In general, we should not write to registers 0x08 and 0x09
+  // A write command automatically begins with register 0x02 so no need to send a write-to address
+  // First we send the 0x02 to 0x07 control registers
+  // In general, we should not write to registers 0x08 and 0x09
   for (int regSpot = 0x02; regSpot < 0x08; regSpot++) {
     _write16HL(_i2cPort, registers[regSpot]);
   }
 
-  //End this transmission
+  // End this transmission
   byte ack = _i2cPort->endTransmission();
-  if (ack != 0) { //We have a problem!
-    Serial.print("Write Fail:"); //No ACK!
-    Serial.println(ack, DEC); //I2C error: 0 = success, 1 = data too long, 2 = rx NACK on address, 3 = rx NACK on data, 4 = other error
+  if (ack != 0) {                 // We have a problem!
+    Serial.print("Write Fail:");  // No ACK!
+    Serial.println(ack, DEC);     // I2C error: 0 = success, 1 = data too long, 2 = rx NACK on address, 3 = rx NACK on data, 4 = other error
   }
 } // _saveRegisters
 
 
 /// Retrieve all the information related to the current radio receiving situation.
-void SI4703::getRadioInfo(RADIO_INFO *info)
-{
-  RADIO::getRadioInfo(info); // all settings to last current settings
+void SI4703::getRadioInfo(RADIO_INFO *info) {
+  RADIO::getRadioInfo(info);  // all settings to last current settings
 
   _readRegisters();
   info->active = true; // ???
@@ -379,8 +373,7 @@ void SI4703::getRadioInfo(RADIO_INFO *info)
 
 
 /// Return current audio settings.
-void SI4703::getAudioInfo(AUDIO_INFO *info)
-{
+void SI4703::getAudioInfo(AUDIO_INFO *info) {
   RADIO::getAudioInfo(info);
 
   _readRegisters();
@@ -393,8 +386,7 @@ void SI4703::getAudioInfo(AUDIO_INFO *info)
 } // getAudioInfo()
 
 
-void SI4703::checkRDS()
-{
+void SI4703::checkRDS() {
   // DEBUG_FUNC0("checkRDS");
 
   // check if there is a listener !
@@ -402,16 +394,49 @@ void SI4703::checkRDS()
     _readRegisters();
     // check for a RDS data set ready
     if (registers[STATUSRSSI] & RDSR) {
-      _sendRDS(registers[RDSA], registers[RDSB], registers[RDSC], registers[RDSD]);
+      uint8_t errA = (registers[STATUSRSSI] >> 9) & 3;
+      uint8_t errB = (registers[READCHAN] >> 14) & 3;
+      uint8_t errC = (registers[READCHAN] >> 12) & 3;
+      uint8_t errD = (registers[READCHAN] >> 10) & 3;
+      if ((errA != 3) && (errB != 3) && (errC != 3) && (errD != 3))
+        _sendRDS(registers[RDSA], registers[RDSB], registers[RDSC], registers[RDSD]);
+      /*
+      Serial.print(" = 0x"); _printHex4( (registers[STATUSRSSI] >> 9)&3 ); Serial.print(' ');
+      Serial.print(" = 0x"); _printHex4( (registers[READCHAN] >> 14)&3 ); Serial.print(' ');
+      Serial.print(" = 0x"); _printHex4( (registers[READCHAN] >> 12)&3 ); Serial.print(' ');
+      Serial.print(" = 0x"); _printHex4( (registers[READCHAN] >> 10)&3 ); Serial.println();
+      */
     } // if
   } // if
 } // checkRDS
 
+
+void SI4703::writeGPIO(int GPIO, int val) {
+  _readRegisters();  // Read the current register set
+
+  switch (GPIO) {
+    case GPIO1:
+      registers[SYSCONFIG1] &= ~(0b11 << GPIO1);
+      registers[SYSCONFIG1] |= (val << GPIO1);
+      break;
+    case GPIO2:
+      registers[SYSCONFIG1] &= ~(0b11 << GPIO2);
+      registers[SYSCONFIG1] |= (val << GPIO2);
+      break;
+    case GPIO3:
+      registers[SYSCONFIG1] &= ~(0b11 << GPIO3);
+      registers[SYSCONFIG1] |= (val << GPIO3);
+      break;
+    default:
+      break;
+  }
+  _saveRegisters();  // Write to registers
+}
+
 // ----- Debug functions -----
 
 /// Send the current values of all registers to the Serial port.
-void SI4703::debugStatus()
-{
+void SI4703::debugStatus() {
   RADIO::debugStatus();
 
   _readRegisters();
@@ -422,13 +447,12 @@ void SI4703::debugStatus()
     Serial.print(" = 0x");
     _printHex4(registers[x]);
     Serial.println();
-  } // for
-} // debugStatus
+  }  // for
+}  // debugStatus
 
 
 /// Seeks out the next available station
-void SI4703::_seek(bool seekUp)
-{
+void SI4703::_seek(bool seekUp) {
   uint16_t reg;
 
   _readRegisters();
@@ -436,21 +460,20 @@ void SI4703::_seek(bool seekUp)
   reg = registers[POWERCFG] & ~((1 << SKMODE) | (1 << SEEKUP));
 
   if (seekUp)
-    reg |= (1 << SEEKUP); // Set the Seek-up bit
+    reg |= (1 << SEEKUP);  // Set the Seek-up bit
 
-  reg |= (1 << SEEK); // Start seek now
+  reg |= (1 << SEEK);  // Start seek now
 
   // save the registers and start seeking...
   registers[POWERCFG] = reg;
   _saveRegisters();
 
   _waitEnd();
-} // _seek
+}  // _seek
 
 
 /// wait until the current seek and tune operation is over.
-void SI4703::_waitEnd()
-{
+void SI4703::_waitEnd() {
   DEBUG_FUNC0("_waitEnd");
 
   // wait until STC gets high
@@ -467,14 +490,14 @@ void SI4703::_waitEnd()
 
   // end the seek mode
   registers[POWERCFG] &= ~(1 << SEEK);
-  registers[CHANNEL] &= ~(1 << TUNE); //Clear the tune after a tune has completed
+  registers[CHANNEL] &= ~(1 << TUNE);  // Clear the tune after a tune has completed
   _saveRegisters();
 
   // wait until STC gets down again
   do {
     _readRegisters();
   } while ((registers[STATUSRSSI] & STC) != 0);
-} // _waitEnd()
+}  // _waitEnd()
 
 
 // ----- internal functions -----

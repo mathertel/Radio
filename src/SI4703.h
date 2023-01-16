@@ -26,6 +26,17 @@
 
 // ----- library definition -----
 
+// writeGPIO parameters
+// GPIO1-3 Pins
+static const uint8_t GPIO1 = 0;  // GPIO1
+static const uint8_t GPIO2 = 2;  // GPIO2
+static const uint8_t GPIO3 = 4;  // GPIO3
+
+// GPIO1-3 Possible Values
+static const uint8_t GPIO_Z = 0b00;     // High impedance (default)
+static const uint8_t GPIO_I = 0b01;     // GPIO1-Reserved, GPIO2-STC/RDS int, or GPIO3-Mono/Sterio Indicator
+static const uint8_t GPIO_Low = 0b10;   // Low output (GND level)
+static const uint8_t GPIO_High = 0b11;  // High output (VIO level)
 
 /// Library to control the SI4703 radio chip.
 class SI4703 : public RADIO {
@@ -52,6 +63,7 @@ public:
   // Control the softMute function of the radio chip
   void setSoftMute(bool switchOn) override; // Switch to soft mute mode.
 
+  void writeGPIO(int GPIO, int val);
 
   // Control of the core receiver
 
@@ -84,7 +96,7 @@ public:
 
 private:
   // ----- local variables
-  uint8_t _sdaPin = -1;
+  int _sdaPin = -1;
 
   // store the current values of the 16 chip internal 16-bit registers
   uint16_t registers[16];
