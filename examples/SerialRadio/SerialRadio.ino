@@ -65,16 +65,16 @@ RADIO_FREQ preset[] = {
     10500 // * FFH
 };
 
-int presetIndex = 5;  ///< Start at Station with index=5
+uint16_t presetIndex = 5;  ///< Start at Station with index=5
 
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
 // RADIO radio;       ///< Create an instance of a non functional radio.
 // RDA5807M radio; ///< Create an instance of a RDA5807 chip radio
-// SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
+SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
 // SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
-SI47xx radio;
+// SI47xx radio; ///<  Create an instance of a SI4720,21,30 (and maybe more) chip radio.
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
 
 
@@ -97,7 +97,7 @@ bool lowLevelDebug = false;
 
 
 /// Update the Frequency on the LCD display.
-void DisplayFrequency(RADIO_FREQ f) {
+void DisplayFrequency() {
   char s[12];
   radio.formatFrequency(s, sizeof(s));
   Serial.print("FREQ:");
@@ -241,10 +241,17 @@ void setup() {
   Serial.println("Radio...");
   delay(200);
 
-#ifdef ESP8266
+#if defined(ARDUINO_ARCH_AVR)
+  Wire.begin();  // a common pins for I2C = SDA:A4, SCL:A5
+  radio.setup(RADIO_RESETPIN, 2);
+  radio.setup(RADIO_SDAPIN, A4);
+
+#elif defined(ESP8266)
   // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
   // need to be specified.
   Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
+  radio.setup(RADIO_RESETPIN, D5);
+  radio.setup(RADIO_SDAPIN, D2);
 
 #elif defined(ESP32)
   Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
@@ -252,7 +259,7 @@ void setup() {
 #endif
 
   // Enable information to the Serial port
-  radio.debugEnable(false);
+  radio.debugEnable(true);
   radio._wireDebug(lowLevelDebug);
 
   // Initialize the Radio
@@ -320,7 +327,7 @@ void loop() {
     f = radio.getFrequency();
     if (f != lastFrequency) {
       // print current tuned frequency
-      DisplayFrequency(f);
+      DisplayFrequency();
       lastFrequency = f;
     }  // if
     nextFreqTime = now + 400;

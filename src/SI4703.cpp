@@ -37,8 +37,8 @@
 // Register Definitions -----
 
 // Define the register names
-#define DEVICEID 0x00
-#define CHIPID 0x01
+#define SI4703_DEVICEID 0x00
+#define SI4703_CHIPID 0x01
 #define POWERCFG 0x02
 #define CHANNEL 0x03
 #define SYSCONFIG1 0x04
