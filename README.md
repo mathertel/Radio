@@ -1,5 +1,7 @@
 # Radio Library Overview
 
+[![Build Examples for ESP8266](https://github.com/mathertel/Radio/actions/workflows/buildESP8266.yml/badge.svg)](https://github.com/mathertel/Radio/actions/workflows/buildESP8266.yml)
+
 This library is about controlling an FM radio chips by using an Arduino, ESP8266 or ESP32 board
 and some optional components like a LCD display, a rotary encoder, a LCD+Keyboard shield
 or an Ethernet Shield to build a standalone radio.

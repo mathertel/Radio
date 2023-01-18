@@ -44,9 +44,9 @@ jobs:
             - name: LiquidCrystal_PCF8574
           sketch-paths: |
             - 'examples/SerialRadio'
+            - 'examples/TestSI4703'
   
           # - 'examples/TestSI47xx'
-          # - 'examples/TestSI4703'
 
           # size-report-sketch: 'ConnectionHandlerDemo'
           # enable-size-deltas-report: 'true'
