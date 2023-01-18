@@ -20,8 +20,9 @@
 *.out
 *.app
 
+_*
 /.vscode
 /.development
-_*
 /build
 .gitignore
+*.code-workspace
