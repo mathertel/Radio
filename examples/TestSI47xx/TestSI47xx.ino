@@ -37,7 +37,7 @@
 #include <Wire.h>
 
 #include <radio.h>
-#include <si47xx.h>
+#include <SI47xx.h>
 
 // ----- Fixed settings here. -----
 
