@@ -37,8 +37,8 @@
 // Register Definitions -----
 
 // Define the register names
-#define DEVICEID 0x00
-#define CHIPID 0x01
+#define SI4703_DEVICEID 0x00
+#define SI4703_CHIPID 0x01
 #define POWERCFG 0x02
 #define CHANNEL 0x03
 #define SYSCONFIG1 0x04
@@ -65,8 +65,6 @@
 
 //Register 0x04 - SYSCONFIG1
 #define RDS 12
-#define DE 11
-
 #define DE 11
 
 
@@ -232,8 +230,6 @@ void SI4703::setBand(RADIO_BAND newBand) {
       registers[POWERCFG] |= (1 << DSMUTE); // disable softmute
 
     registers[SYSCONFIG1] |= (1 << RDS); //Enable RDS
-
-    // registers[SYSCONFIG1] |= 0x0010;  //Enable GPIO3 as Stereo indicator ==> is not working with me.
 
 #ifdef IN_EUROPE
     // Freq(MHz) = 0.100(in Europe) * Channel + 87.5MHz

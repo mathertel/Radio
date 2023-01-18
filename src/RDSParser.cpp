@@ -32,10 +32,10 @@ void RDSParser::init() {
 } // init()
 
 
-void RDSParser::attachServicenNameCallback(receiveServicenNameFunction newFunction)
+void RDSParser::attachServiceNameCallback(receiveServiceNameFunction newFunction)
 {
   _sendServiceName = newFunction;
-} // attachServicenNameCallback
+} // attachServiceNameCallback
 
 void RDSParser::attachTextCallback(receiveTextFunction newFunction)
 {
@@ -54,7 +54,6 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
   // DEBUG_FUNC0("process");
   uint8_t  idx; // index of rdsText
   char c1, c2;
-  char *p;
 
   uint16_t mins; ///< RDS time in minutes
   uint8_t off;   ///< RDS time offset and sign
