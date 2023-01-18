@@ -35,7 +35,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <radio.h>
-#include <si4703.h>
+#include <SI4703.h>
 
 // ----- Fixed settings here. -----
 
