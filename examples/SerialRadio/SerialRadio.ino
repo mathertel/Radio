@@ -259,18 +259,10 @@ void setup() {
   Serial.println("SerialRadio...");
   delay(200);
 
-#if defined(ARDUINO_ARCH_AVR)
-  Wire.begin();  // a common pins for I2C = SDA:A4, SCL:A5
-
-#elif defined(ESP8266)
-  // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
-  // need to be specified.
-  Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
-
-#elif defined(ESP32)
-  Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
-
-#endif
+  // Standard I2C/Wire pins for Arduino UNO:  = SDA:A4, SCL:A5
+  // Standard I2C/Wire pins for ESP8266: SDA:D2, SCL:D1
+  // Standard I2C/Wire pins for ESP32: SDA:21, SCL:22
+  Wire.begin();
 
 #if defined(RESET_PIN)
   // This is required for SI4703 chips:
