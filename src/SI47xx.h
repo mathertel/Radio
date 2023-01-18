@@ -47,11 +47,10 @@ struct TX_STATUS {
 // ----- library definition -----
 
 /// Library to control the SI47xx radio chip.
-class SI47xx : public RADIO
-{
+class SI47xx : public RADIO {
 public:
-  const uint8_t MAXVOLUME = 15; ///< max volume level for radio implementations.
-  const uint8_t MAXVOLUMEX = 63; ///< max volume level for the SI47xx specific implementation.
+  const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
+  const uint8_t MAXVOLUMEX = 63;  ///< max volume level for the SI47xx specific implementation.
 
   SI47xx();
 
@@ -65,20 +64,20 @@ public:
 
   // ----- Audio functions -----
 
-  void setVolume(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..15.
+  void setVolume(uint8_t newVolume);  ///< Control the volume output of the radio chip in the range 0..15.
 
-  void setVolumeX(uint8_t newVolume); ///< Control the volume output of the radio chip in the range 0..63.
-  uint8_t getVolumeX(); ///< Retrieve the current output volume in the range 0..63.
+  void setVolumeX(uint8_t newVolume);  ///< Control the volume output of the radio chip in the range 0..63.
+  uint8_t getVolumeX();                ///< Retrieve the current output volume in the range 0..63.
 
-  void setMute(bool switchOn) override; ///< Control the mute mode of the radio chip.
-  void setSoftMute(bool switchOn) override; ///< Control the softmute mode (mute on low signals) of the radio chip.
+  void setMute(bool switchOn) override;      ///< Control the mute mode of the radio chip.
+  void setSoftMute(bool switchOn) override;  ///< Control the softmute mode (mute on low signals) of the radio chip.
 
   // Overwrite audio functions that are not supported.
-  void setBassBoost(bool switchOn) override; ///< regardless of the given parameter, the Bass Boost will never switch on.
+  void setBassBoost(bool switchOn) override;  ///< regardless of the given parameter, the Bass Boost will never switch on.
 
   // ----- Radio receiver functions -----
 
-  void setMono(bool switchOn); ///< Control the mono/stereo mode of the radio chip.
+  void setMono(bool switchOn);  ///< Control the mono/stereo mode of the radio chip.
 
   /**
    * Start using the new band for receiving or transmitting.
@@ -88,22 +87,22 @@ public:
    */
   void setBand(RADIO_BAND newBand);
 
-  void setFrequency(RADIO_FREQ newF); ///< Control the frequency.
+  void setFrequency(RADIO_FREQ newF);  ///< Control the frequency.
   RADIO_FREQ getFrequency(void);
 
-  void seekUp(bool toNextSender = true); // start seek mode upwards
-  void seekDown(bool toNextSender = true); // start seek mode downwards
+  void seekUp(bool toNextSender = true);    // start seek mode upwards
+  void seekDown(bool toNextSender = true);  // start seek mode downwards
 
-  void attachReceiveRDS(receiveRDSFunction newFunction) override; ///< Register a RDS processor function.
-  void checkRDS(); // read RDS data from the current station and process when data available.
+  void attachReceiveRDS(receiveRDSFunction newFunction) override;  ///< Register a RDS processor function.
+  void checkRDS();                                                 // read RDS data from the current station and process when data available.
 
   void getRadioInfo(RADIO_INFO *info);
   void getAudioInfo(AUDIO_INFO *info);
 
   // ----- debug Helpers send information to Serial port
 
-  void debugScan(); // Scan all frequencies and report a status
-  void debugStatus(); // Report Info about actual Station
+  void debugScan();    // Scan all frequencies and report a status
+  void debugStatus();  // Report Info about actual Station
 
   // ----- transmit functions
 
@@ -119,7 +118,7 @@ public:
 
   // ----- regional compatibility
 
-  void setDeemphasis(uint8_t uS); // set the deemphasis (50 for Europe, 75 for USA)
+  void setDeemphasis(uint8_t uS);  // set the deemphasis (50 for Europe, 75 for USA)
 
 private:
   // ----- local variables
@@ -127,12 +126,12 @@ private:
   bool _hasAM = false;
   bool _hasTX = false;
 
-  uint8_t _realVolume; ///< The real volume set to the chip.
+  uint8_t _realVolume;  ///< The real volume set to the chip.
 
-  uint8_t _fmDeemphasis = 50; ///< RX Deemphasis and TX Preemphasis in uS
+  uint8_t _fmDeemphasis = 50;  ///< RX Deemphasis and TX Preemphasis in uS
 
   // store the current status values
-  uint8_t _status; ///< the status after sending a command
+  uint8_t _status;  ///< the status after sending a command
 
   uint8_t tuneStatus[8];
   uint8_t rsqStatus[1 + 7];
@@ -161,7 +160,7 @@ private:
     };
     // use the the byte while receiving and sending.
     uint8_t buffer[1 + 7];
-  } tuneStatus2; // union RDSSTATUS
+  } tuneStatus2;  // union RDSSTATUS
 
 
   /// structure used to read RDS information from the SI47xx radio chip.
@@ -184,7 +183,7 @@ private:
     };
     // use the the byte while receiving and sending.
     uint8_t buffer[1 + 12];
-  } rdsStatus; // union RDSSTATUS
+  } rdsStatus;  // union RDSSTATUS
 
 
   // ----- low level communication to the chip using I2C bus

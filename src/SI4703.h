@@ -41,27 +41,27 @@ static const uint8_t GPIO_High = 0b11;  // High output (VIO level)
 /// Library to control the SI4703 radio chip.
 class SI4703 : public RADIO {
 public:
-  const uint8_t MAXVOLUME = 15; ///< max volume level for radio implementations.
+  const uint8_t MAXVOLUME = 15;  ///< max volume level for radio implementations.
 
   SI4703();
 
   void setup(int feature, int value) override;
-  bool init() override; // initialize library and the chip.
-  void term() override; // terminate all radio functions.
+  bool init() override;  // initialize library and the chip.
+  void term() override;  // terminate all radio functions.
 
   // Control of the audio features
 
   // Control the volume output of the radio chip
-  void setVolume(uint8_t newVolume) override; ///< Control the volume output of the radio chip in the range 0..15.
+  void setVolume(uint8_t newVolume) override;  ///< Control the volume output of the radio chip in the range 0..15.
 
   // Control mono/stereo mode of the radio chip
-  void setMono(bool switchOn) override; // Switch to mono mode.
+  void setMono(bool switchOn) override;  // Switch to mono mode.
 
   // Control the mute function of the radio chip
-  void setMute(bool switchOn) override; // Switch to mute mode.
+  void setMute(bool switchOn) override;  // Switch to mute mode.
 
   // Control the softMute function of the radio chip
-  void setSoftMute(bool switchOn) override; // Switch to soft mute mode.
+  void setSoftMute(bool switchOn) override;  // Switch to soft mute mode.
 
   void writeGPIO(int GPIO, int val);
 
@@ -73,26 +73,26 @@ public:
   void setFrequency(RADIO_FREQ newF);
   RADIO_FREQ getFrequency(void);
 
-  void seekUp(bool toNextSender = true);   // start seek mode upwards
-  void seekDown(bool toNextSender = true); // start seek mode downwards
+  void seekUp(bool toNextSender = true);    // start seek mode upwards
+  void seekDown(bool toNextSender = true);  // start seek mode downwards
 
-  void checkRDS(); // read RDS data from the current station and process when data available.
+  void checkRDS();  // read RDS data from the current station and process when data available.
 
   // ----- combined status functions -----
 
-  virtual void getRadioInfo(RADIO_INFO *info); ///< Retrieve some information about the current radio function of the chip.
+  virtual void getRadioInfo(RADIO_INFO *info);  ///< Retrieve some information about the current radio function of the chip.
 
-  virtual void getAudioInfo(AUDIO_INFO *info); ///< Retrieve some information about the current audio function of the chip.
+  virtual void getAudioInfo(AUDIO_INFO *info);  ///< Retrieve some information about the current audio function of the chip.
 
   // ----- debug Helpers send information to Serial port
 
-  void debugScan();   // Scan all frequencies and report a status
-  void debugStatus(); // Report Info about actual Station
+  void debugScan();    // Scan all frequencies and report a status
+  void debugStatus();  // Report Info about actual Station
 
   // ----- read/write registers of the chip
 
-  void _readRegisters(); // read all status & data registers
-  void _saveRegisters(); // Save writable registers back to the chip
+  void _readRegisters();  // read all status & data registers
+  void _saveRegisters();  // Save writable registers back to the chip
 
 private:
   // ----- local variables

@@ -41,9 +41,9 @@
 
 // ----- Fixed settings here. -----
 
-#define FIX_BAND RADIO_BAND_FM ///< The band that will be tuned by this sketch is FM.
-#define FIX_STATION 8930 ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME 10 ///< The volume that will be set by this sketch is level 4.
+#define FIX_BAND RADIO_BAND_FM  ///< The band that will be tuned by this sketch is FM.
+#define FIX_STATION 8930        ///< The station that will be tuned by this sketch is 89.30 MHz.
+#define FIX_VOLUME 10           ///< The volume that will be set by this sketch is level 4.
 
 SI47xx radio;  // Create an instance of Class for SI47xx Chip
 
@@ -66,8 +66,7 @@ void setup() {
 
 #elif defined(ESP32)
   Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
-  Serial.println("*1");
-  
+
 #endif
 
   // see if a chip can be found

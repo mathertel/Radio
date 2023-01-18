@@ -45,25 +45,25 @@
 // 89.40 MHz as 8940
 
 RADIO_FREQ preset[] = {
-    8770,
-    8810, // hr1
-    8820,
-    8850, // Bayern2
-    8890, // ???
-    8930, // * hr3
-    8980,
-    9180,
-    9220, 9350,
-    9440, // * hr1
-    9510, // - Antenne Frankfurt
-    9530,
-    9560, // Bayern 1
-    9680, 9880,
-    10020, // planet
-    10090, // ffh
-    10110, // SWR3
-    10030, 10260, 10380, 10400,
-    10500 // * FFH
+  8770,
+  8810,  // hr1
+  8820,
+  8850,  // Bayern2
+  8890,  // ???
+  8930,  // * hr3
+  8980,
+  9180,
+  9220, 9350,
+  9440,  // * hr1
+  9510,  // - Antenne Frankfurt
+  9530,
+  9560,  // Bayern 1
+  9680, 9880,
+  10020,  // planet
+  10090,  // ffh
+  10110,  // SWR3
+  10030, 10260, 10380, 10400,
+  10500  // * FFH
 };
 
 uint16_t presetIndex = 5;  ///< Start at Station with index=5
@@ -73,11 +73,11 @@ uint16_t presetIndex = 5;  ///< Start at Station with index=5
 
 #if defined(ARDUINO_ARCH_AVR)
 #define RESET_PIN 2
-#define MODE_PIN A4 // same as SDA
+#define MODE_PIN A4  // same as SDA
 
 #elif defined(ESP8266)
 #define RESET_PIN D5
-#define MODE_PIN D2 // same as SDA
+#define MODE_PIN D2  // same as SDA
 
 #elif defined(ESP32)
 // not tested with si4703
@@ -93,7 +93,7 @@ uint16_t presetIndex = 5;  ///< Start at Station with index=5
 // RDA5807M radio; ///< Create an instance of a RDA5807M chip radio
 // SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
 // SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
-SI47xx radio; ///<  Create an instance of a SI4720,21,30 (and maybe more) chip radio.
+SI47xx radio;  ///<  Create an instance of a SI4720,21,30 (and maybe more) chip radio.
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
 
 /// get a RDS parser
@@ -102,12 +102,12 @@ RDSParser rds;
 
 /// State of Keyboard input for this radio implementation.
 enum RADIO_STATE {
-  STATE_PARSECOMMAND, ///< waiting for a new command character.
-  STATE_PARSEINT, ///< waiting for digits for the parameter.
-  STATE_EXEC ///< executing the command.
+  STATE_PARSECOMMAND,  ///< waiting for a new command character.
+  STATE_PARSEINT,      ///< waiting for digits for the parameter.
+  STATE_EXEC           ///< executing the command.
 };
 
-RADIO_STATE kbState; ///< The state of parsing input characters.
+RADIO_STATE kbState;  ///< The state of parsing input characters.
 char kbCommand;
 int16_t kbValue;
 
@@ -272,7 +272,7 @@ void setup() {
 
 #endif
 
-#if defined(RESET_PIN) 
+#if defined(RESET_PIN)
   // This is required for SI4703 chips:
   radio.setup(RADIO_RESETPIN, RESET_PIN);
   radio.setup(RADIO_MODEPIN, MODE_PIN);
@@ -337,9 +337,9 @@ void loop() {
         kbCommand = ' ';
         kbState = STATE_PARSECOMMAND;
         kbValue = 0;
-      } // if
-    } // if
-  } // if
+      }  // if
+    }    // if
+  }      // if
 
   // check for RDS data
   radio.checkRDS();
