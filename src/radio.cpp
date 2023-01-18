@@ -1,23 +1,14 @@
-/// \file Radio.cpp
-/// \brief Library implementation for the radio libraries to control radio chips.
-///
-/// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
-/// This work is licensed under a BSD style license.\n
-/// See http://www.mathertel.de/License.aspx
-///
-/// \details
-/// This library enables the use of diverse radio chips by sharing the same class definition.
-/// Implementation for the following Radio Chips are available:
-/// * RDA5807M
-/// * SI4703
-///
-/// The following chip is planned to be supported too:
-/// * TEA5767
-///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
-///
-/// ChangeLog see: radio.h
+/** \file Radio.cpp
+ * \brief Library implementation for the radio libraries to control radio chips.
+ *
+ * \author Matthias Hertel, http://www.mathertel.de
+ * \copyright Copyright (c) 2014 by Matthias Hertel.\n
+ * This work is licensed under a BSD style license.\n
+ * See http://www.mathertel.de/License.aspx
+ * More documentation and source code is available at http://www.mathertel.de/Arduino
+ *
+ * ChangeLog see: radio.h
+ */
 
 #include <Arduino.h>
 #include <Wire.h>

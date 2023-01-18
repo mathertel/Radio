@@ -1,34 +1,35 @@
-///
-/// \file Radio.h
-/// \brief Library header file for the radio libraries to control radio chips.
-///
-/// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
-/// This work is licensed under a BSD style license.\n
-/// See http://www.mathertel.de/License.aspx
-///
-/// \details
-/// This library enables the use of diverse radio chips by sharing the same class definition.
-/// Implementation for the following Radio Chips are available:
-/// * RDA5807M
-/// * SI4703
-/// * TEA5767
-///
-/// The following chip is planned to be supported too:
-/// ...
-///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
-///
-/// ChangeLog:
-/// ----------
-/// * 08.07.2014 creation of the common radio class.
-/// * 15.07.2014 examples working with RDA5807M.
-/// * 26.08.2014 examples working with SI4703.
-/// * 31.08.2014 Doxygen style comments added.
-/// * 05.02.2015 mainpage content added.
-/// * 29.04.2015 clear RDS function, need to clear RDS info after tuning.
-/// * 17.09.2020 Wire Util functions added.
-/// * 06.12.2020 I2C Wire and Reset initialization centralized.
+/* \file Radio.h
+ * \brief Library header file for the radio libraries to control radio chips.
+ *
+ * \author Matthias Hertel, http://www.mathertel.de
+ * \copyright Copyright (c) 2014 by Matthias Hertel.\n
+ * This work is licensed under a BSD style license.\n
+ * See http://www.mathertel.de/License.aspx
+ *
+ * The **RDA5807M** and **RDA5807FP** with I2S support from RDA Microelectronics
+ * The **SI4703** from Silicon Labs, now Skyworks
+ * The **SI4705** from Silicon Labs, now Skyworks
+ * The **SI4721** and **SI4730** chips from Silicon Labs, now Skyworks
+ * The **TEA5767** from NXP
+ *
+ * The following chip is planned to be supported too:
+ * ...
+ *
+ * More documentation and source code is available at http://www.mathertel.de/Arduino
+ *
+ * ChangeLog:
+ * ----------
+ * * 08.07.2014 creation of the common radio class.
+ * * 15.07.2014 examples working with RDA5807M.
+ * * 26.08.2014 examples working with SI4703.
+ * * 31.08.2014 Doxygen style comments added.
+ * * 05.02.2015 mainpage content added.
+ * * 29.04.2015 clear RDS function, need to clear RDS info after tuning.
+ * * 17.09.2020 Wire Util functions added.
+ * * 06.12.2020 I2C Wire and Reset initialization centralized.
+ * 
+ * TODO:
+ */
 
 /// TODO:
 /// --------

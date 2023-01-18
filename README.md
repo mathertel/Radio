@@ -1,12 +1,14 @@
-## Overview
+# Radio Library Overview
 
-This library is about controlling an FM radio chips by using an Arduino board and some optional components like a LCD display, a rotary encoder, a LCD+Keyboard shield or an Ethernet Shield to build a standalone radio.
+This library is about controlling an FM radio chips by using an Arduino, ESP8266 or ESP32 board
+and some optional components like a LCD display, a rotary encoder, a LCD+Keyboard shield
+or an Ethernet Shield to build a standalone radio.
 
-In the [mathertel/Radio](https://github.com/mathertel/Radio) repository on github.com you find an Arduino library for implementing an FM receiver using one of the supported radio chips for receiving FM broadcast audio signals.
+In the [github.com/mathertel/Radio](https://github.com/mathertel/Radio) repository on github.com you find an Arduino library for implementing an FM receiver using one of the supported radio chips for receiving FM broadcast audio signals.
 
 There are various examples included that show using the library using different hardware setups.
 
-The library is working for many boards like Arduino, Arduino Mega, ESP8266 and maybe more.
+The library is working for many boards like Arduino, Arduino Mega, ESP8266, ESP32 and maybe more.
 
 See also the [Changelog](CHANGELOG.md).
 
@@ -19,8 +21,9 @@ A more detailed article is available at [www.mathertel.de/Arduino/RadioLibrary.a
 Currently the following radio receiver chips are supported:
 
 * The **RDA5807M** and **RDA5807FP** with I2S support from RDA Microelectronics
-* The **SI4703** from Silicon Labs
-* The **SI4705**, **SI4721** and **SI4730** chips from Silicon Labs
+* The **SI4703** from Silicon Labs, now Skyworks
+* The **SI4705** from Silicon Labs, now Skyworks
+* The **SI4721** and **SI4730** chips  from Silicon Labs, now Skyworks
 * The **TEA5767** from NXP
 
 They all are capable for receiving FM radio stations in stereo with European and US settings and can be controlled by using the I2C bus. However there are differences in the sensitivity and quality and well on receiving RDS information from the stations.
@@ -31,7 +34,7 @@ All the libraries share the same interface (defined by the radio library) so it 
 
 Currently the following radio transmitter chips are supported:
 
-* The **SI4721** from Silicon Labs
+* The **SI4721** from Silicon Labs, now Skyworks
 
 
 ## Contributions
@@ -57,8 +60,9 @@ The examples can be used with several chips:
 * The **SerialRadio** example needs only an arduino and uses the Serial in- and output to change the settings and report information.
 * The **ScanRadio** is similar to the SerialRadio example but includes some experimental scanning approaches.
 * The **LCDRadio** example is similar to SerialRadio but also populates some information to an attached LCD.
-* The **LCDKeypadRadio** example uses the popular LCDKeypad shield.
-* The **WebRadio** example is the most advanced radio that runs on an Arduino Mega with an Ethernet Shield and an rotator encoder. You can also control the radio by using a web site that is available on the Arduino.
+* The **LCDKeypadRadio** example uses the popular LCDKeypad shield for Arduino UNO.
+* The **WebRadio** example is the most advanced radio that runs on an Arduino Mega with an Ethernet Shield and an rotator encoder.
+  You can also control the radio by using a web site that is available on the Arduino.
 
 The only sending example for the SI4721 chip can be found in **TransmitSI4721**.
 

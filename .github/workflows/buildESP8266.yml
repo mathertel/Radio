@@ -1,0 +1,52 @@
+# GitHub Action Workflow
+
+name: Build Examples for ESP8266
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Build Examples for ESP8266
+  build-esp8266:
+    name: build examples on ESP8266
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Run Arduino Compiler
+      # see https://github.com/arduino/compile-sketches
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          verbose: true
+          platforms: |
+            # Install ESP8266 platform via Boards Manager
+            - name: "esp8266:esp8266"
+              source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+              version: 3.1.0
+          fqbn: esp8266:esp8266:nodemcuv2
+          libraries: |
+            - source-path: ./
+            - name: OneButton
+            - name: RotaryEncoder
+            - name: LiquidCrystal_PCF8574
+          sketch-paths: |
+            - 'examples/TestSI47xx'
+            - 'examples/TestSI4703'
+            - 'examples/SerialRadio'
+
+          # size-report-sketch: 'ConnectionHandlerDemo'
+          # enable-size-deltas-report: 'true'
+          # sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
