@@ -32,6 +32,7 @@
 
 // all possible radio chips included.
 #include <RDA5807M.h>
+#include <RDA5807FP.h>
 #include <SI4703.h>
 #include <SI4705.h>
 #include <SI47xx.h>
@@ -67,16 +68,33 @@ RADIO_FREQ preset[] = {
 
 uint16_t presetIndex = 5;  ///< Start at Station with index=5
 
+
+// ===== Processor / Board specific pin wiring =====
+
+#if defined(ARDUINO_ARCH_AVR)
+#define RESET_PIN 2
+#define MODE_PIN A4 // same as SDA
+
+#elif defined(ESP8266)
+#define RESET_PIN D5
+#define MODE_PIN D2 // same as SDA
+
+#elif defined(ESP32)
+// not tested with si4703
+
+#endif
+
+
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
 // RADIO radio;       ///< Create an instance of a non functional radio.
-// RDA5807M radio; ///< Create an instance of a RDA5807 chip radio
-SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
+// RDA5807FP radio; ///< Create an instance of a RDA5807FP chip radio
+// RDA5807M radio; ///< Create an instance of a RDA5807M chip radio
+// SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
 // SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
-// SI47xx radio; ///<  Create an instance of a SI4720,21,30 (and maybe more) chip radio.
+SI47xx radio; ///<  Create an instance of a SI4720,21,30 (and maybe more) chip radio.
 // TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
-
 
 /// get a RDS parser
 RDSParser rds;
@@ -238,24 +256,26 @@ void setup() {
 
   // open the Serial port
   Serial.begin(115200);
-  Serial.println("Radio...");
+  Serial.println("SerialRadio...");
   delay(200);
 
 #if defined(ARDUINO_ARCH_AVR)
   Wire.begin();  // a common pins for I2C = SDA:A4, SCL:A5
-  radio.setup(RADIO_RESETPIN, 2);
-  radio.setup(RADIO_SDAPIN, A4);
 
 #elif defined(ESP8266)
   // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
   // need to be specified.
   Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
-  radio.setup(RADIO_RESETPIN, D5);
-  radio.setup(RADIO_SDAPIN, D2);
 
 #elif defined(ESP32)
   Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
 
+#endif
+
+#if defined(RESET_PIN) 
+  // This is required for SI4703 chips:
+  radio.setup(RADIO_RESETPIN, RESET_PIN);
+  radio.setup(RADIO_MODEPIN, MODE_PIN);
 #endif
 
   // Enable information to the Serial port
@@ -263,15 +283,17 @@ void setup() {
   radio._wireDebug(lowLevelDebug);
 
   // Initialize the Radio
-  radio.initWire(Wire);
+  if (!radio.initWire(Wire)) {
+    Serial.println("no radio chip found.");
+    delay(4000);
+    ESP.restart();
+  };
 
   radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]);  // 5. preset.
 
   radio.setMono(false);
   radio.setMute(false);
   radio.setVolume(10);
-
-  Serial.write('>');
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);

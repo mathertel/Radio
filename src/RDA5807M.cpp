@@ -215,13 +215,16 @@ void RDA5807M::setBand(RADIO_BAND newBand) {
   uint16_t r;
   RADIO::setBand(newBand);
 
-  if (newBand == RADIO_BAND_FM)
-  r = RADIO_REG_CHAN_BAND_FM;
-  else if (newBand == RADIO_BAND_FMWORLD)
-  r = RADIO_REG_CHAN_BAND_FMWORLD;
+  if (newBand == RADIO_BAND_FM) {
+    r = RADIO_REG_CHAN_BAND_FM;
+  } else if (newBand == RADIO_BAND_FMWORLD) {
+    r = RADIO_REG_CHAN_BAND_FMWORLD;
+  } else {
+    return;
+  }
   registers[RADIO_REG_CHAN] = (r | RADIO_REG_CHAN_SPACE_100);
   _saveRegister(RADIO_REG_CHAN);
-} // setBand()
+}  // setBand()
 
 
 // retrieve the real frequency from the chip after automatic tuning.

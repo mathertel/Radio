@@ -415,8 +415,8 @@ void RADIO::_wireWriteTo(TwoWire *port, int address, uint8_t *cmdData, int cmdLe
     // send out command sequence
     port->beginTransmission(address);
     if (_wireDebugFlag) {
-      Serial.print("--write(");
-      Serial.print(address);
+      Serial.print("--write(0x");
+      Serial.print(address, 16);
       Serial.print("): ");
     }
 

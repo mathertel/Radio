@@ -212,7 +212,7 @@
 #define PROP_TX_PREEMPHASIS_75 0x00
 
 
-#define ELVRADIO
+// #define ELVRADIO
 
 /// Initialize the extra variables in SI47xx
 SI47xx::SI47xx() {
@@ -259,6 +259,7 @@ bool SI47xx::init() {
   } else {
     found = RADIO::_wireExists(_i2cPort, _i2caddr);
   }  // if
+  DEBUG_FUNC1X("I2C-address=", _i2caddr);
 
   // powering up is done by specifying the band etc. so it's implemented in setBand
   return (found);
@@ -384,6 +385,8 @@ void SI47xx::setMono(bool switchOn) {
  * @return void
  */
 void SI47xx::setBand(RADIO_BAND newBand) {
+  DEBUG_FUNC1("setBand", newBand);
+
   // Power down the device
   _sendCommand(1, CMD_POWER_DOWN);
   // Give the device some time to power down before restart

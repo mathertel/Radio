@@ -35,8 +35,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <radio.h>
 
+#include <radio.h>
 #include <si47xx.h>
 
 // ----- Fixed settings here. -----
@@ -54,16 +54,19 @@ void setup() {
 
   // open the Serial port
   Serial.begin(115200);
-  Serial.println("Radio...");
+  Serial.println("SI47xxRadio...");
   delay(200);
 
-#if defined(ESP8266)
+#if defined(ARDUINO_ARCH_AVR)
+
+#elif defined(ESP8266)
   // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
   // need to be specified.
   Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
 
 #elif defined(ESP32)
   Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
+  Serial.println("*1");
   
 #endif
 
@@ -72,12 +75,16 @@ void setup() {
     Serial.println("Device found at address 0x11");
   } else if (radio._wireExists(&Wire, 0x61)) {
     Serial.println("Device found at address 0x61");
+  } else if (radio._wireExists(&Wire, 0x63)) {
+    Serial.println("Device found at address 0x63");
   } else {
     Serial.println("Device NOT found at any address ");
   }
 
+  Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
+
   // Enable debug information to the Serial port
-  radio.debugEnable(false);
+  radio.debugEnable(true);
   radio._wireDebug(false);
 
   // Initialize the Radio

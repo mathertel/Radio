@@ -4,15 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [3.0.0] - 2023-01-15
 
+This is a major update as some behaviors in the library have changed.
+
 * RDSParser::attachServiceNameCallback has been renamed to avoid typo.
 * Some functions have been corrected to use (const char *) instead of (char*) parameters to enforce that the passed strings are not changed
   (e.g. receiveServiceNameFunction or receiveTextFunction). Be sure to change the parameter type avoid casting errors/warnings.
 * The interfaces to the Radio chip functionality has been changed to be more a property oriented interface.
-* A lot inline Documentation
+  Use the `radio.setup()` function to specify chip specific features and extra pins.
+* A lot inline and example documentation
 * fixing warnings from ESP32 compiler
 * The ESP32 processor can be used to compile some of the examples:
   * SerialRadio.ino --  just uncomment the chip you have.
   * TestSI4721.ino --  this example works with the SI4720 and SI4721 radio chips.
+* RDS Error detection for SI4703
+* The `.clang-format` and `.markdownlint.json` files are provided to define formatting rules.
+
 
 ## [2.0.0] - 2020-09-17
 

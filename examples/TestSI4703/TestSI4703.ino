@@ -17,19 +17,20 @@
 /// Wiring
 /// ------
 /// The SI4703 board has to be connected by using the following connections:
-/// | Arduino UNO pin    | ESP8266 | Radio chip signal |
-/// | -------------------| ------- | ----------------- |
-/// | 3.3V (red)         | 3v3     | VCC               |
-/// | GND (black)        | GND     | GND               |
-/// | A5 or SCL (yellow) | D1      | SCLK              |
-/// | A4 or SDA (blue)   | D2      | SDIO              |
-/// | D2 (white)         | D5      | RST               |
+/// | Arduino UNO pin    | ESP8266 | ESP32   | Radio chip signal |
+/// | -------------------| ------- | ------- | ----------------- |
+/// | 3.3V (red)         | 3v3     | 3v3     | VCC               |
+/// | GND (black)        | GND     | GND     | GND               |
+/// | A5 or SCL (yellow) | D1      |         | SCLK              |
+/// | A4 or SDA (blue)   | D2      |         | SDIO              |
+/// | D2 (white)         | D5      |         | RST               |
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
 /// CHangeLog:
 /// ----------
 /// * 05.08.2014 created.
 /// * 03.05.2015 corrections and documentation.
+/// * 17.01.2023 use radio.setup to configure chip specific features.
 
 #include <Arduino.h>
 #include <Wire.h>
