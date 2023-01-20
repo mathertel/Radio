@@ -49,9 +49,6 @@ struct TX_STATUS {
 /// Library to control the SI47xx radio chip.
 class SI47xx : public RADIO {
 public:
-  const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
-  const uint8_t MAXVOLUMEX = 63;  ///< max volume level for the SI47xx specific implementation.
-
   SI47xx();
 
   void setup(int feature, int value) override;
@@ -64,10 +61,7 @@ public:
 
   // ----- Audio functions -----
 
-  void setVolume(uint8_t newVolume);  ///< Control the volume output of the radio chip in the range 0..15.
-
-  void setVolumeX(uint8_t newVolume);  ///< Control the volume output of the radio chip in the range 0..63.
-  uint8_t getVolumeX();                ///< Retrieve the current output volume in the range 0..63.
+  void setVolume(int8_t newVolume) override;  ///< Control the volume output of the radio chip in the range 0..15.
 
   void setMute(bool switchOn) override;      ///< Control the mute mode of the radio chip.
   void setSoftMute(bool switchOn) override;  ///< Control the softmute mode (mute on low signals) of the radio chip.
@@ -77,7 +71,7 @@ public:
 
   // ----- Radio receiver functions -----
 
-  void setMono(bool switchOn);  ///< Control the mono/stereo mode of the radio chip.
+  void setMono(bool switchOn) override;  ///< Control the mono/stereo mode of the radio chip.
 
   /**
    * Start using the new band for receiving or transmitting.
@@ -125,8 +119,6 @@ private:
   bool _hasRDS = false;
   bool _hasAM = false;
   bool _hasTX = false;
-
-  uint8_t _realVolume;  ///< The real volume set to the chip.
 
   uint8_t _fmDeemphasis = 50;  ///< RX Deemphasis and TX Preemphasis in uS
 

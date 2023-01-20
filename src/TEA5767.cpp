@@ -75,6 +75,7 @@
 
 // initialize the extra variables in SI4703
 TEA5767::TEA5767() {
+  _maxVolume = 1;
 }
 
 // initialize all internals.
@@ -108,18 +109,16 @@ void TEA5767::term()
 
 // ----- Volume control -----
 
-/// setVolume is a non-existing function in TEA5767. It will always me MAXVOLUME.
-void TEA5767::setVolume(uint8_t newVolume)
+/// setVolume is a non-existing function in TEA5767. It will always be 1.
+void TEA5767::setVolume(int8_t newVolume)
 {
-  DEBUG_FUNC0("setVolume");
-  RADIO::setVolume(MAXVOLUME);
+  RADIO::setVolume(1);
 } // setVolume()
 
 
-/// setBassBoost is a non-existing function in TEA5767. It will never be acivated.
+/// setBassBoost is a non-existing function in TEA5767. It will never be activated.
 void TEA5767::setBassBoost(bool switchOn)
 {
-  DEBUG_FUNC0("setBassBoost");
   RADIO::setBassBoost(false);
 } // setBassBoost()
 

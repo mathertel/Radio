@@ -69,14 +69,19 @@ void RADIO::term() {
 
 // ----- Volume control -----
 
-void RADIO::setVolume(uint8_t newVolume) {
-  _volume = newVolume;
+void RADIO::setVolume(int8_t newVolume) {
+  _volume = constrain(newVolume, 0, _maxVolume);
 }  // setVolume()
 
 
-uint8_t RADIO::getVolume() {
+int8_t RADIO::getVolume() {
   return (_volume);
 }  // getVolume()
+
+
+int8_t RADIO::getMaxVolume() {
+  return (_maxVolume);
+}  // getMaxVolume()
 
 
 // ----- bass boost control -----

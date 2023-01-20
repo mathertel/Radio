@@ -154,7 +154,7 @@ void SI4703::term() {
 
 // ----- Volume control -----
 
-void SI4703::setVolume(uint8_t newVolume) {
+void SI4703::setVolume(int8_t newVolume) {
   DEBUG_FUNC1("setVolume", newVolume);
   if (newVolume > 15)
     newVolume = 15;

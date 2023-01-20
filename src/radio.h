@@ -27,7 +27,7 @@
  * * 29.04.2015 clear RDS function, need to clear RDS info after tuning.
  * * 17.09.2020 Wire Util functions added.
  * * 06.12.2020 I2C Wire and Reset initialization centralized.
- * 
+ *
  * TODO:
  */
 
@@ -207,7 +207,7 @@ struct AUDIO_INFO {
 class RADIO {
 
 public:
-  const uint8_t MAXVOLUME = 15;  ///< max volume level for all radio implementations.
+  const uint8_t MAXVOLUME = 15;  ///< max volume level for all radio library consumers.
 
   RADIO();  ///< create a new object from this class.
 
@@ -218,8 +218,9 @@ public:
 
   // ----- Audio features -----
 
-  virtual void setVolume(uint8_t newVolume);  ///< Control the volume output of the radio chip in the range 0..15.
-  virtual uint8_t getVolume();                ///< Retrieve the current output volume in the range 0..15.
+  virtual void setVolume(int8_t newVolume);  ///< Set the volume output of the radio chip.
+  virtual int8_t getVolume();                ///< Retrieve the current output volume.
+  virtual int8_t getMaxVolume();             ///< Retrieve the maximum possible output volume.
 
   virtual void setMute(bool switchOn);  ///< Control the mute mode of the radio chip.
   virtual bool getMute();               ///< Retrieve the current mute mode setting.
@@ -331,6 +332,8 @@ protected:
   bool _wireDebugEnabled = false;  ///< Set by _wireDebug() and controls i2c data level debugging.
 
   uint8_t _volume = 0;      ///< Last set volume level.
+  uint8_t _maxVolume = 15;  ///< maximum of volume supported by the chip.
+
   bool _bassBoost = false;  ///< Last set bass Boost effect.
   bool _mono = false;       ///< Last set mono effect.
   bool _mute = false;       ///< Last set mute effect.

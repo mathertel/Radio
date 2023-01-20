@@ -6,13 +6,22 @@ All notable changes to this project will be documented in this file.
 
 This is a major update as some behaviors in the library have changed.
 
+### Major Changes
+
 * RDSParser::attachServiceNameCallback has been renamed to avoid typo.
+* The radio library includes a new function `getMaxVolume` to retrieve the max. volume level supported by the chip.
+  The setVolume function now accepts values in the range of 0..getMaxVolume().
 * Some functions have been corrected to use (const char *) instead of (char*) parameters to enforce that the passed strings are not changed
   (e.g. receiveServiceNameFunction or receiveTextFunction). Be sure to change the parameter type avoid casting errors/warnings.
 * The interfaces to the Radio chip functionality has been changed to be more a property oriented interface.
   Use the `radio.setup()` function to specify chip specific features and extra pins.
-* A lot inline and example documentation
+
+### Other changes
+
 * fixing warnings from ESP32 compiler
+* A lot inline and example documentation
+* The Wire object for I2C bus communication is now used through _i2cPort that can be initializes with initWire().
+  This allows specifying the right i2c port in case the CPU supports multiple instances.
 * The ESP32 processor can be used to compile some of the examples:
   * SerialRadio.ino --  just uncomment the chip you have.
   * TestSI4721.ino --  this example works with the SI4720 and SI4721 radio chips.

@@ -164,7 +164,6 @@ void runSerialCommand(char cmd, int16_t value) {
   else if (cmd == '+') {
     // increase volume
     int v = radio.getVolume();
-    if (v < 15)
       radio.setVolume(++v);
   } else if (cmd == '-') {
     // decrease volume

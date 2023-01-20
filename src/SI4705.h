@@ -37,9 +37,6 @@
 /// Library to control the SI4705 radio chip.
 class SI4705 : public RADIO {
 public:
-  const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
-  const uint8_t MAXVOLUMEX = 63;  ///< max volume level for the SI4705 specific implementation.
-
   SI4705();
 
   bool   init();  ///< Initialize the library and the chip.
@@ -47,22 +44,19 @@ public:
 
   // ----- Audio functions -----
 
-  void    setVolume(uint8_t newVolume);   ///< Control the volume output of the radio chip in the range 0..15.
+  void    setVolume(int8_t newVolume) override;   ///< Control the volume output of the radio chip in the range 0..15.
 
-  void    setVolumeX(uint8_t newVolume);  ///< Control the volume output of the radio chip in the range 0..63.
-  uint8_t getVolumeX();                   ///< Retrieve the current output volume in the range 0..63.
-
-  void    setMute(bool switchOn);         ///< Control the mute mode of the radio chip.
-  void    setSoftMute(bool switchOn);     ///< Control the softmute mode (mute on low signals) of the radio chip.
+  void    setMute(bool switchOn) override;         ///< Control the mute mode of the radio chip.
+  void    setSoftMute(bool switchOn) override;     ///< Control the softmute mode (mute on low signals) of the radio chip.
 
   // Overwrite audio functions that are not supported.
-  void    setBassBoost(bool switchOn);    ///< regardless of the given parameter, the Bass Boost will never switch on.
+  void    setBassBoost(bool switchOn) override;    ///< regardless of the given parameter, the Bass Boost will never switch on.
 
   // ----- Radio receiver functions -----
 
-  void    setMono(bool switchOn);         ///< Control the mono/stereo mode of the radio chip.
+  void    setMono(bool switchOn) override;         ///< Control the mono/stereo mode of the radio chip.
 
-  void    setBand(RADIO_BAND newBand);    ///< Control the band of the radio chip.
+  void    setBand(RADIO_BAND newBand) override;    ///< Control the band of the radio chip.
 
   void    setFrequency(RADIO_FREQ newF);  ///< Control the frequency.
   RADIO_FREQ getFrequency(void);

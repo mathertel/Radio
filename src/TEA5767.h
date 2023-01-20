@@ -31,7 +31,6 @@
 /// Library to control the TEA5767 radio chip.
 class TEA5767 : public RADIO {
   public:
-  const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
   TEA5767();
   
   bool   init();  // initialize library and the chip.
@@ -40,7 +39,7 @@ class TEA5767 : public RADIO {
   // Control of the audio features
   
   /// setVolume is a non-existing function in TEA5767. It will always me MAXVOLUME.
-  void   setVolume(uint8_t newVolume);
+  void   setVolume(int8_t newVolume) override;
 
   // Control the bass boost function of the radio chip
   void   setBassBoost(bool switchOn);

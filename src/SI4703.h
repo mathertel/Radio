@@ -41,8 +41,6 @@ static const uint8_t GPIO_High = 0b11;  // High output (VIO level)
 /// Library to control the SI4703 radio chip.
 class SI4703 : public RADIO {
 public:
-  const uint8_t MAXVOLUME = 15;  ///< max volume level for radio implementations.
-
   SI4703();
 
   void setup(int feature, int value) override;
@@ -52,7 +50,7 @@ public:
   // Control of the audio features
 
   // Control the volume output of the radio chip
-  void setVolume(uint8_t newVolume) override;  ///< Control the volume output of the radio chip in the range 0..15.
+  void setVolume(int8_t newVolume) override;  ///< Control the volume output of the radio chip in the range 0..15.
 
   // Control mono/stereo mode of the radio chip
   void setMono(bool switchOn) override;  // Switch to mono mode.
