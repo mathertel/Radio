@@ -33,6 +33,7 @@
 /// * 04.10.2014 working.
 /// * 22.03.2015 Copying to LCDKeypadRadio.
 /// * 23.01.2023 more robust, nicer LCD messages and cleanup.
+/// * 30.01.2023 avoid using analogRead() too often.
 
 #include <LiquidCrystal.h>
 
@@ -57,6 +58,10 @@ enum KEYSTATE {
   KEYSTATE_RIGHT
 } __attribute__((packed));
 
+// Define RESET and Mode signals for SI4703 chips:
+// #define RESET_PIN 2
+// #define MODE_PIN A4  // same as SDA
+
 // ----- forwards -----
 // You need this because the function is not returning a simple value.
 KEYSTATE getLCDKeypadKey();
@@ -80,19 +85,24 @@ unsigned int presetIndex = 0;  ///< Start at Station with index=5
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
-// RADIO radio;       ///< Create an instance of a non functional radio.
-// RDA5807M radio;    ///< Create an instance of a RDA5807 chip radio
-// SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
-// SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
-SI47xx radio;  ///< Create an instance of a SI4721 chip radio.
-// TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
+// RADIO radio;     ///< Create an instance of a non functional radio.
+RDA5807M radio;  ///< Create an instance of a RDA5807 chip radio
+// SI4703   radio;  ///< Create an instance of a SI4703 chip radio.
+// SI4705   radio;  ///< Create an instance of a SI4705 chip radio.
+// SI47xx radio;    ///< Create an instance of a SI4721 chip radio.
+// TEA5767  radio;  ///< Create an instance of a TEA5767 chip radio.
 
 
 /// get a RDS parser
 RDSParser rds;
 
 unsigned long nextFreqTime = 0;
+unsigned long nextKeyTime = 0;
 unsigned long nextClearTime = 0;
+
+bool doReportKey = false;
+KEYSTATE lastKey = KEYSTATE_NONE;
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -149,14 +159,10 @@ void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t blo
 /// * returns a specific key down only once.
 ///
 /// [Next] [seek--] [Vol+] [seek++] [RST]
-///              [Vol-]
+///                 [Vol-]
 ///
 KEYSTATE getLCDKeypadKey() {
-  static unsigned long lastChange = 0;
-  static KEYSTATE lastKey = KEYSTATE_NONE;
-
-  unsigned long now = millis();
-  KEYSTATE newKey;
+  KEYSTATE newKey = KEYSTATE_NONE;
 
   // Get current key state
   int v = analogRead(A0);  // the buttons are read from the analog0 pin
@@ -177,28 +183,30 @@ KEYSTATE getLCDKeypadKey() {
 
   if (newKey != lastKey) {
     // a new situation - just remember but do not return anything pressed.
-    lastChange = now;
+    doReportKey = true;
     lastKey = newKey;
     return (KEYSTATE_NONE);
 
-  } else if (lastChange == 0) {
-    // nothing new.
-    return (KEYSTATE_NONE);
+  } else if ((newKey == lastKey) && (doReportKey)) {
+     doReportKey = false;  // don't report twice
+     return (newKey);
   }
-  if (now > lastChange + 50) {
-    // now its not a bouncing button any more.
-    lastChange = 0;  // don't report twice
-    return (newKey);
-
-  } else {
-    return (KEYSTATE_NONE);
-
-  }  // if
+  return (KEYSTATE_NONE);
 }  // getLCDKeypadKey()
+
+
+void displayKeyValue(const char *key, int value) {
+  lcd.setCursor(0, 1);
+  lcd.print(key);
+  lcd.print(": ");
+  lcd.print(value);
+  lcd.print("  ");
+}  // displayKeyValue
 
 
 /// Setup a FM only radio configuration with I/O for commands and debugging on the Serial port.
 void setup() {
+  delay(1000);
   // open the Serial port
   Serial.begin(115200);
   Serial.println("LCDKeypadRadio...");
@@ -210,6 +218,12 @@ void setup() {
   lcd.print("LCDKeypadRadio");
   delay(2000);
   lcd.clear();
+
+#if defined(RESET_PIN)
+  // This is required for SI4703 chips:
+  radio.setup(RADIO_RESETPIN, RESET_PIN);
+  radio.setup(RADIO_MODEPIN, MODE_PIN);
+#endif
 
   // Initialize the Radio
   bool found = radio.initWire(Wire);
@@ -223,7 +237,7 @@ void setup() {
     lcd.setCursor(0, 1);
     lcd.print("Press reset...");
 
-    while (1) {};
+    while (1) {}; // forever
   }
 
   // Enable information to the Serial port
@@ -231,13 +245,9 @@ void setup() {
 
   radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]);  // first preset.
 
-  // delay(100);
-
   radio.setMono(false);
   radio.setMute(false);
   radio.setVolume(radio.getMaxVolume());
-
-  Serial.write('>');
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
@@ -250,51 +260,50 @@ void setup() {
 void loop() {
   unsigned long now = millis();
 
+  // check for RDS data
+  radio.checkRDS();
+
   // some internal static values for parsing the input
   static RADIO_FREQ lastFrequency = 0;
   RADIO_FREQ f = 0;
 
-  KEYSTATE k = getLCDKeypadKey();
+  // detect any key press on LCD Keypad Module
+  if (now > nextKeyTime) {
+    nextKeyTime = now + 100;
 
-  if (k == KEYSTATE_RIGHT) {
-    radio.seekUp(true);
+    KEYSTATE k = getLCDKeypadKey();
 
-  } else if (k == KEYSTATE_UP) {
-    // increase volume
-    int v = radio.getVolume();
-    if (v < radio.getMaxVolume()) radio.setVolume(++v);
-    lcd.setCursor(0, 1);
-    lcd.print("vol:");
-    lcd.print(v);
-    nextClearTime = now + 2000;
+    if (k == KEYSTATE_RIGHT) {
+      radio.seekUp(true);
 
-  } else if (k == KEYSTATE_DOWN) {
-    // decrease volume
-    int v = radio.getVolume();
-    if (v > 0) radio.setVolume(--v);
-    lcd.setCursor(0, 1);
-    lcd.print("vol:");
-    lcd.print(v);
-    nextClearTime = now + 2000;
+    } else if (k == KEYSTATE_UP) {
+      // increase volume
+      int v = radio.getVolume();
+      if (v < radio.getMaxVolume()) radio.setVolume(++v);
+      displayKeyValue("vol", v);
+      nextClearTime = now + 2000;
 
-  } else if (k == KEYSTATE_LEFT) {
-    radio.seekDown(true);
+    } else if (k == KEYSTATE_DOWN) {
+      // decrease volume
+      int v = radio.getVolume();
+      if (v > 0) radio.setVolume(--v);
+      displayKeyValue("vol", v);
+      nextClearTime = now + 2000;
 
-  } else if (k == KEYSTATE_SELECT) {
-    // 10110
-    if (presetIndex < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
-      presetIndex++;
-    } else {
-      presetIndex = 0;
+    } else if (k == KEYSTATE_LEFT) {
+      radio.seekDown(true);
+
+    } else if (k == KEYSTATE_SELECT) {
+      if (presetIndex < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
+        presetIndex++;
+      } else {
+        presetIndex = 0;
+      }
+
+      radio.setFrequency(preset[presetIndex]);
+      nextClearTime = now;
     }
-    radio.setFrequency(preset[presetIndex]);
-
-  } else {
-    //
-  }
-
-  // check for RDS data
-  radio.checkRDS();
+  }  // if
 
   // update the display from time to time
   if (now > nextFreqTime) {
@@ -313,7 +322,6 @@ void loop() {
     lcd.print("                ");
     nextClearTime = 0;
   }  // if
-
 }  // loop
 
 // End.

@@ -112,6 +112,7 @@ void TEA5767::term()
 /// setVolume is a non-existing function in TEA5767. It will always be 1.
 void TEA5767::setVolume(int8_t newVolume)
 {
+  (void)newVolume;
   RADIO::setVolume(1);
 } // setVolume()
 
@@ -119,6 +120,7 @@ void TEA5767::setVolume(int8_t newVolume)
 /// setBassBoost is a non-existing function in TEA5767. It will never be activated.
 void TEA5767::setBassBoost(bool switchOn)
 {
+  (void)switchOn;
   RADIO::setBassBoost(false);
 } // setBassBoost()
 
@@ -217,12 +219,14 @@ void TEA5767::setFrequency(RADIO_FREQ newF) {
 /// Start seek mode upwards.
 void TEA5767::seekUp(bool toNextSender) {
   DEBUG_FUNC0("seekUp");
+  (void)toNextSender;
   _seek(true);
 } // seekUp()
 
 
 /// Start seek mode downwards.
 void TEA5767::seekDown(bool toNextSender) {
+  (void)toNextSender;
   _seek(false);
 } // seekDown()
 
@@ -291,6 +295,7 @@ void TEA5767::debugStatus()
 /// Seeks out the next available station
 void TEA5767::_seek(bool seekUp) {
   DEBUG_FUNC0("_seek");
+  (void)seekUp;
 } // _seek
 
 

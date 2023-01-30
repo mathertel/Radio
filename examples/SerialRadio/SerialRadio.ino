@@ -164,7 +164,7 @@ void runSerialCommand(char cmd, int16_t value) {
   else if (cmd == '+') {
     // increase volume
     int v = radio.getVolume();
-      radio.setVolume(++v);
+    radio.setVolume(++v);
   } else if (cmd == '-') {
     // decrease volume
     int v = radio.getVolume();
@@ -277,14 +277,14 @@ void setup() {
   if (!radio.initWire(Wire)) {
     Serial.println("no radio chip found.");
     delay(4000);
-    ESP.restart();
+    while (1) {};
   };
 
   radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]);  // 5. preset.
 
   radio.setMono(false);
   radio.setMute(false);
-  radio.setVolume(10);
+  radio.setVolume(radio.getMaxVolume());
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);

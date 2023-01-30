@@ -1,0 +1,52 @@
+# GitHub Action Workflow
+
+name: Build Examples for AVR UNO
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  # This defines a job for checking the Arduino library format specifications
+  # see <https://github.com/marketplace/actions/arduino-arduino-lint-action>
+  compile-uno:
+    name: check library format
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Arduino - lint
+      - name: Arduino-lint
+        uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
+          verbose: false
+
+      # Run Arduino Compiler
+      # see https://github.com/arduino/compile-sketches
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          verbose: true
+          fqbn: arduino:avr:uno
+
+          libraries: |
+            - source-path: ./
+            - name: LiquidCrystal
+          sketch-paths: |
+            - 'examples/LCDKeypadRadio'
+
+          # size-report-sketch: 'ConnectionHandlerDemo'
+          # enable-size-deltas-report: 'true'
+          # sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}

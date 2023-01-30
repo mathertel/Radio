@@ -100,7 +100,10 @@ bool RDA5807M::init() {
   _i2cPort->begin();
   _i2cPort->beginTransmission(I2C_INDX);
   result = _i2cPort->endTransmission();
-  if (result == 0) {
+  if (result != 0) {
+    DEBUG_STR("NO radio found.");
+
+  } else {
     DEBUG_STR("radio found.");
     result = true;
 
@@ -139,9 +142,9 @@ void RDA5807M::term() {
 
 void RDA5807M::setVolume(int8_t newVolume) {
   DEBUG_FUNC1("setVolume", newVolume);
-  RADIO::setVolume(newVolume); // will constrain the _volume in the range 0.._maxVolume
+  RADIO::setVolume(newVolume);  // will constrain the _volume in the range 0.._maxVolume
   uint8_t v = _volume & RADIO_REG_VOL_VOL;
-  
+
   registers[RADIO_REG_VOL] &= (~RADIO_REG_VOL_VOL);
   registers[RADIO_REG_VOL] |= v;
   _saveRegister(RADIO_REG_VOL);
@@ -332,9 +335,9 @@ void RDA5807M::_saveRegister(byte regNr) {
 
 // read a register value using 2 bytes in a row
 // uint16_t RDA5807M::_read16(void) {
-  // uint8_t hiByte = _i2cPort->read();
-  // uint8_t loByte = _i2cPort->read();
-  // return (256 * hiByte + loByte);
+// uint8_t hiByte = _i2cPort->read();
+// uint8_t loByte = _i2cPort->read();
+// return (256 * hiByte + loByte);
 // }  // _read16
 
 
@@ -357,7 +360,7 @@ void RDA5807M::checkRDS() {
     registers[RADIO_REG_RA] = _read16HL(_i2cPort);
 
     // if (registers[RADIO_REG_RA] & RADIO_REG_RA_RDSBLOCK) {
-      // DEBUG_STR("BLOCK_E found.");
+    // DEBUG_STR("BLOCK_E found.");
     // }  // if
 
     if (registers[RADIO_REG_RA] & RADIO_REG_RA_RDS) {
