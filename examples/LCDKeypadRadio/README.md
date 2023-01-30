@@ -12,5 +12,5 @@ Be sure to activate the lines for the RST signal for SI4703 radio chips.
 
 Please read the README.md files in the TEST____ examples for more chip specific hints.
 
-There is a picture of this setup with a RDA5807 chip available at <http://localhost:8080/elements/audio/rda5807.htm>
+There is a picture of this setup with a RDA5807 chip available at <https://homeding.github.io/elements/audio/rda5807.htm>
 
