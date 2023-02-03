@@ -76,6 +76,9 @@ void setup() {
 
 #endif
 
+  radio.setup(RADIO_FMSPACING, RADIO_FMSPACING_100); // for EUROPE
+  radio.setup(RADIO_DEEMPHASIS, RADIO_DEEMPHASIS_50); // for EUROPE
+
   // Initialize the Radio
   radio.initWire(Wire);
 

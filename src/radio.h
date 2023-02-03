@@ -193,15 +193,29 @@ struct AUDIO_INFO {
 
 // ----- common RADIO class definition -----
 
+// setup() features and defined values
+
 #define RADIO_RESETPIN 0x01
 #define RADIO_SDAPIN 0x02
 #define RADIO_MODEPIN 0x02
 #define RADIO_I2CADDRESS 0x03
+
 #define RADIO_ANTENNA 0x04
 #define RADIO_ANTENNA_DEFAULT 0
 #define RADIO_ANTENNA_OPT1 1
 #define RADIO_ANTENNA_OPT2 2
 
+// FM channel spacing configuration is supported by some radio chips.
+#define RADIO_FMSPACING 0x05
+#define RADIO_FMSPACING_25 25
+#define RADIO_FMSPACING_50 50
+#define RADIO_FMSPACING_100 100  // 100 kHz typically used in Europe / Japan = default
+#define RADIO_FMSPACING_200 200  // 200 kHz typically used in US / Australia 
+
+// FM High Frequency de-emphasis 
+#define RADIO_DEEMPHASIS 0x06
+#define RADIO_DEEMPHASIS_50 50 // 50µs typically used in Europe, Australia, Japan
+#define RADIO_DEEMPHASIS_75 75 // 75µs typically used in USA
 
 /// Library to control radio chips in general. This library acts as a base library for the chip specific implementations.
 class RADIO {
@@ -358,8 +372,14 @@ protected:
   // extra pins
   int _resetPin = -1;
 
-  // OPTIONS
+  // Antenna Features
   int _antennaOption = 0;
+
+  // FM Channel Spacing Features
+  int _fmSpacing = RADIO_FMSPACING_100;
+
+  // FM de-emphasis 
+  int _deEmphasis = RADIO_DEEMPHASIS_50;
 
 private:
   void int16_to_s(char *s, uint16_t val);  ///< Converts a int16 number to a string, similar to itoa, but using the format "00000".

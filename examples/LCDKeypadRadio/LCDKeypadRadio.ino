@@ -40,11 +40,11 @@
 #include <Wire.h>
 
 #include <radio.h>
-#include <rda5807M.h>
-#include <si4703.h>
-#include <si4705.h>
+#include <RDA5807M.h>
+#include <SI4703.h>
+#include <SI4705.h>
 #include <SI47xx.h>
-#include <tea5767.h>
+#include <TEA5767.h>
 
 #include <RDSParser.h>
 

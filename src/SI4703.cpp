@@ -29,11 +29,6 @@
 
 // ----- Radio chip specific definitions including the registers
 
-// Use this define to setup European FM specific settings in the chip.
-#define IN_EUROPE
-
-// int STATUS_LED = 13;
-
 // Register Definitions -----
 
 // Define the register names
@@ -64,6 +59,7 @@
 #define TUNE 15
 
 // Register 0x04 - SYSCONFIG1
+#define DEEMPHASIS50 0x0800
 #define RDS 12
 #define DE 11
 
@@ -74,8 +70,12 @@
 #define SEEKTH_MID 0x1000
 #define SEEKTH_MAX 0x7F00
 
-#define SPACE1 5
-#define SPACE0 4
+#define FMSPACE_MASK 0x0030
+#define FMSPACE_50 0x0020
+#define FMSPACE_100 0x0010
+#define FMSPACE_200 0x0000
+
+#define VOLUME_MASK 0x000F
 
 // Register 0x06 - SYSCONFIG3
 #define SKSNR_MASK 0x00F0
@@ -158,10 +158,10 @@ void SI4703::setVolume(int8_t newVolume) {
   DEBUG_FUNC1("setVolume", newVolume);
   if (newVolume > 15)
     newVolume = 15;
-  _readRegisters();                    // Read the current register set
-  registers[SYSCONFIG2] &= 0xFFF0;     // Clear volume bits
-  registers[SYSCONFIG2] |= newVolume;  // Set new volume
-  _saveRegisters();                    // Update
+  _readRegisters();                         // Read the current register set
+  registers[SYSCONFIG2] &= ~(VOLUME_MASK);  // Clear volume bits
+  registers[SYSCONFIG2] |= newVolume;       // Set new volume
+  _saveRegisters();  // Update
   RADIO::setVolume(newVolume);
 }  // setVolume()
 
@@ -231,20 +231,32 @@ void SI4703::setBand(RADIO_BAND newBand) {
 
     registers[SYSCONFIG1] |= (1 << RDS);  // Enable RDS
 
-#ifdef IN_EUROPE
-    // Freq(MHz) = 0.100(in Europe) * Channel + 87.5MHz
-    _freqSteps = 10;
-    registers[SYSCONFIG1] |= (1 << DE);      // 50kHz Europe setup
-    registers[SYSCONFIG2] |= (1 << SPACE0);  // 100kHz channel spacing for Europe
-#else
-    // Freq(MHz) = 0.200(in USA) * Channel + 87.5MHz
-    _freqSteps = 20;
-    registers[SYSCONFIG2] &= ~(1 << SPACE1 | 1 << SPACE0);  // Force 200kHz channel spacing for USA
-#endif
+  
+    if (_deEmphasis == RADIO_DEEMPHASIS_50) {
+      registers[SYSCONFIG1] |= DEEMPHASIS50;      // 50µs
+    }else {
+      registers[SYSCONFIG1] &= ~DEEMPHASIS50;      // 75µs 
+    }
+
+    if (_fmSpacing == RADIO_FMSPACING_50) {
+      _freqSteps = 5;
+      registers[SYSCONFIG2] &= ~(FMSPACE_MASK);  // Clear all
+      registers[SYSCONFIG2] |= FMSPACE_50;
+
+    } else if (_fmSpacing == RADIO_FMSPACING_100) {
+      _freqSteps = 10;
+      registers[SYSCONFIG2] &= ~(FMSPACE_MASK);  // Clear all
+      registers[SYSCONFIG2] |= FMSPACE_100;      // set 100
+
+    } else if (_fmSpacing == RADIO_FMSPACING_200) {
+      _freqSteps = 20;
+      registers[SYSCONFIG2] &= ~(FMSPACE_MASK);  // Clear all
+      registers[SYSCONFIG2] |= FMSPACE_200;
+    }
 
     _volume = 1;
-    registers[SYSCONFIG2] &= 0xFFF0;            // Clear volume bits
-    registers[SYSCONFIG2] |= (_volume & 0x0F);  // Set volume
+    registers[SYSCONFIG2] &= ~(VOLUME_MASK);
+    registers[SYSCONFIG2] |= (_volume & VOLUME_MASK);  // Set volume
 
     // set seek parameters
     registers[SYSCONFIG2] |= SEEKTH_MID;     // Set volume
@@ -378,7 +390,7 @@ void SI4703::getAudioInfo(AUDIO_INFO *info) {
   if (!(registers[POWERCFG] & (1 << DSMUTE)))
     info->softmute = true;
   info->bassBoost = false;  // no bassBoost
-  info->volume = registers[SYSCONFIG2] & 0x000F;
+  info->volume = registers[SYSCONFIG2] & VOLUME_MASK;
 }  // getAudioInfo()
 
 

@@ -34,6 +34,10 @@ void RADIO::setup(int feature, int value) {
     _i2caddr = value;
   } else if ((feature == RADIO_ANTENNA) && (value > 0)) {
     _antennaOption = value;
+  } else if ((feature == RADIO_FMSPACING) && (value > 0)) {
+    _fmSpacing = value;
+  } else if ((feature == RADIO_DEEMPHASIS) && (value > 0)) {
+    _deEmphasis = value;
   }
 
 }  // setup()

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [unpublished]
+
+* Runtime Configuration of de-emphasis and channel spacing
+
 ## [3.0.0] - 2023-01-15
 
 This is a major update as some behaviors in the library have changed.
