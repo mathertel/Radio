@@ -46,6 +46,7 @@ jobs:
             - name: LiquidCrystal
           sketch-paths: |
             - 'examples/LCDKeypadRadio'
+            - 'examples/ScanRadio'
 
           # size-report-sketch: 'ConnectionHandlerDemo'
           # enable-size-deltas-report: 'true'
