@@ -35,7 +35,7 @@
 #include <RDA5807M.h>
 #include <SI4703.h>
 #include <SI4705.h>
-#include <SI4721.h>
+#include <SI47xx.h>
 #include <TEA5767.h>
 
 #include <RDSParser.h>
@@ -45,9 +45,9 @@
 
 /// Create the radio instance that fits the current chip:
 // RDA5807M radio;  ///< Create an instance of a RDA5807 chip radio
-// SI4703   radio;  ///< Create an instance of a SI4703 chip radio.
+SI4703 radio;  ///< Create an instance of a SI4703 chip radio.
 // SI4705 radio;    ///< Create an instance of a SI4705 chip radio.
-SI4721 radio; ///< Create an instance of a SI4705 chip radio.
+// SI47xx radio; ///< Create an instance of a SI4705 chip radio.
 // TEA5767  radio;  ///< Create an instance of a TEA5767 chip radio.
 
 /// get a RDS parser
@@ -56,12 +56,12 @@ RDSParser rds;
 
 /// State of Keyboard input for this radio implementation.
 enum RADIO_STATE {
-  STATE_PARSECOMMAND, ///< waiting for a new command character.
-  STATE_PARSEINT, ///< waiting for digits for the parameter.
-  STATE_EXEC ///< executing the command.
+  STATE_PARSECOMMAND,  ///< waiting for a new command character.
+  STATE_PARSEINT,      ///< waiting for digits for the parameter.
+  STATE_EXEC           ///< executing the command.
 };
 
-RADIO_STATE kbState; ///< The state of parsing input characters.
+RADIO_STATE kbState;  ///< The state of parsing input characters.
 char kbCommand;
 int16_t kbValue;
 
@@ -73,16 +73,14 @@ bool lowLevelDebug = false;
 
 // use a function in between the radio chip and the RDS parser
 // to catch the block1 value (used for sender identification)
-void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4)
-{
+void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
   // Serial.printf("RDS: 0x%04x 0x%04x 0x%04x 0x%04x\n", block1, block2, block3, block4);
   g_block1 = block1;
   rds.processData(block1, block2, block3, block4);
 }
 
 /// Update the Time
-void DisplayTime(uint8_t hour, uint8_t minute)
-{
+void DisplayTime(uint8_t hour, uint8_t minute) {
   Serial.print("Time: ");
   if (hour < 10)
     Serial.print('0');
@@ -91,12 +89,11 @@ void DisplayTime(uint8_t hour, uint8_t minute)
   if (minute < 10)
     Serial.print('0');
   Serial.println(minute);
-} // DisplayTime()
+}  // DisplayTime()
 
 
 /// Update the ServiceName text on the LCD display.
-void DisplayServiceName(char *name)
-{
+void DisplayServiceName(const char *name) {
   bool found = false;
 
   for (uint8_t n = 0; n < 8; n++)
@@ -108,26 +105,24 @@ void DisplayServiceName(char *name)
     Serial.print(name);
     Serial.println('>');
   }
-} // DisplayServiceName()
+}  // DisplayServiceName()
 
 
 /// Update the ServiceName text on the LCD display.
-void DisplayText(char *txt)
-{
+void DisplayText(const char *txt) {
   Serial.print("Text: <");
   Serial.print(txt);
   Serial.println('>');
-} // DisplayText()
+}  // DisplayText()
 
 
 /// Execute a command identified by a character and an optional number.
 /// See the "?" command for available commands.
 /// \param cmd The command character.
 /// \param value An optional parameter for the command.
-void runSerialCommand(char cmd, int16_t value)
-{
-  unsigned long startSeek; // after 300 msec must be tuned. after 500 msec must have RDS.
-  RADIO_FREQ fSave, fLast;
+void runSerialCommand(char cmd, int16_t value) {
+  unsigned long startSeek;  // after 300 msec must be tuned. after 500 msec must have RDS.
+  RADIO_FREQ fSave, fLast = 0;
   RADIO_FREQ f = radio.getMinFrequency();
   RADIO_FREQ fMax = radio.getMaxFrequency();
   char sFreq[12];
@@ -210,11 +205,11 @@ void runSerialCommand(char cmd, int16_t value)
         Serial.print(ri.stereo ? 'S' : '-');
         Serial.print(ri.rds ? 'R' : '-');
         Serial.println();
-      } // if
+      }  // if
 
       // tune up by 1 step
       f += radio.getFrequencyStep();
-    } // while
+    }  // while
     radio.setFrequency(fSave);
     Serial.println();
 
@@ -227,7 +222,7 @@ void runSerialCommand(char cmd, int16_t value)
 
     while (f <= fMax) {
       radio.seekUp(true);
-      delay(100); //
+      delay(100);  //
       startSeek = millis();
 
       // wait for seek complete
@@ -269,10 +264,10 @@ void runSerialCommand(char cmd, int16_t value)
           Serial.print('[');
           Serial.print(g_block1, HEX);
           Serial.print(']');
-        } // if
+        }  // if
         Serial.println();
-      } // if
-    } // while
+      }  // if
+    }    // while
     radio.setFrequency(fSave);
     Serial.println();
 
@@ -314,18 +309,17 @@ void runSerialCommand(char cmd, int16_t value)
     radio.debugAudioInfo();
 
   } else if (cmd == 'x') {
-    radio.debugStatus(); // print chip specific data.
+    radio.debugStatus();  // print chip specific data.
 
   } else if (cmd == '*') {
     lowLevelDebug = !lowLevelDebug;
     radio._wireDebug(lowLevelDebug);
   }
-} // runSerialCommand()
+}  // runSerialCommand()
 
 
 /// Setup a FM only radio configuration with I/O for commands and debugging on the Serial port.
-void setup()
-{
+void setup() {
   // open the Serial port
   Serial.begin(115200);
   Serial.print("Radio...");
@@ -334,7 +328,7 @@ void setup()
 #ifdef ESP8266
   // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
   // need to be specified.
-  Wire.begin(D2, D1); // a common GPIO pin setting for I2C
+  Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
 #endif
 
   // Enable information to the Serial port
@@ -362,12 +356,11 @@ void setup()
 
   runSerialCommand('?', 0);
   kbState = STATE_PARSECOMMAND;
-} // Setup
+}  // Setup
 
 
 /// Constantly check for serial input commands and trigger command execution.
-void loop()
-{
+void loop() {
   if (Serial.available() > 0) {
     // read the next char from input.
     char c = Serial.peek();
@@ -392,14 +385,14 @@ void loop()
         kbCommand = ' ';
         kbState = STATE_PARSECOMMAND;
         kbValue = 0;
-      } // if
-    } // if
-  } // if
+      }  // if
+    }    // if
+  }      // if
 
   // check for RDS data
   radio.checkRDS();
 
 
-} // loop
+}  // loop
 
 // End.
