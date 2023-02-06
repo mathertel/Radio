@@ -40,6 +40,21 @@
 
 #include <RDSParser.h>
 
+// ===== Processor / Board specific pin wiring =====
+
+#if defined(ARDUINO_ARCH_AVR)
+#define RESET_PIN 2
+#define MODE_PIN A4  // same as SDA
+
+#elif defined(ESP8266)
+#define RESET_PIN D5
+#define MODE_PIN D2  // same as SDA
+
+#elif defined(ESP32)
+// not tested with si4703
+
+#endif
+
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
@@ -65,9 +80,10 @@ RADIO_STATE kbState;  ///< The state of parsing input characters.
 char kbCommand;
 int16_t kbValue;
 
-
 uint16_t g_block1;
+bool radioDebug = false;
 bool lowLevelDebug = false;
+String lastServiceName;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -101,6 +117,7 @@ void DisplayServiceName(const char *name) {
       found = true;
 
   if (found) {
+    lastServiceName = name;
     Serial.print("Sender:<");
     Serial.print(name);
     Serial.println('>');
@@ -116,6 +133,22 @@ void DisplayText(const char *txt) {
 }  // DisplayText()
 
 
+void PrintScanInfo(RADIO_INFO *ri) {
+  char sFreq[12];
+  radio.formatFrequency(sFreq, sizeof(sFreq));
+  Serial.print(sFreq);
+  Serial.print(' ');
+
+  Serial.print(ri->rssi);
+  Serial.print(' ');
+  // Serial.print(ri->snr);
+  // Serial.print(' ');
+  Serial.print(ri->tuned ? 'T' : '-');
+  Serial.print(ri->stereo ? 'S' : '-');
+  Serial.print(ri->rds ? 'R' : '-');
+  Serial.println();
+}
+
 /// Execute a command identified by a character and an optional number.
 /// See the "?" command for available commands.
 /// \param cmd The command character.
@@ -125,7 +158,6 @@ void runSerialCommand(char cmd, int16_t value) {
   RADIO_FREQ fSave, fLast = 0;
   RADIO_FREQ f = radio.getMinFrequency();
   RADIO_FREQ fMax = radio.getMaxFrequency();
-  char sFreq[12];
   RADIO_INFO ri;
 
   if ((cmd == '\n') || (cmd == '\r')) {
@@ -140,8 +172,9 @@ void runSerialCommand(char cmd, int16_t value) {
     Serial.println("? Help");
     Serial.println("+ increase volume");
     Serial.println("- decrease volume");
-    Serial.println("1 start scan version 1");
-    Serial.println("2 start scan version 2");
+    Serial.println("1 scan Frequency + Data");
+    Serial.println("2 scan version 2");
+    Serial.println("3 scan RDS stations");
     Serial.println(". scan up   : scan up to next sender");
     Serial.println(", scan down ; scan down to next sender");
     Serial.println("i station status");
@@ -150,6 +183,7 @@ void runSerialCommand(char cmd, int16_t value) {
     Serial.println("m mute/unmute");
     Serial.println("u soft mute/unmute");
     Serial.println("x debug...");
+    Serial.println("y toggle Debug Messages...");
     Serial.println("* toggle i2c debug output");
 
     // ----- control the volume and audio output -----
@@ -190,28 +224,34 @@ void runSerialCommand(char cmd, int16_t value) {
     // start Simple Scan: all channels
     while (f <= fMax) {
       radio.setFrequency(f);
-      delay(80);
+      delay(100);
 
       radio.getRadioInfo(&ri);
-      if (ri.tuned) {
-        radio.formatFrequency(sFreq, sizeof(sFreq));
-        Serial.print(sFreq);
-        Serial.print(' ');
 
-        Serial.print(ri.rssi);
-        Serial.print(' ');
-        Serial.print(ri.snr);
-        Serial.print(' ');
-        Serial.print(ri.stereo ? 'S' : '-');
-        Serial.print(ri.rds ? 'R' : '-');
-        Serial.println();
-      }  // if
+      // you may adjust the following condition to adjust to the chip you use.
+      // some do not report snr or tuned and good rssi differs.
+
+      if (true) {  // print all frequencies
+      // if (ri.stereo) {  // print all stereo frequencies
+      // if (ri.rssi >= 32) {  // si4703 usable threshold value
+
+        // PrintScanInfo(&ri);
+
+        RADIO_FREQ f = radio.getFrequency();
+        Serial.print(f);
+        Serial.print(',');
+        Serial.print(ri.stereo);
+        Serial.print(',');
+        Serial.print(ri.rds);
+        Serial.print(',');
+        Serial.println(ri.rssi);
+      }
 
       // tune up by 1 step
       f += radio.getFrequencyStep();
     }  // while
+    Serial.println("done.");
     radio.setFrequency(fSave);
-    Serial.println();
 
   } else if (cmd == '2') {
     Serial.println("Seeking all frequencies... (2)");
@@ -237,41 +277,61 @@ void runSerialCommand(char cmd, int16_t value) {
       }
       fLast = f;
 
-      if ((ri.tuned) && (ri.rssi > 42) && (ri.snr > 12)) {
-        radio.checkRDS();
+      // you may adjust the following condition to adjust to the chip you use.
+      // some do not report snr or tuned and good rssi differs.
 
-        // print frequency.
-        radio.formatFrequency(sFreq, sizeof(sFreq));
-        Serial.print(sFreq);
-        Serial.print(' ');
+      if (true) {  // every frequency detected by builtin scan
+      // if ((ri.tuned) && (ri.rssi > 34) && (ri.snr > 12)) {
+      // if (ri.rssi >= 32) {  // si4703 threshold value
 
-        do {
-          radio.checkRDS();
-          // Serial.print(g_block1); Serial.print(' ');
-        } while ((!g_block1) && (startSeek + 600 > millis()));
-
-        // fetch final status for printing
         radio.getRadioInfo(&ri);
-        Serial.print(ri.rssi);
-        Serial.print(' ');
-        Serial.print(ri.snr);
-        Serial.print(' ');
-        Serial.print(ri.stereo ? 'S' : '-');
-        Serial.print(ri.rds ? 'R' : '-');
-
-        if (g_block1) {
-          Serial.print(' ');
-          Serial.print('[');
-          Serial.print(g_block1, HEX);
-          Serial.print(']');
-        }  // if
-        Serial.println();
+        PrintScanInfo(&ri);
       }  // if
     }    // while
+    Serial.println("done.");
     radio.setFrequency(fSave);
-    Serial.println();
 
 
+  } else if (cmd == '3') {
+    Serial.println("Seeking all RDS senders...");
+    fSave = radio.getFrequency();
+
+    // start Scan
+    radio.setFrequency(f);
+
+    // start Simple Scan: all channels
+    while (f <= fMax) {
+      radio.setFrequency(f);
+      lastServiceName.clear();
+      delay(100);
+
+      radio.getRadioInfo(&ri);
+
+      // you may adjust the following condition to adjust to the chip you use.
+      // some do not report snr or tuned and good rssi differs.
+
+      // if (true) {  // print all frequencies
+      // if (ri.stereo) {  // print all stereo frequencies
+
+      if (ri.rssi >= 32) {  // si4703 usable threshold value
+        if (ri.rds) {
+          radio.checkRDS();
+          PrintScanInfo(&ri);
+          startSeek = millis();
+
+          // wait 3 secs for sender name
+          do {
+            radio.checkRDS();
+            delay(30);
+          } while (lastServiceName.isEmpty() && (startSeek + 6000 > millis()));
+        }  // if
+      }
+
+      // tune up by 1 step
+      f += radio.getFrequencyStep();
+    }  // while
+    Serial.println("done.");
+    radio.setFrequency(fSave);
   } else if (cmd == 'f') {
     radio.setFrequency(value);
   }
@@ -284,10 +344,8 @@ void runSerialCommand(char cmd, int16_t value) {
     radio.seekDown(false);
   } else if (cmd == ';') {
     radio.seekDown(true);
-  }
 
-
-  else if (cmd == '!') {
+  } else if (cmd == '!') {
     // not in help
     RADIO_FREQ f = radio.getFrequency();
     if (value == 0) {
@@ -296,7 +354,6 @@ void runSerialCommand(char cmd, int16_t value) {
       radio.init();
       radio.setBandFrequency(RADIO_BAND_FM, f);
     }
-
   } else if (cmd == 'i') {
     // info
     char s[12];
@@ -307,10 +364,11 @@ void runSerialCommand(char cmd, int16_t value) {
     radio.debugRadioInfo();
     Serial.print("Audio:");
     radio.debugAudioInfo();
-
   } else if (cmd == 'x') {
     radio.debugStatus();  // print chip specific data.
-
+  } else if (cmd == 'y') {
+    radioDebug = !radioDebug;
+    radio.debugEnable(radioDebug);
   } else if (cmd == '*') {
     lowLevelDebug = !lowLevelDebug;
     radio._wireDebug(lowLevelDebug);
@@ -320,39 +378,46 @@ void runSerialCommand(char cmd, int16_t value) {
 
 /// Setup a FM only radio configuration with I/O for commands and debugging on the Serial port.
 void setup() {
+  delay(3000);
+
   // open the Serial port
   Serial.begin(115200);
-  Serial.print("Radio...");
-  delay(500);
+  Serial.println("ScanRadio...");
+  delay(200);
 
-#ifdef ESP8266
-  // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
-  // need to be specified.
-  Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
+  // Standard I2C/Wire pins for Arduino UNO:  = SDA:A4, SCL:A5
+  // Standard I2C/Wire pins for ESP8266: SDA:D2, SCL:D1
+  // Standard I2C/Wire pins for ESP32: SDA:21, SCL:22
+  Wire.begin();
+
+#if defined(RESET_PIN)
+  // This is required for SI4703 chips:
+  radio.setup(RADIO_RESETPIN, RESET_PIN);
+  radio.setup(RADIO_MODEPIN, MODE_PIN);
 #endif
 
   // Enable information to the Serial port
-  radio.debugEnable(true);
+  radio.debugEnable(radioDebug);
   radio._wireDebug(lowLevelDebug);
 
   // Initialize the Radio
-  radio.init();
+  if (!radio.initWire(Wire)) {
+    Serial.println("no radio chip found.");
+    delay(4000);
+    while (1) {};
+  };
 
   radio.setBandFrequency(RADIO_BAND_FM, 8930);
 
-  // delay(100);
-
   radio.setMono(false);
   radio.setMute(false);
-  radio.setVolume(10);
-
-  Serial.write('>');
+  radio.setVolume(5);
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
   rds.attachServiceNameCallback(DisplayServiceName);
-  rds.attachTextCallback(DisplayText);
-  rds.attachTimeCallback(DisplayTime);
+  // rds.attachTextCallback(DisplayText);
+  // rds.attachTimeCallback(DisplayTime);
 
   runSerialCommand('?', 0);
   kbState = STATE_PARSECOMMAND;
