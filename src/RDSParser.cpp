@@ -28,9 +28,11 @@ RDSParser::RDSParser() {
 
 
 void RDSParser::init() {
-  strcpy(_PSName1, "--------");
-  strcpy(_PSName2, _PSName1);
+  strcpy(_PSName1, "11111111");
+  strcpy(_PSName2, "22222222");
+  strcpy(_PSName3, "33333333");
   strcpy(programServiceName, "        ");
+  strcpy(lastServiceName, "        ");
   memset(_RDSText, 0, sizeof(_RDSText));
   _lastTextIDX = 0;
 }  // init()
@@ -78,37 +80,45 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
     case 0x0A:
     case 0x0B:
       // The data received is part of the Service Station Name
-      idx = 2 * (block2 & 0x0003);
+      idx = 2 * (block2 & 0x0003); // idx = 0, 2, 4, 6
 
       // new data is 2 chars from block 4
       c1 = block4 >> 8;
       c2 = block4 & 0x00FF;
 
+      // Serial.printf(">%d %c%c %02x %02x\n", idx, c1, c2, c1, c2);
+
+      // shift new data into _PSNameN
+      _PSName3[idx] = _PSName2[idx];
+      _PSName2[idx] = _PSName1[idx];
+      _PSName1[idx] = c1;
+
+      _PSName3[idx+1] = _PSName2[idx+1];
+      _PSName2[idx+1] = _PSName1[idx+1];
+      _PSName1[idx+1] = c2;
+
       // check that the data was received successfully twice
       // before publishing the station name
+      if (idx == 6) {
+        bool isGood = true;
+        // create programServiceName with 2 of 3
+        for (int n= 0; n < 8; n++) {
+          if ((_PSName1[n] == _PSName2[n]) || (_PSName1[n] == _PSName3[n])) {
+            programServiceName[n] = _PSName1[n];
 
-      if ((_PSName1[idx] == c1) && (_PSName1[idx + 1] == c2)) {
-        // retrieved the text a second time: store to _PSName2
-        _PSName2[idx] = c1;
-        _PSName2[idx + 1] = c2;
-        _PSName2[8] = '\0';
+          } else if (_PSName2[n] == _PSName3[n]) {
+            programServiceName[n] = _PSName2[n];
 
-        if ((idx == 6) && strcmp(_PSName1, _PSName2) == 0) {
-          if (strcmp(_PSName2, programServiceName) != 0) {
-            // publish station name
-            strcpy(programServiceName, _PSName2);
-            if (_sendServiceName)
-              _sendServiceName(programServiceName);
-          }  // if
-        }    // if
-      }      // if
-
-      if ((_PSName1[idx] != c1) || (_PSName1[idx + 1] != c2)) {
-        _PSName1[idx] = c1;
-        _PSName1[idx + 1] = c2;
-        _PSName1[8] = '\0';
-        // Serial.println(_PSName1);
-      }  // if
+          } else {
+            isGood = false;
+          }
+        }
+        if ((isGood) && (strcmp(lastServiceName, programServiceName) != 0)) {
+          strcpy(lastServiceName, programServiceName);
+          if (_sendServiceName)
+            _sendServiceName(programServiceName);
+        }
+      } // if
       break;
 
     case 0x2A:

@@ -52,10 +52,14 @@ private:
   uint8_t rdsGroupType, rdsTP, rdsPTY;
   uint8_t _textAB, _last_textAB, _lastTextIDX;
 
-  // Program Service Name
+  // Program Service Name data for 2 of 3 verifications
+  // assuming that error is less than 1/3 data failures.
   char _PSName1[10];            // including trailing '\00' character.
   char _PSName2[10];            // including trailing '\00' character.
+  char _PSName3[10];            // including trailing '\00' character.
+
   char programServiceName[10];  // found station name or empty. Is max. 8 character long.
+  char lastServiceName[10];     // found station name or empty. Is max. 8 character long.
 
   receiveServiceNameFunction _sendServiceName;  ///< Registered ServiceName function.
   receiveTimeFunction _sendTime;                ///< Registered Time function.
