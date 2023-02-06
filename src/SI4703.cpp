@@ -11,9 +11,7 @@
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
 ///
-/// History:
-/// --------
-/// * 05.08.2014 created.
+/// History, see <SI4703.h>
 
 #include <Arduino.h>
 #include <Wire.h>  // The chip is controlled via the standard Arduiino Wire library and the IIC/I2C bus.
@@ -161,7 +159,7 @@ void SI4703::setVolume(int8_t newVolume) {
   _readRegisters();                         // Read the current register set
   registers[SYSCONFIG2] &= ~(VOLUME_MASK);  // Clear volume bits
   registers[SYSCONFIG2] |= newVolume;       // Set new volume
-  _saveRegisters();  // Update
+  _saveRegisters();                         // Update
   RADIO::setVolume(newVolume);
 }  // setVolume()
 
@@ -231,11 +229,11 @@ void SI4703::setBand(RADIO_BAND newBand) {
 
     registers[SYSCONFIG1] |= (1 << RDS);  // Enable RDS
 
-  
+
     if (_deEmphasis == RADIO_DEEMPHASIS_50) {
-      registers[SYSCONFIG1] |= DEEMPHASIS50;      // 50µs
-    }else {
-      registers[SYSCONFIG1] &= ~DEEMPHASIS50;      // 75µs 
+      registers[SYSCONFIG1] |= DEEMPHASIS50;  // 50µs
+    } else {
+      registers[SYSCONFIG1] &= ~DEEMPHASIS50;  // 75µs
     }
 
     if (_fmSpacing == RADIO_FMSPACING_50) {
@@ -303,6 +301,9 @@ void SI4703::setFrequency(RADIO_FREQ newF) {
   registers[CHANNEL] |= channel;      // Mask in the new channel
   registers[CHANNEL] |= (1 << TUNE);  // Set the TUNE bit to start
   _saveRegisters();
+  if (_sendRDS) {
+    _sendRDS(0, 0, 0, 0);
+  }
   _waitEnd();
 }  // setFrequency()
 
@@ -335,6 +336,13 @@ void SI4703::_readRegisters() {
       break;  // We're done!
   }           // for
 }  // _readRegisters()
+
+
+// Load all status registers from to the chip
+void SI4703::_readRegister0A() {
+  _i2cPort->requestFrom(_i2caddr, 2);  // We want to read the entire register set from 0x0A to 0x09 = 32 bytes.
+  registers[0x0A] = _read16HL(_i2cPort);
+}  // _readRegister0A()
 
 
 // Save writable registers back to the chip
@@ -396,12 +404,23 @@ void SI4703::getAudioInfo(AUDIO_INFO *info) {
 
 void SI4703::checkRDS() {
   // DEBUG_FUNC0("checkRDS");
+  unsigned long now = millis();
 
   // check if there is a listener !
-  if (_sendRDS) {
-    _readRegisters();
+  if ((_sendRDS) && (now > _lastRDSPoll + 40)) {
+    _readRegister0A();
+    _lastRDSPoll = now;
+
+    // int r1 = registers[STATUSRSSI];
+    // _readRegisters();
+    // int r2 = registers[STATUSRSSI];
+    // Serial.printf("== 0x%04x 0x%04x\n", r1, r2);
+
+
     // check for a RDS data set ready
     if (registers[STATUSRSSI] & RDSR) {
+      _readRegisters();
+      _lastRDSPoll = now;
       uint8_t errA = (registers[STATUSRSSI] >> 9) & 3;
       uint8_t errB = (registers[READCHAN] >> 14) & 3;
       uint8_t errC = (registers[READCHAN] >> 12) & 3;
@@ -475,7 +494,9 @@ void SI4703::_seek(bool seekUp) {
   // save the registers and start seeking...
   registers[POWERCFG] = reg;
   _saveRegisters();
-
+  if (_sendRDS) {
+    _sendRDS(0, 0, 0, 0);
+  }
   _waitEnd();
 }  // _seek
 
@@ -486,7 +507,8 @@ void SI4703::_waitEnd() {
 
   // wait until STC gets high
   do {
-    _readRegisters();
+    _readRegister0A();
+    delay(10);
   } while ((registers[STATUSRSSI] & STC) == 0);
 
   // DEBUG_VAL("Freq:", getFrequency());

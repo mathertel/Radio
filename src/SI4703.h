@@ -14,6 +14,7 @@
 /// History:
 /// --------
 /// * 05.08.2014 created.
+/// * 05.02.2023 clearing RDS data after frequency changes and scan.
 
 
 #ifndef SI4703_h
@@ -90,6 +91,7 @@ public:
   // ----- read/write registers of the chip
 
   void _readRegisters();  // read all status & data registers
+  void _readRegister0A();  // read just status 0x0A register
   void _saveRegisters();  // Save writable registers back to the chip
 
 private:
@@ -98,6 +100,9 @@ private:
 
   // store the current values of the 16 chip internal 16-bit registers
   uint16_t registers[16];
+
+  // last RDS Poll to prevent polling < 40 
+  unsigned long _lastRDSPoll = 0;
 
   // ----- low level communication to the chip using I2C bus
 
