@@ -1,5 +1,5 @@
 /// \file WebRadio.ino
-/// \brief Radio implementation using a web frontend served by the Arduino.
+/// \brief Radio implementation using a web frontend served by s Arduino Mega.
 ///
 /// \author Matthias Hertel, http://www.mathertel.de
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
@@ -30,6 +30,8 @@
 /// * 01.05.2015 faster WebServer responses by using a buffer.
 /// * 16.05.2015 Using StringBuffer to collect output at several places for reducing net packages.
 /// * 21.10.2017 Ethernet reset wait time
+/// * 05.02.2021 Remove Compiler Warnings
+///              Using Arduino Interrupt routine attachments 
 
 // There are several tasks that have to be done when the radio is running.
 // Therefore all these tasks are handled this way:
@@ -65,31 +67,26 @@
 
 #define  ENCODER_FALLBACK (3*1000)  ///< after 3 seconds no turning fall back to tune mode.
 
-RADIO_FREQ preset[] = {
-  8770,
-  8810, // hr1
-  8820,
-  8850, // Bayern2
-  8890, // ???
-  8930, // * hr3
-  8980,
-  9180,
-  9220, 9350,
-  9440, // * hr1
-  9510, // - Antenne Frankfurt
-  9530,
-  9560, // Bayern 1
-  9680, 9880,
-  10020, // planet
-  10090, // ffh
-  10110, // SWR3
-  10030, 10260, 10380, 10400,
-  10500 // * FFH
-};
-// , 10650,10650,10800
+// Define some stations available at your locations here:
+// 89.30 MHz as 8930
 
-int    i_sidx = 5;        // Start at Station with index=5
-int    i_smax = 14;       // Max Index of Stations
+RADIO_FREQ preset[] = {
+  8930,   // Sender:<  hr3   >
+  9060,   // Sender:<  hr1   >
+  9310,   //
+  9340,   // Sender:<BAYERN 3>
+  9440,   // Sender:<  hr1   >
+  9530,   // Sender:< YOU FM >
+  9670,   // Sender:<  hr2   >
+  9870,   // Sender:<  Dlf   >
+  10020,  // Sender:< planet >
+  10140,  // Sender:<RADIOBOB>
+  10160,  // Sender:<  hr4   >
+  10300   // Sender:<ANTENNE >
+};
+
+uint16_t presetIndex = 0;  ///< Start at Station with index = 1
+
 
 // -----  Setup directly attached input stuff -----
 
@@ -192,7 +189,7 @@ boolean _debugEnabled = true; ///< enable / disable local debug output and reuse
 #define REDIRECT_FNAME "/redirect.htm" ///< The filename on the disk that is used when requesting the root of the web.
 
 // How big our line buffer should be. 80 is plenty!
-#define BUFSIZ 256
+#define LINE_BUFFERSIZE 256
 
 enum WebServerState {
   WEBSERVER_OFF,    // not running
@@ -211,7 +208,7 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; // Name will be WIZnetEFFEE
 // byte ip[] = { 192, 168, 2, 250 };
 
 // CompactList for file Extension -> content-type and cache-control
-char *CONTENTTYPES =
+const char *CONTENTTYPES =
   "htm text/html 1\n"
   "css text/css 1\n"
   "js  application/x-javascript 1\n"
@@ -235,8 +232,8 @@ EthernetClient _client;
 
 WebServerState webstate;
 
-char _readBuffer[BUFSIZ]; ///< a buffer that is used to read a line from the request header and for reading file content.
-char _writeBuffer[BUFSIZ]; ///< a buffer that is used to compose a line for the reponse.
+char _readBuffer[LINE_BUFFERSIZE]; ///< a buffer that is used to read a line from the request header and for reading file content.
+char _writeBuffer[LINE_BUFFERSIZE]; ///< a buffer that is used to compose a line for the reponse.
 
 char _httpVerb[6]; // HTTP verb from the first line of the request
 char _httpURI[40]; // HTTP URI from the first line of the request
@@ -267,10 +264,10 @@ void runRadioJSONCommand(char *cmd, int16_t value);
 void runRadioSerialCommand(char cmd, int16_t value);
 
 void setupRadio();
-void loopRadio(unsigned long now);
+void loopRadio();
 void respondRadioData();
 
-void loopSerial(unsigned long now);
+void loopSerial();
 void loopWebServer(unsigned long now);
 void loopButtons(unsigned long now);
 
@@ -325,8 +322,7 @@ void loopLCD(unsigned long now) {
 /// that is formatted in multiple text lines separated by \n.
 /// Each line starts with a key word and a SPACE character.
 /// The pointer to the rest of the line is returned or null.
-char *_ctFind(char *table, char *key) {
-  char *p = table;
+const char *_ctFind(const char *table, const char *key) {
   int keyLen = strlen(key);
 
   while ((table) && (*table)) {
@@ -351,7 +347,7 @@ char *_ctFind(char *table, char *key) {
 /// This is a helper function that returns the position to the next word on the same line.
 /// This is done by skipping all non-SPACE characters and then all SPACE characters
 /// and returns this position.
-char *_ctNextWord(char *text)
+const char *_ctNextWord(const char *text)
 {
   // skip all remaining characters of the word if word was too long.
   while ((text) && (*text) && (*text != SPACE)) text++;
@@ -363,12 +359,12 @@ char *_ctNextWord(char *text)
 
 
 // copy a word over to a string.
-char *_ctCopyWord(char *text, char *word, int len)
+const char *_ctCopyWord(const char *text, char *word, int wordSize)
 {
-  while ((text) && (*text > SPACE) && (len > 1)) {
+  while ((text) && (*text > SPACE) && (wordSize > 1)) {
     // copy over the printable characters
     *word++ = *text++;
-    len--;
+    wordSize--;
   } // while
   *word = NUL;
   return (_ctNextWord(text));
@@ -412,7 +408,6 @@ void respondEmptyFile()
 void respondFileList()
 {
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
-  char *p;
 
   // send out a header
   sout.append(HTTP_200_CT); sout.append("text/html"); sout.append(CRLF);
@@ -444,7 +439,7 @@ void respondFileList()
     sout.append("\r\n");
 
     // flush buffer out when filled.
-    if (sout.getLength() > BUFSIZ - 32) {
+    if (sout.getLength() > LINE_BUFFERSIZE - 32) {
       _client.print(_writeBuffer);
       sout.clear();
     }
@@ -482,7 +477,7 @@ void respondSystemInfo()
 /// Read one line of text from _client into the _readBuffer.
 void readRequestLine()
 {
-  uint8_t index = 0;
+  uint16_t index = 0;
   int c;
 
   while (_client.connected()) {
@@ -506,8 +501,8 @@ void readRequestLine()
 
       // When lines are too long, just ignore the last characters.
       // If that happens in your application ther might be a header line that is out of interest
-      // or use a bigger line buffer by incrementing BUFSIZ.
-      if (index >= BUFSIZ) index = BUFSIZ - 1;
+      // or use a bigger line buffer by incrementing LINE_BUFFERSIZE.
+      if (index >= LINE_BUFFERSIZE) index = LINE_BUFFERSIZE - 1;
 
     } // if
   } // while
@@ -516,13 +511,13 @@ void readRequestLine()
 
 
 /// Responds the content of a file from the SD disk given by fName.
-void respondFileContent(char *fName)
+void respondFileContent(const char *fName)
 {
   DEBUG_FUNC0("respondFileContent");
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
 
-  char *p;
-  char *fileType = NULL;
+  const char *p;
+  const char *fileType = NULL;
   size_t len;
 
   // check for fileType
@@ -567,7 +562,7 @@ void respondFileContent(char *fName)
     // using a buffer is up to 10 times faster than transferring byte by byte
     // using the _readBuffer
     do {
-      len = f.read((uint8_t*)_readBuffer, BUFSIZ);
+      len = f.read((uint8_t*)_readBuffer, LINE_BUFFERSIZE);
       _client.write((uint8_t*)_readBuffer, len);
     } while (len > 0);
     f.close();
@@ -582,9 +577,7 @@ void loopWebServer(unsigned long now) {
   static unsigned long timeout;
 
   // static bool moreData = false;
-  int index = 0;
-  char c;
-  char *p;
+  const char *p;
 
   File f;
 
@@ -674,8 +667,8 @@ void loopWebServer(unsigned long now) {
           } else if (webstate == PROCESS_POST) {
             // get data posted by a html form
 
-            int len;
-            len = _client.read((uint8_t *)_readBuffer, BUFSIZ);
+            uint16_t len;
+            len = _client.read((uint8_t *)_readBuffer, LINE_BUFFERSIZE);
 
             if ((len > 0) && (len < sizeof(_readBuffer))) {
               _httpContentLen -= len;
@@ -688,12 +681,12 @@ void loopWebServer(unsigned long now) {
             } // if
 
             if (strcmp(_httpURI, "/$radio") == 0) {
-              char *name = NULL; // name of command
+              const char *name = NULL; // name of command
 
               // simple parsing of the JSON request.
               // assume only one command like {"vol":6}
               // DEBUG_STR(_readBuffer);
-              p = strchr(_readBuffer, '{');
+              char *p = strchr(_readBuffer, '{');
               if (p) p = strchr(p, '"');
               if (p) p += 1;
               if (p) {
@@ -781,7 +774,7 @@ void DisplayFrequency()
 /// This function will be called by the RDS module when a rds service name was received.
 /// The text be displayed on the LCD and written to the serial port
 /// and will be stored for the web interface.
-void DisplayServiceName(char *name)
+void DisplayServiceName(const char *name)
 {
   DEBUG_VAL("RDS", name);
   strncpy(rdsServiceName, name, sizeof(rdsServiceName));
@@ -796,7 +789,7 @@ void DisplayServiceName(char *name)
 /// This function will be called by the RDS module when a rds text message was received.
 /// The text will not displayed on the LCD but written to the serial port
 /// and will be stored for the web interface.
-void DisplayText(char *text)
+void DisplayText(const char *text)
 {
   DEBUG_VAL("RDS-text", text);
   strncpy(rdsText, text, sizeof(rdsText));
@@ -853,7 +846,6 @@ void DisplaySoftMute(uint8_t v)
 void respondRadioData()
 {
   // DEBUG_FUNC0("respondRadioData");
-  char s[12];
   StringBuffer sout = StringBuffer(_writeBuffer, sizeof(_writeBuffer));
 
   // build http header in _writeBuffer and send out.
@@ -956,12 +948,10 @@ void doSeekClick() {
 // The Interrupt Service Routine for Pin Change Interrupts
 // On Arduino UNO you can use the PCINT1 interrupt vector that covers digital value changes on A2 and A3.
 // On Arduino Mega 2560  you can use the PCINT2 interrupt vector that covers digital value changes on A8 and A9.
-// Read http://www.atmel.com/Images/doc8468.pdf for more details on external interrupts.
 
-ISR(PCINT2_vect) {
+void checkPosition() {
   encoder.tick(); // just call tick() to check the state.
-} // ISR for PCINT2
-
+}
 
 // ----- Setup and run the radio -----
 
@@ -974,8 +964,7 @@ void setupRadio() {
   radio.init();
 
   // radio.setBandFrequency(RADIO_BAND_FM, 8930); // hr3
-  radio.setBandFrequency(RADIO_BAND_FM, preset[i_sidx]); // 5. preset.
-  // radio.setFrequency(10140); // Radio BOB // preset[i_sidx]
+  radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]); // default preset.
 
   radio.setMono(false);
   radio.setMute(false);
@@ -983,15 +972,9 @@ void setupRadio() {
   radio.setVolume(8);
 
   // Setup rotary encoder
-
-  // You may have to modify the next 2 lines if using other pins than A2 and A3
-  // On Arduino-Uno: rotary encoder in A2(PCINT10) and A3(PCINT11)
-  // PCICR  |= (1 << PCIE1);    // This enables Pin Change Interrupt 1 that covers the Analog input pins or Port C.
-  // PCMSK1 |= (1 << PCINT10) | (1 << PCINT11);  // This enables the interrupt for pin 2 and 3 of Port C.
-
-  // On Arduino-MEGA2560: A8(PCINT16) and A9(PCINT17) for interrupt vector PCINT2
-  PCICR |= (1 << PCIE2);
-  PCMSK2 |= (1 << PCINT16) | (1 << PCINT17);
+  // Any change in signals on pins A8 and A9 are captured in the ISR routine `checkPosition`
+  attachInterrupt(digitalPinToInterrupt(A8), checkPosition, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(A9), checkPosition, CHANGE);
 
   encoderLastPos = (radio.getFrequency() - radio.getMinFrequency()) / radio.getFrequencyStep();
   encoder.setPosition(encoderLastPos);
@@ -1019,7 +1002,7 @@ void setupRadio() {
 
 
 /// Check once new radio data.
-void loopRadio(unsigned long now) {
+void loopRadio() {
   // check for RDS data
   radio.checkRDS();
 } // loopRadio()
@@ -1029,7 +1012,7 @@ void loopRadio(unsigned long now) {
 /// See the "?" command for available commands.
 /// \param cmd The command word.
 /// \param value An optional parameter for the command.
-void runRadioJSONCommand(char *cmd, int16_t value) {
+void runRadioJSONCommand(const char *cmd, int16_t value) {
   if (strcmp(cmd, "freq") == 0) {
     radio.setFrequency(value);
   } else if (strcmp(cmd, "vol") == 0) {
@@ -1056,7 +1039,7 @@ void runRadioJSONCommand(char *cmd, int16_t value) {
 
 
 /// Constantly check for serial input commands and trigger command execution.
-void loopSerial(unsigned long now) {
+void loopSerial() {
   char c;
   // some internal static values for parsing the input
   static char command;
@@ -1136,14 +1119,14 @@ void runRadioSerialCommand(char cmd, int16_t value)
 
   else if (cmd == '>') {
     // next preset
-    if (i_sidx < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
-      i_sidx++; radio.setFrequency(preset[i_sidx]);
+    if (presetIndex < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
+      presetIndex++; radio.setFrequency(preset[presetIndex]);
     } // if
   } else if (cmd == '<') {
     // previous preset
-    if (i_sidx > 0) {
-      i_sidx--;
-      radio.setFrequency(preset[i_sidx]);
+    if (presetIndex > 0) {
+      presetIndex--;
+      radio.setFrequency(preset[presetIndex]);
     } // if
 
   } else if (cmd == 'f') {
@@ -1327,10 +1310,10 @@ void setup() {
 void loop()
 {
   unsigned long now = millis();
-  loopWebServer(now);  /// Look for incomming webserver requests and answer them...
+  loopWebServer(now);  /// Look for incoming webserver requests and answer them...
   loopButtons(now);    /// Check for changed signals on the buttons and rotary encoder.
-  loopSerial(now);     /// Check for serial input commands and trigger command execution.
-  loopRadio(now);      /// Check for new radio data.
+  loopSerial();     /// Check for serial input commands and trigger command execution.
+  loopRadio();      /// Check for new radio data.
   loopLCD(now);        /// Check for new LCD data to be displayed.
 } // loop()
 
