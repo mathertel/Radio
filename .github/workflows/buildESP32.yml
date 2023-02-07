@@ -1,10 +1,10 @@
 # GitHub Action Workflow
 
-name: Build Examples for ESP8266
+name: Build Examples for ESP32
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push or pull request events but only for the develop branch
   push:
     branches: [master]
   pull_request:
@@ -15,9 +15,9 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Build Examples for ESP8266
-  build-esp8266:
-    name: build examples on ESP8266
+  # Build Examples for ESP32
+  build-esp32:
+    name: build examples on ESP32
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -32,22 +32,14 @@ jobs:
         with:
           verbose: true
           platforms: |
-            # Install ESP8266 platform via Boards Manager
-            - name: "esp8266:esp8266"
-              source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
-              version: 3.1.1
-          fqbn: esp8266:esp8266:nodemcuv2
+            # Install ESP32 platform via Boards Manager
+            - name: "esp32:esp32"
+              source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+              # version: 2.0.4 doesn't work with CLI caused by issue https://github.com/espressif/arduino-esp32/pull/7060
+              version: 2.0.2
+          fqbn: esp32:esp32:esp32
           libraries: |
             - source-path: ./
-            - name: OneButton
-            - name: RotaryEncoder
-            - name: LiquidCrystal_PCF8574
           sketch-paths: |
             - 'examples/SerialRadio'
             - 'examples/ScanRadio'
-            - 'examples/TestSI4703'
-            - 'examples/TestSI47xx'
-
-          # size-report-sketch: 'ConnectionHandlerDemo'
-          # enable-size-deltas-report: 'true'
-          # sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
