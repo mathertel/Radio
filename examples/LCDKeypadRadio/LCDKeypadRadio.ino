@@ -9,12 +9,12 @@
 /// \details
 /// This is a full function radio implementation that uses a LCD display to show the current station information.\n
 /// It can be used with various chips after adjusting the radio object definition.\n
-/// Open the Serial console with 57600 baud to see current radio information and change various settings.
+/// Open the Serial console with 115200 baud to see current radio information and change various settings.
 ///
 /// Wiring
 /// ------
 /// The necessary wiring of the various chips are described in the Testxxx example sketches.
-/// The boards have to be connected by using the following connections:
+/// The boards have to be connected e. g. by using the following connections:
 ///
 /// Arduino port | SI4703 signal | RDA5807M signal
 /// :----------: | :-----------: | :-------------:
@@ -24,8 +24,8 @@
 ///           A4 | SDIO          | SDIO
 ///           D2 | RST           | -
 ///
-///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// History:
 /// --------
@@ -48,6 +48,47 @@
 
 #include <RDSParser.h>
 
+// Define some stations available at your locations here:
+// 89.30 MHz as 8930
+
+RADIO_FREQ preset[] = {
+  8930,   // Sender:<  hr3   >
+  9060,   // Sender:<  hr1   >
+  9310,   //
+  9340,   // Sender:<BAYERN 3>
+  9440,   // Sender:<  hr1   >
+  9530,   // Sender:< YOU FM >
+  9670,   // Sender:<  hr2   >
+  9870,   // Sender:<  Dlf   >
+  10020,  // Sender:< planet >
+  10140,  // Sender:<RADIOBOB>
+  10160,  // Sender:<  hr4   >
+  10300   // Sender:<ANTENNE >
+};
+
+uint16_t presetIndex = 0;  ///< Start at Station with index = 1
+
+
+// ===== SI4703 specific pin wiring =====
+// #define ENABLE_SI4703
+
+#ifdef ENABLE_SI4703
+#if defined(ARDUINO_ARCH_AVR)
+#define RESET_PIN 2
+#define MODE_PIN A4  // same as SDA
+
+#elif defined(ESP8266)
+#define RESET_PIN D5
+#define MODE_PIN D2  // same as SDA
+
+#elif defined(ESP32)
+#define RESET_PIN 4
+#define MODE_PIN 21  // same as SDA
+
+#endif
+#endif
+
+
 // The keys available on the keypad
 enum KEYSTATE {
   KEYSTATE_NONE,
@@ -58,29 +99,10 @@ enum KEYSTATE {
   KEYSTATE_RIGHT
 } __attribute__((packed));
 
-// Define RESET and Mode signals for SI4703 chips:
-// #define RESET_PIN 2
-// #define MODE_PIN A4  // same as SDA
 
 // ----- forwards -----
 // You need this because the function is not returning a simple value.
 KEYSTATE getLCDKeypadKey();
-
-
-
-// Define some stations available at your locations here:
-// 89.30 MHz as 8930
-// Be sure to enter a strong station in preset[0];
-
-RADIO_FREQ preset[] = {
-  8930,  // * hr3
-  9270,
-  9310,
-  9670,
-  10250
-};
-
-unsigned int presetIndex = 0;  ///< Start at Station with index=5
 
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
@@ -188,8 +210,8 @@ KEYSTATE getLCDKeypadKey() {
     return (KEYSTATE_NONE);
 
   } else if ((newKey == lastKey) && (doReportKey)) {
-     doReportKey = false;  // don't report twice
-     return (newKey);
+    doReportKey = false;  // don't report twice
+    return (newKey);
   }
   return (KEYSTATE_NONE);
 }  // getLCDKeypadKey()
@@ -237,7 +259,7 @@ void setup() {
     lcd.setCursor(0, 1);
     lcd.print("Press reset...");
 
-    while (1) {}; // forever
+    while (1) {};  // forever
   }
 
   // Enable information to the Serial port

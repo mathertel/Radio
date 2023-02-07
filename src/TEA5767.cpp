@@ -9,7 +9,8 @@
 ///
 /// This library enables the use of the Radio Chip TEA5767.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// good links for hints how to implement this chip:
 /// http://www.sparkfun.com/datasheets/Wireless/General/TEA5767.pdf
@@ -83,6 +84,8 @@ bool TEA5767::init() {
   bool result = false; // no chip found yet.
   DEBUG_FUNC0("init");
 
+  RADIO::init();  // will create reset impulse
+
   registers[0] = 0x00;
   registers[1] = 0x00;
   registers[2] = 0xB0;
@@ -94,7 +97,6 @@ bool TEA5767::init() {
   registers[REG_5] = REG_5_DTC; // 75 ms Europe setup
 #endif
   Wire.begin();
-
 
   return(result);
 } // init()

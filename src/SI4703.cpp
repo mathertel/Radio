@@ -9,7 +9,8 @@
 ///
 /// This library enables the use of the Radio Chip SI4703.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// History, see <SI4703.h>
 
@@ -125,6 +126,7 @@ bool SI4703::init() {
   if (_sdaPin >= 0) {
     pinMode(_sdaPin, OUTPUT);    // SDIO is connected to SDA for I2C
     digitalWrite(_sdaPin, LOW);  // A low SDA during reset indicates a 2-wire interface
+    delay(5);
   }
 
   RADIO::init();  // will create reset impulse

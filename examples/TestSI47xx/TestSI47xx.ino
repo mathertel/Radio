@@ -25,7 +25,8 @@
 /// | A5 or SCL       | D1      | IO22  | SCLK               |
 /// | A4 or SDA       | D2      | IO21  | SDIO               |
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// ChangeLog:
 /// ----------
@@ -85,6 +86,10 @@ void setup() {
   // Enable debug information to the Serial port
   radio.debugEnable(true);
   radio._wireDebug(false);
+
+  // Set FM Options for Europe
+  radio.setup(RADIO_FMSPACING, RADIO_FMSPACING_100);   // for EUROPE
+  radio.setup(RADIO_DEEMPHASIS, RADIO_DEEMPHASIS_50);  // for EUROPE
 
   // Initialize the Radio
   radio.initWire(Wire);

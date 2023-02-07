@@ -51,19 +51,29 @@ Radio chip specific questions may be answered by the community (or not) and are 
 Within the Arduino library you can find examples that implement different scenarios to control various radio chips.
 
 The basic examples only startup the chips and set a static station and volume:LCDKeypadRadio
+
 * **TestRDA5807M** to test the RDA5807M chip. 
 * **TestSI4703** to test the SI4703 chip.
 * **TestSI47xx** to test the SI4705, SI4721 and SI4730 chips.
 * **TestTEA5767** to test the TEA5767 chip.
 * **TransmitSI4721** to test transmission mode of SI4721 chip.
 
-The examples can be used with several chips:
+The examples can be used with several chips and boards:
 
-* The **SerialRadio** example needs only an arduino and uses the Serial in- and output to change the settings and report information.
-* The **ScanRadio** is similar to the SerialRadio example but includes some experimental scanning approaches.
+* The **SerialRadio** example doesn't need extra inputs as it
+  uses the Serial in- and output to change the settings and report information.
+  This example can be used with Arduino, ESP8266 and ESP32.
+
 * The **LCDRadio** example is similar to SerialRadio but also populates some information to an attached LCD.
-* The **LCDKeypadRadio** example uses the popular LCDKeypad shield for Arduino UNO.
-* The **WebRadio** example is the most advanced radio that runs on an Arduino Mega with an Ethernet Shield and an rotator encoder.
+  This example can be used with Arduino, ESP8266 and ESP32.
+
+* The **ScanRadio** is similar to the SerialRadio example
+  and includes some experimental scanning approaches.
+  This example can be used with Arduino, ESP8266 and ESP32.
+
+* The **LCDKeypadRadio** example uses the popular LCDKeypad shield for **Arduino UNO** only.
+
+* The **WebRadio** example is the most advanced radio that runs on an **Arduino Mega** with an Ethernet Shield and an rotator encoder.
   You can also control the radio by using a web site that is available on the Arduino.
 
 The only sending example for the SI4721 chip can be found in **TransmitSI4721**.

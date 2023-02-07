@@ -16,16 +16,17 @@
 /// Wiring
 /// ------
 /// The RDA5807M board/chip has to be connected by using the following connections:
-/// | Arduino UNO pin    | Radio chip signal  |
-/// | -------------------| -------------------|
-/// | 3.3V (red)         | VCC                |
-/// | GND (black)        | GND                |
-/// | A5 or SCL (yellow) | SCLK               |
-/// | A4 or SDA (blue)   | SDIO               |
-/// The locations of the pins on the UNO board are written on the PCB.
-/// The locations of the signals on the RDA5807M side depend on the board you use.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// | Signal       | Arduino UNO | ESP8266 | ESP32  | Radio chip signal |
+/// | ------------ | ------------| ------- | ------ | ----------------- |
+/// | VCC (red)    | 3.3V        | 3v3     | 3v3    | VCC               |
+/// | GND (black)  | GND         | GND     | GND    | GND               |
+/// | SCL (yellow) | A5 / SCL    | D1      | 22     | SCLK              |
+/// | SDA (blue)   | A4 / SDA    | D2      | 21     | SDIO              |
+///
+/// The locations of the signals on the RDA5807M side depend on the board you use.
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// ChangeLog:
 /// ----------
@@ -55,14 +56,13 @@ void setup() {
   Serial.println("RDA5807M Radio...");
   delay(200);
 
-  // Standard I2C/Wire pins for Arduino UNO:  = SDA:A4, SCL:A5
-  // Standard I2C/Wire pins for ESP8266: SDA:D2, SCL:D1
-  // Standard I2C/Wire pins for ESP32: SDA:21, SCL:22
-  Wire.begin();
-
   // Enable information to the Serial port
   radio.debugEnable(true);
   radio._wireDebug(false);
+
+  // Set FM Options for Europe
+  radio.setup(RADIO_FMSPACING, RADIO_FMSPACING_100);   // for EUROPE
+  radio.setup(RADIO_DEEMPHASIS, RADIO_DEEMPHASIS_50);  // for EUROPE
 
   // Initialize the Radio
   if (!radio.initWire(Wire)) {

@@ -24,7 +24,8 @@
 ///           A4 | SDIO
 ///           D2 | RST
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// History:
 /// --------

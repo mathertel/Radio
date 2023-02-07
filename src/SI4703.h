@@ -9,13 +9,13 @@
 ///
 /// This library enables the use of the Radio Chip SI4703.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// History:
 /// --------
 /// * 05.08.2014 created.
 /// * 05.02.2023 clearing RDS data after frequency changes and scan.
-
 
 #ifndef SI4703_h
 #define SI4703_h

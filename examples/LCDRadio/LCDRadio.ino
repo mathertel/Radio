@@ -1,7 +1,7 @@
 ///
-/// \file LCDRadio.ino 
+/// \file LCDRadio.ino
 /// \brief Radio implementation including LCD output.
-/// 
+///
 /// \author Matthias Hertel, http://www.mathertel.de
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
@@ -16,18 +16,9 @@
 /// ------
 /// The necessary wiring of the various chips are described in the Testxxx example sketches.
 /// The boards have to be connected by using the following connections:
-/// 
-/// Arduino UNO | ESP8266 | ESP32 | LCD | SI4703 | RDA5807M |
-/// ----------- | ------- | ----- | --- | ------ | -------- |
-/// 3.3V (red)  | 3V3     | 3V3   | -   | VCC    | VCC      |
-/// GND (black) | GND     | GND   | GND | GND    | GND      |
-/// 5V (red)    | Vin     | Vin   | VCC | -      | -        |
-/// A5 (yellow) | D1(SCL) |       | SCL | SCLK   | SCLK     |
-/// A4 (blue)   | D2(SDA) |       | SDA | SDIO   | SDIO     |
-/// 2  (white)  | D5      |       | -   | RST    | -        |
-/// see code below for changing.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// History:
 /// --------
@@ -55,48 +46,55 @@
 #include <RotaryEncoder.h>
 #include <OneButton.h>
 
-// Define some stations available at your locations here:
-// 89.40 MHz as 8940
 
-// RADIO_FREQ preset[] = {8850, 8930, 9320,9350, 9450,9570, 9680, 9880, 10030, 10260, 10400, 10500, 10600,10650,10800};
+// Define some stations available at your locations here:
+// 89.30 MHz as 8930
 
 RADIO_FREQ preset[] = {
-  8770,
-  8810, // hr1
-  8820,
-  8850, // Bayern2
-  8890, // ???
-  8930, // * hr3
-  8980,
-  9180,
-  9220, 9350,
-  9440, // * hr1
-  9510, // - Antenne Frankfurt
-  9530,
-  9560, // Bayern 1
-  9680, 9880,
-  10020, // planet
-  10090, // ffh
-  10110, // SWR3
-  10030, 10260, 10380, 10400,
-  10500 // * FFH
+  8930,   // Sender:<  hr3   >
+  9060,   // Sender:<  hr1   >
+  9310,   //
+  9340,   // Sender:<BAYERN 3>
+  9440,   // Sender:<  hr1   >
+  9530,   // Sender:< YOU FM >
+  9670,   // Sender:<  hr2   >
+  9870,   // Sender:<  Dlf   >
+  10020,  // Sender:< planet >
+  10140,  // Sender:<RADIOBOB>
+  10160,  // Sender:<  hr4   >
+  10300   // Sender:<ANTENNE >
 };
-// , 10650,10650,10800
 
-uint16_t presetIndex = 5;  ///< Start at Station with index=5
+uint16_t presetIndex = 0;  ///< Start at Station with index = 1
 
-// ===== Processor / Board specific pin wiring =====
 
+// ===== SI4703 specific pin wiring =====
+#define ENABLE_SI4703
+
+#ifdef ENABLE_SI4703
 #if defined(ARDUINO_ARCH_AVR)
 #define RESET_PIN 2
-#define MODE_PIN A4 // same as SDA
-#define ROT_PIN1 A2
-#define ROT_PIN2 A3
-#define MENU_PIN 
+#define MODE_PIN A4  // same as SDA
 
 #elif defined(ESP8266)
 #define RESET_PIN D5
-#define MODE_PIN D2 // same as SDA
+#define MODE_PIN D2  // same as SDA
+
+#elif defined(ESP32)
+#define RESET_PIN 4
+#define MODE_PIN 21  // same as SDA
+
+#endif
+#endif
+
+// ===== rotator and menu button specific pin wiring =====
+
+#if defined(ARDUINO_ARCH_AVR)
+#define ROT_PIN1 A2
+#define ROT_PIN2 A3
+#define MENU_PIN
+
+#elif defined(ESP8266)
 #define ROT_PIN1 D6
 #define ROT_PIN2 D7
 #define MENU_PIN D3
@@ -119,14 +117,18 @@ unsigned long encoderLastTime;
 
 
 // variables for rotator encoder
-//unsigned long lastRotatorChange = 0; // last time a change of the rotator was detected.
+// unsigned long lastRotatorChange = 0; // last time a change of the rotator was detected.
 
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
+// Standard I2C/Wire pins for Arduino UNO:  = SDA:A4, SCL:A5
+// Standard I2C/Wire pins for ESP8266: SDA:D2, SCL:D1
+// Standard I2C/Wire pins for ESP32: SDA:21, SCL:22
+
 // RADIO radio;    // Create an instance of a non functional radio.
 // RDA5807M radio;    // Create an instance of a RDA5807 chip radio
-SI4703   radio;    // Create an instance of a SI4703 chip radio.
+SI4703 radio;  // Create an instance of a SI4703 chip radio.
 // SI47xx   radio;    // Create an instance of a SI4721 chip radio.
 // TEA5767  radio;    // Create an instance of a TEA5767 chip radio.
 
@@ -143,50 +145,49 @@ RDSParser rds;
 /// State definition for this radio implementation.
 enum RADIO_STATE {
   STATE_NONE = 0,
-  STATE_PARSECOMMAND, ///< waiting for a new command character.
-  STATE_PARSEINT,     ///< waiting for digits for the parameter.
+  STATE_PARSECOMMAND,  ///< waiting for a new command character.
+  STATE_PARSEINT,      ///< waiting for digits for the parameter.
   STATE_EXEC,          ///< executing the command.
-  
+
   STATE_FREQ,
   STATE_VOL,
   STATE_MONO,
   STATE_SMUTE
-
 };
 
-RADIO_STATE state; ///< The state variable is used for parsing input characters.
+RADIO_STATE state;  ///< The state variable is used for parsing input characters.
 RADIO_STATE rot_state;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 /// Update the Frequency on the LCD display.
-void DisplayFrequency()
-{
+void DisplayFrequency() {
   char s[12];
   radio.formatFrequency(s, sizeof(s));
-  Serial.print("FREQ:"); Serial.println(s);
+  Serial.print("FREQ:");
+  Serial.println(s);
   lcd.setCursor(0, 0);
   lcd.print(s);
-} // DisplayFrequency()
+}  // DisplayFrequency()
 
 
 /// Update the ServiceName text on the LCD display when in RDS mode.
-void DisplayServiceName(const char *name)
-{
-  Serial.print("RDS:"); Serial.println(name);
+void DisplayServiceName(const char *name) {
+  Serial.print("RDS:");
+  Serial.println(name);
   if (rot_state == STATE_FREQ) {
     lcd.setCursor(0, 1);
     lcd.print(name);
   }
-} // DisplayServiceName()
+}  // DisplayServiceName()
 
 
 /// Update the RDS Text
-void DisplayRDSText(const char *txt)
-{
-  Serial.print("Text:"); Serial.println(txt);
-} // DisplayRDSText()
+void DisplayRDSText(const char *txt) {
+  Serial.print("Text:");
+  Serial.println(txt);
+}  // DisplayRDSText()
 
 
 void DisplayTime(uint8_t hour, uint8_t minute) {
@@ -196,7 +197,7 @@ void DisplayTime(uint8_t hour, uint8_t minute) {
   Serial.print(':');
   if (minute < 10) Serial.print('0');
   Serial.println(minute);
-} // DisplayTime()
+}  // DisplayTime()
 
 
 /// Display a label and value for several purpose
@@ -231,39 +232,36 @@ void doMenuClick() {
     encoder.setPosition(encoderLastPos);
     DisplayMenuValue("Vol", encoderLastPos);
 
-  }
-  else if (rot_state == STATE_VOL) {
+  } else if (rot_state == STATE_VOL) {
     // jump into mono/stereo switch
     rot_state = STATE_MONO;
     encoderLastPos = radio.getMono();
     encoder.setPosition(encoderLastPos);
     DisplayMenuValue("Mono", encoderLastPos);
 
-  }
-  else if (rot_state == STATE_MONO) {
+  } else if (rot_state == STATE_MONO) {
     // jump into soft mute switch
     rot_state = STATE_SMUTE;
     encoderLastPos = radio.getSoftMute();
     encoder.setPosition(encoderLastPos);
     DisplayMenuValue("SMute", encoderLastPos);
-  }
-  else if (rot_state == STATE_SMUTE) {
+  } else if (rot_state == STATE_SMUTE) {
     rot_state = STATE_FREQ;
     encoderLastPos = (radio.getFrequency() - radio.getMinFrequency()) / radio.getFrequencyStep();
     encoder.setPosition(encoderLastPos);
     DisplayServiceName("...");
 
-  } // if
+  }  // if
   encoderLastTime = now;
-    
-} // doMenuClick()
+
+}  // doMenuClick()
 
 
 // this function will be called when the seekButton was clicked
 void doSeekClick() {
   Serial.println("doSeekClick()");
   radio.seekUp(true);
-} // doSeekClick()
+}  // doSeekClick()
 
 
 // The Interrupt Service Routine for Pin Change Interrupts
@@ -274,7 +272,7 @@ void doSeekClick() {
 #if defined(ARDUINO_ARCH_AVR)
 // This interrupt routine will be called on any change of one of the input signals
 void checkPosition() {
-  encoder.tick(); // just call tick() to check the state.
+  encoder.tick();  // just call tick() to check the state.
 }
 
 #elif defined(ESP8266)
@@ -300,27 +298,24 @@ void setup() {
   lcd.begin(16, 2);
   lcd.setBacklight(1);
   lcd.print("LCDRadio...");
-  
+
   delay(800);
   lcd.clear();
 
-  // Standard I2C/Wire pins for Arduino UNO:  = SDA:A4, SCL:A5
-  // Standard I2C/Wire pins for ESP8266: SDA:D2, SCL:D1
-  // Standard I2C/Wire pins for ESP32: SDA:21, SCL:22
-  Wire.begin();
-
-  // This is required for SI4703 chips:
-  radio.setup(RADIO_RESETPIN, RESET_PIN);
-  radio.setup(RADIO_MODEPIN, MODE_PIN);
-
   attachInterrupt(digitalPinToInterrupt(ROT_PIN1), checkPosition, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ROT_PIN2), checkPosition, CHANGE);
+
+  // This is required for SI4703 chips:
+#if defined(RESET_PIN)
+  radio.setup(RADIO_RESETPIN, RESET_PIN);
+  radio.setup(RADIO_MODEPIN, MODE_PIN);
+#endif
 
   // Enable information to the Serial port
   radio.debugEnable(false);
   radio._wireDebug(false);
 
-  // Initialize the Radio 
+  // Initialize the Radio
   radio.initWire(Wire);
 
   radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]);  // 5. preset.
@@ -339,10 +334,10 @@ void setup() {
   menuButton.attachDoubleClick(doSeekClick);
 
   Serial.println('>');
-  
+
   state = STATE_PARSECOMMAND;
   rot_state = STATE_NONE;
-  
+
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
 
@@ -352,15 +347,14 @@ void setup() {
   rds.attachTimeCallback(DisplayTime);
 
   Serial.println("setup done.");
-} // Setup
+}  // Setup
 
 
 /// Execute a command identified by a character and an optional number.
 /// See the "?" command for available commands.
 /// \param cmd The command character.
 /// \param value An optional parameter for the command.
-void runCommand(char cmd, int16_t value)
-{
+void runCommand(char cmd, int16_t value) {
   if (cmd == '?') {
     Serial.println();
     Serial.println("? Help");
@@ -379,14 +373,13 @@ void runCommand(char cmd, int16_t value)
   }
 
   // ----- control the volume and audio output -----
-  
+
   else if (cmd == '+') {
     // increase volume
     int v = radio.getVolume() + 1;
     v = constrain(v, 0, 15);
     radio.setVolume(v);
-  }
-  else if (cmd == '-') {
+  } else if (cmd == '-') {
     // decrease volume
     int v = radio.getVolume() - 1;
     v = constrain(v, 0, 15);
@@ -395,45 +388,53 @@ void runCommand(char cmd, int16_t value)
 
   else if (cmd == 'm') {
     // toggle mute mode
-    radio.setMute(! radio.getMute());
+    radio.setMute(!radio.getMute());
   }
-  
+
   else if (cmd == 'u') {
     // toggle soft mute mode
-    radio.setSoftMute(! radio.getSoftMute());
+    radio.setSoftMute(!radio.getSoftMute());
   }
 
   // toggle stereo mode
-  else if (cmd == 's') { radio.setMono(! radio.getMono()); }
+  else if (cmd == 's') { radio.setMono(!radio.getMono()); }
 
   // toggle bass boost
-  else if (cmd == 'b') { radio.setBassBoost(! radio.getBassBoost()); }
+  else if (cmd == 'b') {
+    radio.setBassBoost(!radio.getBassBoost());
+  }
 
   // ----- control the frequency -----
-  
+
   else if (cmd == '>') {
     // next preset
-    if (presetIndex < (sizeof(preset) / sizeof(RADIO_FREQ))-1) {
+    if (presetIndex < (sizeof(preset) / sizeof(RADIO_FREQ)) - 1) {
       presetIndex++;
       radio.setFrequency(preset[presetIndex]);
       rds.init();
-    } // if
-  }
-  else if (cmd == '<') {
+    }  // if
+  } else if (cmd == '<') {
     // previous preset
     if (presetIndex > 0) {
       presetIndex--;
       radio.setFrequency(preset[presetIndex]);
       rds.init();
-    } // if
+    }  // if
 
+  } else if (cmd == 'f') {
+    radio.setFrequency(value);
+    rds.init();
   }
-  else if (cmd == 'f') { radio.setFrequency(value); rds.init(); }
 
-  else if (cmd == '.') { radio.seekUp(false); }
-  else if (cmd == ':') { radio.seekUp(true); }
-  else if (cmd == ',') { radio.seekDown(false); }
-  else if (cmd == ';') { radio.seekDown(true); }
+  else if (cmd == '.') {
+    radio.seekUp(false);
+  } else if (cmd == ':') {
+    radio.seekUp(true);
+  } else if (cmd == ',') {
+    radio.seekDown(false);
+  } else if (cmd == ';') {
+    radio.seekDown(true);
+  }
 
 
   // not in help:
@@ -441,25 +442,27 @@ void runCommand(char cmd, int16_t value)
     if (value == 0) radio.term();
     if (value == 1) radio.init();
 
-  }
-  else if (cmd == 'i') {
+  } else if (cmd == 'i') {
     char s[12];
     radio.formatFrequency(s, sizeof(s));
-    Serial.print("Station:"); Serial.println(s);
-    Serial.print("Radio:"); radio.debugRadioInfo();
-    Serial.print("Audio:"); radio.debugAudioInfo();
+    Serial.print("Station:");
+    Serial.println(s);
+    Serial.print("Radio:");
+    radio.debugRadioInfo();
+    Serial.print("Audio:");
+    radio.debugAudioInfo();
 
-//     Serial.print("  RSSI: ");
-//     Serial.print(info.rssi);
-//     
-//     for (uint8_t i = 0; i < info.rssi - 15; i+=2) { Serial.write('*'); } // Empfangspegel ab 15. Zeichen
-//     Serial.println();
-  } // info
-//  else if (cmd == 'n') { radio.debugScan(); }
+    //     Serial.print("  RSSI: ");
+    //     Serial.print(info.rssi);
+    //
+    //     for (uint8_t i = 0; i < info.rssi - 15; i+=2) { Serial.write('*'); } // Empfangspegel ab 15. Zeichen
+    //     Serial.println();
+  }  // info
+     //  else if (cmd == 'n') { radio.debugScan(); }
   else if (cmd == 'x') { radio.debugStatus(); }
-    
 
-} // runCommand()
+
+}  // runCommand()
 
 
 /// Constantly check for serial input commands and trigger command execution.
@@ -468,14 +471,14 @@ void loop() {
   unsigned long now = millis();
   static unsigned long nextFreqTime = 0;
   static unsigned long nextRadioInfoTime = 0;
-  
+
   // some internal static values for parsing the input
   static char command;
   static int16_t value;
   static RADIO_FREQ lastf = 0;
   RADIO_FREQ f = 0;
   char c;
-  
+
   // check for the menuButton
   encoder.tick();
   menuButton.tick();
@@ -489,79 +492,73 @@ void loop() {
       // ignore unprintable chars
       Serial.read();
 
-    }
-    else if (state == STATE_PARSECOMMAND) {
+    } else if (state == STATE_PARSECOMMAND) {
       // read a command.
       command = Serial.read();
       state = STATE_PARSEINT;
 
-    }
-    else if (state == STATE_PARSEINT) {
+    } else if (state == STATE_PARSEINT) {
       if ((c >= '0') && (c <= '9')) {
         // build up the value.
         c = Serial.read();
         value = (value * 10) + (c - '0');
-      }
-      else {
+      } else {
         // not a value -> execute
         runCommand(command, value);
         command = ' ';
         state = STATE_PARSECOMMAND;
         value = 0;
-      } // if
-    } // if
-  } // if
+      }  // if
+    }    // if
+  }      // if
 
   // check for the rotary encoder changes
   newPos = encoder.getPosition();
   if (newPos != encoderLastPos) {
 
     if (rot_state == STATE_FREQ) {
-      RADIO_FREQ f = radio.getMinFrequency() + (newPos *  radio.getFrequencyStep());
+      RADIO_FREQ f = radio.getMinFrequency() + (newPos * radio.getFrequencyStep());
       radio.setFrequency(f);
       rds.init();
       encoderLastPos = newPos;
       nextFreqTime = now + 10;
-    
-    }      
-    else if (rot_state == STATE_VOL) {
+
+    } else if (rot_state == STATE_VOL) {
       newPos = constrain(newPos, 0, 15);
       encoder.setPosition(newPos);
       radio.setVolume(newPos);
       encoderLastPos = newPos;
       DisplayMenuValue("Vol", encoderLastPos);
 
-    }
-    else if (rot_state == STATE_MONO) {
+    } else if (rot_state == STATE_MONO) {
       radio.setMono(newPos & 0x01);
       encoderLastPos = newPos;
       DisplayMenuValue("Mono", newPos & 0x01);
 
-    }
-    else if (rot_state == STATE_SMUTE) {
+    } else if (rot_state == STATE_SMUTE) {
       radio.setSoftMute(newPos & 0x01);
       encoderLastPos = newPos;
       DisplayMenuValue("SMute", newPos & 0x01);
 
-    } // if
+    }  // if
     encoderLastTime = now;
-        
-  } 
-  else if (now > encoderLastTime + 2000) {
+
+  } else if (now > encoderLastTime + 2000) {
     // rotary encoder was not changed since 2 seconds:
     // fall into FREQ + RDS mode and set rotary encoder to frequency mode.
     if (rot_state != STATE_FREQ) {
       DisplayServiceName("...");
-      lcd.setCursor(0, 1); lcd.print("        ");
+      lcd.setCursor(0, 1);
+      lcd.print("        ");
       rot_state = STATE_FREQ;
-    }    
+    }
     encoderLastPos = (radio.getFrequency() - radio.getMinFrequency()) / radio.getFrequencyStep();
-    if (encoderLastPos != newPos){
+    if (encoderLastPos != newPos) {
       encoder.setPosition(encoderLastPos);
     }
     encoderLastTime = now;
 
-  } // if
+  }  // if
 
   // check for RDS data
   radio.checkRDS();
@@ -572,11 +569,12 @@ void loop() {
     if (f != lastf) {
       // don't display a Service Name while frequency is no stable.
       DisplayFrequency();
-      lcd.setCursor(0, 1); lcd.print("        ");
+      lcd.setCursor(0, 1);
+      lcd.print("        ");
       lastf = f;
-    } // if
+    }  // if
     nextFreqTime = now + 400;
-  } // if  
+  }  // if
 
   if (now > nextRadioInfoTime) {
     RADIO_INFO info;
@@ -584,8 +582,8 @@ void loop() {
     lcd.setCursor(14, 0);
     lcd.print(info.rssi);
     nextRadioInfoTime = now + 1000;
-  } // update
+  }  // update
 
-} // loop
+}  // loop
 
 // End.

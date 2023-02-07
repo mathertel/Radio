@@ -16,15 +16,19 @@
 ///
 /// Wiring
 /// ------
+///
 /// The SI4703 board has to be connected by using the following connections:
-/// | Arduino UNO pin    | ESP8266 | ESP32   | Radio chip signal |
-/// | -------------------| ------- | ------- | ----------------- |
-/// | 3.3V (red)         | 3v3     | 3v3     | VCC               |
-/// | GND (black)        | GND     | GND     | GND               |
-/// | A5 or SCL (yellow) | D1      |         | SCLK              |
-/// | A4 or SDA (blue)   | D2      |         | SDIO              |
-/// | D2 (white)         | D5      |         | RST               |
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+///
+/// | Signal       | Arduino UNO | ESP8266 | ESP32  | Radio chip signal |
+/// | ------------ | ------------| ------- | ------ | ----------------- |
+/// | VCC (red)    | 3.3V        | 3v3     | 3v3    | VCC               |
+/// | GND (black)  | GND         | GND     | GND    | GND               |
+/// | SCL (yellow) | A5 / SCL    | D1      | 22     | SCLK              |
+/// | SDA (blue)   | A4 / SDA    | D2      | 21     | SDIO              |
+/// | Reset        | D2          | D5      |        | RST               |
+///
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// CHangeLog:
 /// ----------
@@ -36,6 +40,22 @@
 #include <Wire.h>
 #include <radio.h>
 #include <SI4703.h>
+
+// ===== Processor / Board specific pin wiring =====
+
+#if defined(ARDUINO_ARCH_AVR)
+#define RESET_PIN 2
+#define MODE_PIN A4  // same as SDA
+
+#elif defined(ESP8266)
+#define RESET_PIN D5
+#define MODE_PIN D2  // same as SDA
+
+#elif defined(ESP32)
+#define RESET_PIN 4
+#define MODE_PIN 21  // same as SDA
+
+#endif
 
 // ----- Fixed settings here. -----
 
@@ -55,29 +75,16 @@ void setup() {
   Serial.println("Radio::TestSI4703...");
   delay(200);
 
+  radio.setup(RADIO_RESETPIN, RESET_PIN);
+  radio.setup(RADIO_SDAPIN, MODE_PIN);
+
   // Enable information to the Serial port
   radio.debugEnable(true);
   radio._wireDebug(true);
 
-#if defined(ARDUINO_ARCH_AVR)
-  Wire.begin();  // a common pins for I2C = SDA:A4, SCL:A5
-  radio.setup(RADIO_RESETPIN, 2);
-  radio.setup(RADIO_SDAPIN, A4);
-
-#elif defined(ESP8266)
-  // For ESP8266 boards (like NodeMCU) the I2C GPIO pins in use
-  // need to be specified.
-  Wire.begin(D2, D1);  // a common GPIO pin setting for I2C
-  radio.setup(RADIO_RESETPIN, D5);
-  radio.setup(RADIO_SDAPIN, D2);
-
-#elif defined(ESP32)
-  Wire.begin();  // a common GPIO pin setting for I2C = SDA:21, SCL:22
-
-#endif
-
-  radio.setup(RADIO_FMSPACING, RADIO_FMSPACING_100); // for EUROPE
-  radio.setup(RADIO_DEEMPHASIS, RADIO_DEEMPHASIS_50); // for EUROPE
+  // Set FM Options for Europe
+  radio.setup(RADIO_FMSPACING, RADIO_FMSPACING_100);   // for EUROPE
+  radio.setup(RADIO_DEEMPHASIS, RADIO_DEEMPHASIS_50);  // for EUROPE
 
   // Initialize the Radio
   radio.initWire(Wire);

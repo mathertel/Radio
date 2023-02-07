@@ -9,7 +9,8 @@
 ///
 /// This library enables the use of the Radio Chip SI4705.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// Many hints can be found in AN332: http://www.silabs.com/Support%20Documents/TechnicalDocs/AN332.pdf
 ///
@@ -129,6 +130,8 @@ SI4705::SI4705() {
 bool SI4705::init() {
   bool result = false;  // no chip found yet.
   DEBUG_FUNC0("init");
+
+  RADIO::init();  // will create reset impulse
 
   // Now that the unit is reset and I2C inteface mode, we need to begin I2C
   Wire.begin();

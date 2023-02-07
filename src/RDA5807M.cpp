@@ -8,7 +8,8 @@
 ///
 /// This library enables the use of the radio chip RDA5807M from http://www.rdamicro.com/.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// History:
 /// --------
@@ -96,6 +97,8 @@ RDA5807M::RDA5807M() {
 bool RDA5807M::init() {
   bool result = false;  // no chip found yet.
   DEBUG_FUNC0("init");
+
+  RADIO::init();  // will create reset impulse
 
   _i2cPort->begin();
   _i2cPort->beginTransmission(I2C_INDX);

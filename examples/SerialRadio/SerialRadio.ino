@@ -17,7 +17,8 @@
 /// The necessary wiring of the various chips are described in the Testxxx example sketches.
 /// No additional components are required because all is done through the serial interface.
 ///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
+/// More documentation is available at http://www.mathertel.de/Arduino
+/// Source Code is available on https://github.com/mathertel/Radio
 ///
 /// History:
 /// --------
@@ -42,35 +43,30 @@
 
 
 // Define some stations available at your locations here:
-// 89.40 MHz as 8940
+// 89.30 MHz as 8930
 
 RADIO_FREQ preset[] = {
-  8770,
-  8810,  // hr1
-  8820,
-  8850,  // Bayern2
-  8890,  // ???
-  8930,  // * hr3
-  8980,
-  9180,
-  9220, 9350,
-  9440,  // * hr1
-  9510,  // - Antenne Frankfurt
-  9530,
-  9560,  // Bayern 1
-  9680, 9880,
-  10020,  // planet
-  10090,  // ffh
-  10110,  // SWR3
-  10030, 10260, 10380, 10400,
-  10500  // * FFH
+  8930,   // Sender:<  hr3   >
+  9060,   // Sender:<  hr1   >
+  9310,   //
+  9340,   // Sender:<BAYERN 3>
+  9440,   // Sender:<  hr1   >
+  9530,   // Sender:< YOU FM >
+  9670,   // Sender:<  hr2   >
+  9870,   // Sender:<  Dlf   >
+  10020,  // Sender:< planet >
+  10140,  // Sender:<RADIOBOB>
+  10160,  // Sender:<  hr4   >
+  10300   // Sender:<ANTENNE >
 };
 
-uint16_t presetIndex = 5;  ///< Start at Station with index=5
+uint16_t presetIndex = 0;  ///< Start at Station with index = 1
 
 
-// ===== Processor / Board specific pin wiring =====
+// ===== SI4703 specific pin wiring =====
+#define ENABLE_SI4703
 
+#ifdef ENABLE_SI4703
 #if defined(ARDUINO_ARCH_AVR)
 #define RESET_PIN 2
 #define MODE_PIN A4  // same as SDA
@@ -80,21 +76,27 @@ uint16_t presetIndex = 5;  ///< Start at Station with index=5
 #define MODE_PIN D2  // same as SDA
 
 #elif defined(ESP32)
-// not tested with si4703
+#define RESET_PIN 4
+#define MODE_PIN 21  // same as SDA
 
 #endif
+#endif
 
+
+// Standard I2C/Wire pins for Arduino UNO:  = SDA:A4, SCL:A5
+// Standard I2C/Wire pins for ESP8266: SDA:D2, SCL:D1
+// Standard I2C/Wire pins for ESP32: SDA:21, SCL:22
 
 /// The radio object has to be defined by using the class corresponding to the used chip.
 /// by uncommenting the right radio object definition.
 
-// RADIO radio;       ///< Create an instance of a non functional radio.
+// RADIO radio;     ///< Create an instance of a non functional radio.
 // RDA5807FP radio; ///< Create an instance of a RDA5807FP chip radio
-// RDA5807M radio; ///< Create an instance of a RDA5807M chip radio
-// SI4703   radio;    ///< Create an instance of a SI4703 chip radio.
-// SI4705   radio;    ///< Create an instance of a SI4705 chip radio.
-SI47xx radio;  ///<  Create an instance of a SI4720,21,30 (and maybe more) chip radio.
-// TEA5767  radio;    ///< Create an instance of a TEA5767 chip radio.
+// RDA5807M radio;  ///< Create an instance of a RDA5807M chip radio
+SI4703 radio;  ///< Create an instance of a SI4703 chip radio.
+// SI4705   radio;  ///< Create an instance of a SI4705 chip radio.
+// SI47xx radio;    ///<  Create an instance of a SI4720,21,30 (and maybe more) chip radio.
+// TEA5767  radio;  ///< Create an instance of a TEA5767 chip radio.
 
 /// get a RDS parser
 RDSParser rds;
@@ -258,11 +260,6 @@ void setup() {
   Serial.println("SerialRadio...");
   delay(200);
 
-  // Standard I2C/Wire pins for Arduino UNO:  = SDA:A4, SCL:A5
-  // Standard I2C/Wire pins for ESP8266: SDA:D2, SCL:D1
-  // Standard I2C/Wire pins for ESP32: SDA:21, SCL:22
-  Wire.begin();
-
 #if defined(RESET_PIN)
   // This is required for SI4703 chips:
   radio.setup(RADIO_RESETPIN, RESET_PIN);
@@ -273,6 +270,10 @@ void setup() {
   radio.debugEnable(true);
   radio._wireDebug(lowLevelDebug);
 
+  // Set FM Options for Europe
+  radio.setup(RADIO_FMSPACING, RADIO_FMSPACING_100);   // for EUROPE
+  radio.setup(RADIO_DEEMPHASIS, RADIO_DEEMPHASIS_50);  // for EUROPE
+
   // Initialize the Radio
   if (!radio.initWire(Wire)) {
     Serial.println("no radio chip found.");
@@ -280,11 +281,11 @@ void setup() {
     while (1) {};
   };
 
-  radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]);  // 5. preset.
+  radio.setBandFrequency(RADIO_BAND_FM, preset[presetIndex]);
 
   radio.setMono(false);
   radio.setMute(false);
-  radio.setVolume(radio.getMaxVolume());
+  radio.setVolume(radio.getMaxVolume() / 2);
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);

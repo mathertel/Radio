@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [unpublished]
 
-* Runtime Configuration of de-emphasis and channel spacing
+* Runtime Configuration of de-emphasis and channel spacing.
+
+    ``` cpp
+    // Set FM Options for Europe
+    radio.setup(RADIO_FMSPACING, RADIO_FMSPACING_100);   // for EUROPE
+    radio.setup(RADIO_DEEMPHASIS, RADIO_DEEMPHASIS_50);  // for EUROPE
+    ```
+
+  This code was added to the examples but not all radio chip implementation do use it yet.
+
+* The initialization sequence on ESP32 is sensitive in case of SI4703
+  as the SDA signal from I2C bus is also used to define the bus mode
+  of the SI4703.
+  It is important to NOT initialize the I2C bus before the reset of the radio chip.
+
+
 
 ## [3.0.0] - 2023-01-15
 
