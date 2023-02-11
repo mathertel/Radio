@@ -12,7 +12,7 @@
 /// The radio chip is initialized and setup to a fixed band and frequency. These settings can be changed by modifying the
 /// FIX_BAND and FIX_STATION definitions.
 ///
-/// Open the Serial console with 57600 baud to see the current radio information.
+/// Open the Serial console with 115200 baud to see the current radio information.
 ///
 /// Wiring
 /// ------
@@ -76,7 +76,7 @@ void setup() {
   delay(200);
 
   radio.setup(RADIO_RESETPIN, RESET_PIN);
-  radio.setup(RADIO_SDAPIN, MODE_PIN);
+  radio.setup(RADIO_MODEPIN, MODE_PIN);
 
   // Enable information to the Serial port
   radio.debugEnable(true);

@@ -108,7 +108,7 @@ SI4703::SI4703() {
 
 void SI4703::setup(int feature, int value) {
   RADIO::setup(feature, value);
-  if (feature == RADIO_SDAPIN) {
+  if (feature == RADIO_MODEPIN) {
     _sdaPin = value;
   }  // if
 }  // setup()

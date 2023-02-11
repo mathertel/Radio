@@ -196,7 +196,6 @@ struct AUDIO_INFO {
 // setup() features and defined values
 
 #define RADIO_RESETPIN 0x01
-#define RADIO_SDAPIN 0x02
 #define RADIO_MODEPIN 0x02
 #define RADIO_I2CADDRESS 0x03
 
